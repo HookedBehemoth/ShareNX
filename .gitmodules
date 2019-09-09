@@ -1,4 +1,4 @@
 [submodule "Plutonium"]
 	path = Plutonium
 	url = https://github.com/HookedBehemoth/Plutonium
-    branch = fixed_size_icons 
+	branch = fixed_size_icons
