@@ -59,7 +59,7 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++17
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= 	-lSwurl -lpu -lcurl -lz -lmbedtls -lmbedx509 -lmbedcrypto -lfreetype -lSDL2_ttf \
+LIBS	:= 	-lpu -lcurl -lz -lmbedtls -lmbedx509 -lmbedcrypto -lfreetype -lSDL2_ttf \
 			-lSDL2_mixer -lopusfile -lopus -lmodplug -lmpg123 -lvorbisidec -logg \
 			-lSDL2_gfx -lSDL2_image -lSDL2 -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
 			-lpng -ljpeg -lwebp \
