@@ -8,6 +8,7 @@ class ListLayout : public pu::ui::Layout
         ListLayout();
         PU_SMART_CTOR(ListLayout)
     private:
+        void onItemClick();
         elm::TextBlock::Ref helloText;
         elm::Rectangle::Ref topRect;
         elm::Menu::Ref menu;

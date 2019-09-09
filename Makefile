@@ -54,16 +54,15 @@ CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++17
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -std=gnu++17
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= 	-lpu -lcurl -lz -lmbedtls -lmbedx509 -lmbedcrypto -lfreetype -lSDL2_ttf \
-			-lSDL2_mixer -lopusfile -lopus -lmodplug -lmpg123 -lvorbisidec -logg \
-			-lSDL2_gfx -lSDL2_image -lSDL2 -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
+LIBS	:= 	-lcurl -lz -lmbedtls -lmbedx509 -lmbedcrypto -lstdc++fs -lpu -lfreetype -lSDL2_ttf \
+			-lSDL2_gfx -lSDL2_image -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
 			-lpng -ljpeg -lwebp \
-			`sdl2-config --libs` `freetype-config --libs` -lnx -lstdc++fs
+			`sdl2-config --libs` `freetype-config --libs` -lnx
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
