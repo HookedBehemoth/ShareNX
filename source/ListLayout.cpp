@@ -2,7 +2,7 @@
 #include "utils.hpp"
 
 extern appcolor theme;
-extern std::string path;
+extern fs::path path;
 extern MainApplication *mainApp;
 std::vector<fs::path> *filePaths = new std::vector<fs::path>;
 ListLayout::ListLayout() {

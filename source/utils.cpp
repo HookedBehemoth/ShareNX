@@ -52,6 +52,44 @@ Result smcGetEmummcConfig(emummc_mmc_t mmc_id, emummc_config_t *out_cfg, void *o
         }
     }
     return rc;
+}    
+// https://github.com/AtlasNX/Kosmos-Updater/blob/master/source/FileManager.cpp#L34
+bool writeFile(std::string filename, std::string data) {
+    FILE * file = fopen(filename.c_str(), "w");
+    if (!file) {
+        return false;
+    }
+    size_t result = fwrite(data.c_str(), sizeof(char), data.size(), file);
+    fflush(file);
+    fclose(file);
+    return (result == data.size());
+}
+// https://github.com/AtlasNX/Kosmos-Updater/blob/master/source/FileManager.cpp#L58
+bool fileExists(std::string filename) {
+    FILE * file = fopen(filename.c_str(), "r");
+    if (file) {
+        fflush(file);
+        fclose(file);
+        return true;
+    }
+    return false;
+}
+
+std::string getUrl(fs::path path) {
+    std::string txtloc = path.string() + ".txt";
+    std::string url;
+    if(!fileExists(txtloc)) { //Upload if file doesn't exist
+        url = uploadFile(path.string());
+        if(url.compare("")) writeFile(txtloc, url);//fwrite(url.c_str(), sizeof(char), url.size(), file);
+    } else { //read url from string
+        FILE * file = fopen(txtloc.c_str(), "r");
+        char line[1024];
+        fgets(line, 1024, file);
+        url = line;
+        fflush(file);
+        fclose(file);
+    }
+    return url;
 }
 
 std::string uploadFile(std::string filePath) {

@@ -1,7 +1,7 @@
 #include "MainApplication.hpp"
 
 MainApplication *mainApp;
-std::string path;
+fs::path path;
 MainApplication::MainApplication() {
     mainApp = this;
     this->listLayout = ListLayout::New();
@@ -28,8 +28,13 @@ void MainApplication::onInput_upload(u64 Down, u64 Up, u64 Held) {
         list();
     }
     if(Down & KEY_A) {
-        this->uploadLayout->showUrl(uploadFile(path));
-        this->uploadLayout->SetOnInput(std::bind(&MainApplication::onInput_back, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+        std::string url = getUrl(path);
+        if(url.compare("")) {
+            this->uploadLayout->showUrl(url);
+            this->uploadLayout->SetOnInput(std::bind(&MainApplication::onInput_back, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+        } else {
+            this->uploadLayout->showUrl("FAILED!");
+        }
     }
 }
 void MainApplication::onInput_back(u64 Down, u64 Up, u64 Held) {
