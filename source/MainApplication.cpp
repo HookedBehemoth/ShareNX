@@ -48,7 +48,7 @@ void MainApplication::onInput_upload(u64 Down, u64 Up, u64 Held) {
             this->uploadLayout->showUrl(url);
             this->uploadLayout->SetOnInput(std::bind(&MainApplication::onInput_back, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
         } else {
-            this->uploadLayout->showUrl("FAILED!");
+            this->uploadLayout->showUrl("Upload failed!");
         }
     }
 }
