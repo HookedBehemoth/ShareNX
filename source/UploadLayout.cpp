@@ -26,7 +26,8 @@ UploadLayout::UploadLayout() {
     this->text->SetColor(theme.WHITE);
     this->url = elm::TextBlock::New(80,640,"",45);
     this->url->SetColor(theme.WHITE);
-    this->screenShot = elm::Image::New(10,40,path);
+    if (path.find(".mp4") != std::string::npos) this->screenShot = elm::Image::New(10,40,"romfs:/video.png");
+    else this->screenShot = elm::Image::New(10,40,path);
     this->screenShot->SetWidth(970);
     this->screenShot->SetHeight(545);
     this->owo = elm::Image::New(989,240,"romfs:/owo.png");
