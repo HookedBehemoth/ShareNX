@@ -32,11 +32,12 @@ ListLayout::ListLayout() {
     this->owo->SetHeight(480);
     this->menu = elm::Menu::New(0,40,980,theme.RED,136,5,45);
     this->menu->SetOnFocusColor(theme.DRED);  
-    for (auto &f: getDirectoryFiles(path, {".jpg", ".png"})){
+    for (auto &f: getDirectoryFiles(path, {".jpg", ".png", ".mp4"})){
         filePaths->push_back(f);
         auto itm = elm::MenuItem::New(f.filename().string().substr(0,12).insert(10,":").insert(8," ").insert(6,".").insert(4,"."));
         itm->SetColor(theme.WHITE);
-        itm->SetIcon(f.string());
+        if (f.filename().extension() == ".mp4") itm->SetIcon("romfs:/video.png");
+        else itm->SetIcon(f.string());
         itm->AddOnClick(std::bind(&ListLayout::onItemClick, this));
         menu->AddItem(itm);
     }
