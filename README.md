@@ -1,2 +1,2 @@
 # screen-nx
-upload screenshots directly from your switch
+Upload screenshots directly to Lewd.pics from your switch
