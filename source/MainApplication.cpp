@@ -17,7 +17,7 @@
 
 MainApplication *mainApp;
 fs::path path;
-int uploading = 0;
+bool uploading = false;
 MainApplication::MainApplication() {
     mainApp = this;
     this->listLayout = ListLayout::New();
@@ -44,7 +44,7 @@ void MainApplication::onInput_upload(u64 Down, u64 Up, u64 Held) {
         list();
     }
     if(Down & KEY_A && !uploading) {
-        uploaded = 1;
+        uploading = true;
         this->uploadLayout->showUrl("Uploading... Please wait!");
         return;
     }
@@ -56,7 +56,7 @@ void MainApplication::onInput_upload(u64 Down, u64 Up, u64 Held) {
         } else {
             this->uploadLayout->showUrl("Upload failed!");
         }
-        uploaded = 0;
+        uploading = false;
     }
 }
 void MainApplication::onInput_back(u64 Down, u64 Up, u64 Held) {
