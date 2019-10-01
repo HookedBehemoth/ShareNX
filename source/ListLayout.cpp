@@ -25,7 +25,7 @@ ListLayout::ListLayout() {
     this->SetBackgroundColor(theme.RED);
     this->SetBackgroundImage("romfs:/bg.jpg");
     this->topRect = elm::Rectangle::New(0,0,1280,30,theme.TOPBAR);
-    this->helloText = elm::TextBlock::New(10,0,path.c_str(),25);
+    this->helloText = elm::TextBlock::New(10,0,"Lewd.pics",25);
     this->helloText->SetColor(theme.WHITE);
     this->owo = elm::Image::New(989,240,"romfs:/owo.png");
     this->owo->SetWidth(291);
