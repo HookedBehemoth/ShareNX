@@ -27,6 +27,7 @@ std::vector<fs::path> getDirectoryFiles(const std::string & dir, const std::vect
             }
         }
     }
+    std::sort(files.begin(), files.end());
     std::reverse(files.begin(), files.end());
     return files;
 }
