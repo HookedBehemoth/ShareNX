@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <curl/curl.h>
 #include <pu/Plutonium>
+#include <ctime>
 
 namespace fs = std::filesystem;
 std::vector<fs::path> getDirectoryFiles(const std::string & dir, const std::vector<std::string> & extensions);

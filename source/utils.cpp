@@ -94,17 +94,21 @@ bool fileExists(std::string filename) {
 std::string getUrl(fs::path path) {
     std::string txtloc = path.string() + ".txt";
     std::string url;
-    if(!fileExists(txtloc)) { //Upload if file doesn't exist
-        url = uploadFile(path.string());
-        if(url.compare("")) writeFile(txtloc, url);//fwrite(url.c_str(), sizeof(char), url.size(), file);
-    } else { //read url from string
-        FILE * file = fopen(txtloc.c_str(), "r");
-        char line[1024];
-        fgets(line, 1024, file);
-        url = line;
-        fflush(file);
-        fclose(file);
+    if(fileExists(txtloc)) {
+	std::time_t currentTime = std::time(nullptr);
+	std::time_t lastWriteTimePlusAWeek = std::chrono::system_clock::to_time_t(std::filesystem::last_write_time(txtloc)) + 604800;
+	if (currentTime < lastWriteTimePlusAWeek) { //if txt file is younger than a week, don't upload and read from txt file
+	    FILE * file = fopen(txtloc.c_str(), "r");
+	    char line[1024];
+	    fgets(line, 1024, file);
+	    url = line;
+	    fflush(file);
+	    fclose(file);
+	    return url;
+	}
     }
+    url = uploadFile(path.string());
+    if(url.compare("")) writeFile(txtloc, url);//fwrite(url.c_str(), sizeof(char), url.size(), file);
     return url;
 }
 
