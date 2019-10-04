@@ -13,24 +13,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #pragma once
-#include <string.h>
-#include "emummc_cfg.h"
-#include <switch.h>
 #include <filesystem>
 #include <vector>
-#include <algorithm>
-#include <curl/curl.h>
-#include <pu/Plutonium>
-#include <ctime>
+#include <string.h>
+
+#ifdef NXLINK_DEBUG
+#define LOG(format, ...) { fprintf(nxlinkout, "%s:%u: ", __func__, __LINE__); fprintf(nxlinkout, format, ##__VA_ARGS__); }
+#else
+#define LOG(format, ...) ;
+#endif
 
 namespace fs = std::filesystem;
-std::vector<fs::path> getDirectoryFiles(const std::string & dir, const std::vector<std::string> & extensions);
-std::string getAlbumPath();
-std::string getUrl(fs::path path);
-std::string uploadFile(std::string filePath);
-Result smcGetEmummcConfig(emummc_mmc_t mmc_id, emummc_config_t *out_cfg, void *out_paths);
-size_t WriteCallback(const char *contents, size_t size, size_t nmemb, std::string *userp);
-struct appcolor {
-    pu::ui::Color WHITE, RED, DRED, TOPBAR;
-};
+namespace scr::utl {
+    struct mimepart {
+        char * name;
+        char * data;
+        bool is_file_data;
+    };
+    struct theme {
+        char * color_text;
+        char * color_background;
+        char * color_focus;
+        char * color_topbar;
+        char * background_path;
+        char * image_path;
+        int32_t image_x;
+        int32_t image_y;
+        int32_t image_w;
+        int32_t image_h;
+    };
+    struct hosterConfig {
+        char * m_name;
+        char * m_url;
+        std::vector<mimepart *> m_mimeparts;
+        theme m_theme;
+    };
+    struct entry {
+        char * path;
+        char * thumbnail;
+        char * time;
+    };
+    std::string uploadFile(char * path, hosterConfig config);
+    std::vector<hosterConfig *> getConfigs();
+    hosterConfig getDefaultConfig();
+    void setDefaultConfig(int i);
+    std::vector<entry *> getEntries();
+}

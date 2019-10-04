@@ -13,7 +13,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "utils.hpp"
+#include "ini.h"
+#include <algorithm>
+#include <emummc_cfg.h>
+#include <switch.h>
+#include <curl/curl.h>
+#define CONFIGPATH "sdmc:/config/screen-nx"
+#define SCRCONFIGPATH "sdmc:/config/screen-nx/config.ini"
 
 std::vector<fs::path> getDirectoryFiles(const std::string & dir, const std::vector<std::string> & extensions) {
     std::vector<fs::path> files;
@@ -30,24 +38,6 @@ std::vector<fs::path> getDirectoryFiles(const std::string & dir, const std::vect
     std::sort(files.begin(), files.end());
     std::reverse(files.begin(), files.end());
     return files;
-}
-
-std::string getAlbumPath() {
-    std::string out = "Nintendo/Album";
-    static struct
-    {
-        char storage_path[0x7F + 1];
-        char nintendo_path[0x7F + 1];
-    } __attribute__((aligned(0x1000))) paths;
-
-    emummc_config_t config;
-
-    int x = smcGetEmummcConfig(EMUMMC_MMC_NAND, &config, &paths);
-    if(x != 0) return out;
-    if(config.base_cfg.type == 0) return out;
-    out = paths.nintendo_path;
-    out += "/Album";
-    return out;
 }
 
 Result smcGetEmummcConfig(emummc_mmc_t mmc_id, emummc_config_t *out_cfg, void *out_paths) {
@@ -68,89 +58,197 @@ Result smcGetEmummcConfig(emummc_mmc_t mmc_id, emummc_config_t *out_cfg, void *o
         }
     }
     return rc;
-}    
-// https://github.com/AtlasNX/Kosmos-Updater/blob/master/source/FileManager.cpp#L34
-bool writeFile(std::string filename, std::string data) {
-    FILE * file = fopen(filename.c_str(), "w");
-    if (!file) {
-        return false;
-    }
-    size_t result = fwrite(data.c_str(), sizeof(char), data.size(), file);
-    fflush(file);
-    fclose(file);
-    return (result == data.size());
-}
-// https://github.com/AtlasNX/Kosmos-Updater/blob/master/source/FileManager.cpp#L58
-bool fileExists(std::string filename) {
-    FILE * file = fopen(filename.c_str(), "r");
-    if (file) {
-        fflush(file);
-        fclose(file);
-        return true;
-    }
-    return false;
 }
 
-std::string getUrl(fs::path path) {
-    std::string txtloc = path.string() + ".txt";
-    std::string url;
-    if(fileExists(txtloc)) {
-	std::time_t currentTime = std::time(nullptr);
-	std::time_t lastWriteTimePlusAWeek = std::chrono::system_clock::to_time_t(std::filesystem::last_write_time(txtloc)) + 604800;
-	if (currentTime < lastWriteTimePlusAWeek) { //if txt file is younger than a week, don't upload and read from txt file
-	    FILE * file = fopen(txtloc.c_str(), "r");
-	    char line[1024];
-	    fgets(line, 1024, file);
-	    url = line;
-	    fflush(file);
-	    fclose(file);
-	    return url;
-	}
-    }
-    url = uploadFile(path.string());
-    if(url.compare("")) writeFile(txtloc, url);//fwrite(url.c_str(), sizeof(char), url.size(), file);
-    return url;
+std::string getAlbumPath() {
+    std::string out = "Nintendo/Album";
+    static struct
+    {
+        char storage_path[0x7F + 1];
+        char nintendo_path[0x7F + 1];
+    } __attribute__((aligned(0x1000))) paths;
+
+    emummc_config_t config;
+
+    int x = smcGetEmummcConfig(EMUMMC_MMC_NAND, &config, &paths);
+    if(x != 0) return out;
+    if(config.base_cfg.type == 0) return out;
+    out = paths.nintendo_path;
+    out += "/Album";
+    return out;
 }
 
-std::string uploadFile(std::string filePath) {
-	CURL *easy = curl_easy_init();
-	curl_mime *mime;
-	curl_mimepart *filestuff;
-	curl_mimepart *curlstuff;
-
-	mime = curl_mime_init(easy);
-	filestuff = curl_mime_addpart(mime);
-	curl_mime_filedata(filestuff, filePath.c_str());
-	curl_mime_name(filestuff, "fileToUpload");
-	curlstuff = curl_mime_addpart(mime);
-	curl_mime_data(curlstuff, "1", CURL_ZERO_TERMINATED);
-	curl_mime_name(curlstuff, "curl");
-
-	auto * urlresponse = new std::string;
-	curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, WriteCallback);
-	curl_easy_setopt(easy, CURLOPT_WRITEDATA, (void *) urlresponse);
-	curl_easy_setopt(easy, CURLOPT_CUSTOMREQUEST, "POST");
-	curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);
-	curl_easy_setopt(easy, CURLOPT_URL, "https://lewd.pics/p/index.php");
-    curl_easy_setopt(easy, CURLOPT_SSL_VERIFYPEER, 0L);
-
-	CURLcode res = curl_easy_perform(easy);
-    if (res != CURLE_OK) {
-        printf("FUCK!\n");
-    }
-
-	int rcode;
-	curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &rcode);
-
-	printf("\nresponse code: %d\n", rcode);
-	printf("\nurl: %s\n", urlresponse->c_str());
-	curl_easy_cleanup(easy);
-	curl_mime_free(mime);
-
-    return *urlresponse;
-}
-
-size_t WriteCallback(const char *contents, size_t size, size_t nmemb, std::string *userp) {
+size_t CurlWriteCallback(const char *contents, size_t size, size_t nmemb, std::string *userp) {
 	userp->append(contents, size * nmemb);
 	return size * nmemb;
+}
+
+static int hoster_handler(void* user, const char* section, const char* name, const char* value) {
+    scr::utl::hosterConfig *config = (scr::utl::hosterConfig *)user;
+
+    #define SECTION(s) strcmp(section, s) == 0
+    #define NAME(n) strcmp(name, n) == 0
+
+    if (SECTION("hoster")) {
+        if (NAME("url")) config->m_url = strdup(value);
+        else if (NAME("name")) config->m_name = strdup(value);
+    } else if (strcmp(section, "theme") == 0) {
+        if (NAME("color_text")) {
+            config->m_theme.color_text = strdup(value);
+        } else if (NAME("color_background")) {
+            config->m_theme.color_background = strdup(value);
+        } else if (NAME("color_focus")) {
+            config->m_theme.color_focus = strdup(value);
+        } else if (NAME("color_topbar")) {
+            config->m_theme.color_topbar = strdup(value);
+        } else if (NAME("background_path")) {
+            config->m_theme.background_path = strdup(value);
+        } else if (NAME("image_path")) {
+            config->m_theme.image_path = strdup(value);
+        } else if (NAME("image_x")) {
+            config->m_theme.image_x = atoi(value);
+        } else if (NAME("image_y")) {
+            config->m_theme.image_y = atoi(value);
+        } else if (NAME("image_w")) {
+            config->m_theme.image_w = atoi(value);
+        } else if (NAME("image_h")) {
+            config->m_theme.image_h = atoi(value);
+        }
+    } else {
+        int index;
+        try {
+            index = atoi(section);
+        } catch (std::exception& e) {
+            LOG("An error occurred:\n%s", e.what());
+            return 0;
+        }
+		while (config->m_mimeparts.size() < index+1) {
+            config->m_mimeparts.push_back(new scr::utl::mimepart);
+        }
+        if (NAME("name")) {
+            config->m_mimeparts[index]->name = strdup(value);
+        } else if (NAME("data")) {
+            config->m_mimeparts[index]->data = strdup(value);
+        } else if (NAME("is_file_data")) {
+            config->m_mimeparts[index]->is_file_data = strcmp(value, "true") == 0 ? true: false;
+        } else {
+			return 0;
+		}
+    }
+    return 1;
+}
+
+static int config_handler(void* user, const char* section, const char* name, const char* value) {
+    if(strcmp(section, "screen-nx") == 0 && strcmp(name, "config_index") == 0)
+        *((int *)user) = atoi(value);
+    return 0;
+}
+
+namespace scr::utl {
+    /**
+     * @brief Uploads a file to a hoster.
+     * @param path Path to the file to upload.
+     * @param config HosterConfig to upload to.
+     * @return url to the upload
+     */
+    std::string uploadFile(char * path, hosterConfig config) {
+        CURL * curl = curl_easy_init();
+        curl_mime * mime;
+        mime = curl_mime_init(curl);
+        
+        for (mimepart * m_mimepart : config.m_mimeparts) {
+            curl_mimepart * cmimepart = curl_mime_addpart(mime);
+            curl_mime_name(cmimepart, m_mimepart->name);
+            if (m_mimepart->is_file_data) {
+                curl_mime_filedata(cmimepart, path);
+            } else {
+                curl_mime_data(cmimepart, m_mimepart->data, CURL_ZERO_TERMINATED);
+            }
+        }
+
+        std::string * urlresponse = new std::string;
+        
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)urlresponse);
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+        curl_easy_setopt(curl, CURLOPT_URL, config.m_url);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+
+        CURLcode res = curl_easy_perform(curl);
+        if (res != CURLE_OK) {
+            LOG("perform failed with %s\n", res);
+        }
+
+        int rcode;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &rcode);
+        
+        LOG("response code: %d\n", rcode)
+        LOG("urlresponse: %s\n", urlresponse->c_str())
+
+        curl_easy_cleanup(curl);
+        curl_mime_free(mime);
+
+        return *urlresponse;        
+    }
+    
+    /**
+     * @brief reads all configs from /config/screen-nx
+     */
+    std::vector<hosterConfig *> getConfigs() {
+        std::vector<hosterConfig *> * vector = new std::vector<hosterConfig *>;
+        for(fs::path file: getDirectoryFiles(CONFIGPATH, {".ini"})) {
+            if (file.filename() == "config.ini") continue;
+            hosterConfig * config = new hosterConfig;
+            if (ini_parse(file.c_str(), hoster_handler, config) < 0) {
+                LOG("Couldn't parse %s\n", file.c_str())
+                continue;
+            }
+            vector->push_back(config);
+        }
+        return *vector;
+    }
+
+    /**
+     * @brief returns the default config
+     */
+    hosterConfig getDefaultConfig() {
+        std::vector<hosterConfig *> configs = getConfigs();
+        int i = 0;
+        if (ini_parse(SCRCONFIGPATH, config_handler, &i) < 0) {
+            LOG("failed to parse own config\n")
+        }
+        if (configs.size() > 0) {
+            return *configs[i%configs.size()];
+        }
+        /* load default config if everything fails */
+        return {"lewd.pics",
+                "https://lewd.pics/p/index.php",
+                { new mimepart({"fileToUpload", "", true}), new mimepart({"curl", "1", false})},
+                {"#FFFFFFFF","#6c0000FF","#480001FF","#170909FF","romfs:/bg.png","romfs:/owo.png",989,240,291,480}};
+    }
+
+    /**
+     * @brief sets the default config from the config ini.
+     */
+    void setDefaultConfig(int i) {
+    }
+
+    /**
+     * @brief get's all file entries for listing.
+     */
+    std::vector<entry *> getEntries() {
+        std::vector<entry *> * entries = new std::vector<entry *>;
+        for (auto& file: getDirectoryFiles("sdmc:/" + getAlbumPath(), {".jpg", ".png", ".mp4"})) {
+            printf("%s\n", file.filename().c_str());
+            entry * m_entry = new entry;
+            m_entry->path = strdup(file.c_str());
+            m_entry->thumbnail = "";
+            m_entry->time = strdup(file.filename().string().substr(0,12).insert(10,":").insert(8," ").insert(6,".").insert(4,".").c_str());
+            entries->push_back(m_entry);
+            if (file.filename().extension() == ".mp4") m_entry->thumbnail = "romfs:/video.png";
+            else m_entry->thumbnail = m_entry->path;
+        }
+        return *entries;
+    }
 }

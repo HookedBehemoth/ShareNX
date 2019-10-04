@@ -13,26 +13,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "MainApplication.hpp"
-#include "utils.hpp"
 
-appcolor theme;
-std::string imgPath;
+#include "ui/MainApplication.hpp"
+#include "switch.h"
+
+using namespace pu::ui::render;
 int main(int argc, char* argv[])
 {
-    theme = *new appcolor;
-    theme.WHITE = Color::FromHex("#FFFFFFFF");
-    theme.RED = Color::FromHex("#6c0000FF");
-    theme.DRED = Color::FromHex("#480001FF");
-    theme.TOPBAR = Color::FromHex("#170909FF");
     socketInitializeDefault();
+#ifdef __DEBUG__
+    nxlinkStdio();
+#endif
     romfsInit();
-    imgPath = "sdmc:/";
-	imgPath += getAlbumPath();
+    LOG("starting\n")
+    try {
+        auto renderer = Renderer::New(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER,
+            RendererInitOptions::RendererNoSound, RendererHardwareFlags);
+        auto main = scr::ui::MainApplication::New(renderer);
+        main->Prepare();
+        main->Show();
+    } catch (std::exception& e) {
+        printf("An error occurred:\n%s\n\nPress any button to exit.", e.what());
+        LOG("An error occurred:\n%s", e.what());
 
-    auto main = MainApplication::New();
-    main->Show();
+        u64 kDown = 0;
+
+        while (!kDown)
+        {
+            hidScanInput();
+            kDown = hidKeysDown(CONTROLLER_P1_AUTO);
+        }
+    }
     romfsExit();
+    LOG("exiting\n")
     socketExit();
     return 0;
 }

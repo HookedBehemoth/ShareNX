@@ -41,17 +41,17 @@ TARGET		:=	$(notdir $(CURDIR))
 APP_AUTHOR	:=	Behemoth & Huntereb
 APP_VERSION	:=	1.2.1
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source source/ui
 DATA		:=	data
-INCLUDES	:=	include
-ROMFS	:=	romfs
+INCLUDES	:=	include include/ui
+ROMFS		:=	romfs
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
+CFLAGS	:=	-g -Wall -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__

@@ -13,23 +13,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #pragma once
 #include <pu/Plutonium>
-#include "ListLayout.hpp"
-#include "UploadLayout.hpp"
+#include "ui/elm_FixedMenu.hpp"
 #include "utils.hpp"
 
-class MainApplication : public pu::ui::Application
-{
-    public:
-        MainApplication();
-        PU_SMART_CTOR(MainApplication)
-        void list();
-        void upload(std::string path);
-        void onInput_list(u64 Down, u64 Up, u64 Held);
-        void onInput_upload(u64 Down, u64 Up, u64 Held);
-        void onInput_back(u64 Down, u64 Up, u64 Held);
-    private:
-        ListLayout::Ref listLayout;
-        UploadLayout::Ref uploadLayout;
-};
+using namespace pu::ui::elm;
+namespace scr::ui {
+    class ListLayout : public pu::ui::Layout {
+        public:
+            ListLayout();
+            PU_SMART_CTOR(ListLayout)
+            void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
+        private:
+            void onItemClick();
+            TextBlock::Ref topText;
+            Rectangle::Ref topRect;
+            FixedMenu::Ref menu;
+            Image::Ref image;
+    };
+}
