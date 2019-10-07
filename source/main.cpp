@@ -35,6 +35,7 @@ int nix()
 #endif
     romfsInit();
     scr::utl::init();
+    scr::utl::clearCacheMonthly();
     LOG("starting\n")
     try {
         auto renderer = Renderer::New(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER,

@@ -159,6 +159,15 @@ namespace scr::utl {
         if (!std::filesystem::exists(TEMPPATH))
             std::filesystem::create_directory(TEMPPATH);
     }
+
+    void clearCacheMonthly() {
+        for(fs::path file: getDirectoryFiles(TEMPPATH, {".txt",".png"})) {
+            std::time_t currentTime = std::time(nullptr);
+            std::time_t lastWriteTimePlusAMonth = std::chrono::system_clock::to_time_t(std::filesystem::last_write_time(file)) + 2592000;
+            if (currentTime > lastWriteTimePlusAMonth) remove(file);
+        }
+    }
+
     /**
      * @brief Uploads a file to a hoster.
      * @param path Path to the file to upload.
