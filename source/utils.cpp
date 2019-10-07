@@ -169,12 +169,51 @@ namespace scr::utl {
     }
 
     /**
+     * @brief Check if file has been uploaded previously
+     * @param path to the file to upload.
+     * @return url to the upload
+     */
+    std::string checkUploadCache(std::string path) {
+        std::string txtloc = TEMPPATH + fs::path(path).filename().string() + ".txt";
+        if(std::filesystem::exists(txtloc)) {
+            std::time_t currentTime = std::time(nullptr);
+            std::time_t lastWriteTimePlusADay = std::chrono::system_clock::to_time_t(std::filesystem::last_write_time(txtloc)) + 86400;
+            if (currentTime < lastWriteTimePlusADay) {
+                FILE * file = fopen(txtloc.c_str(), "r");
+                char line[1024];
+                fgets(line, 1024, file);
+                std::string url = line;
+                fflush(file);
+                fclose(file);
+                return url;
+            }
+        }
+        return "";
+    }
+
+    /**
+     * @brief Store a URL for an uploaded file
+     * @param path to the file uploaded.
+     * @param url to the file uploaded.
+     */
+    void storeCachedURL(std::string path, std::string url) {
+        std::string cachedURLFile = TEMPPATH + fs::path(path).filename().string() + ".txt";
+        FILE * file = fopen(cachedURLFile.c_str(), "w");
+        fwrite(url.c_str(), sizeof(char), url.size(), file);
+        fflush(file);
+        fclose(file);
+    }
+
+    /**
      * @brief Uploads a file to a hoster.
      * @param path Path to the file to upload.
      * @param config HosterConfig to upload to.
      * @return url to the upload
      */
     std::string uploadFile(std::string path, hosterConfig * config) {
+        std::string cachedURL = checkUploadCache(path);
+        if (!cachedURL.empty()) return cachedURL;
+
         CURL * curl = curl_easy_init();
         curl_mime * mime;
         mime = curl_mime_init(curl);
@@ -211,6 +250,8 @@ namespace scr::utl {
 
         curl_easy_cleanup(curl);
         curl_mime_free(mime);
+
+        storeCachedURL(path, *urlresponse);
 
         return *urlresponse;        
     }
