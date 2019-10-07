@@ -39,7 +39,7 @@ namespace scr::ui {
         this->bottomText->SetColor(COLOR(m_config->m_theme->color_text));
         if(m_entry.path.find(".mp4") != std::string::npos) { // Is video
             if(m_entry.thumbnail.empty()) {
-                m_entry.thumbnail = scr::utl::getThumbnail(m_entry.path.substr(5), 970, 545);
+                m_entry.thumbnail = scr::utl::getThumbnail(m_entry.path.substr(5), 485, 273);
             }
             this->preview = Image::New(10, 40, m_entry.thumbnail);
         } else { // Is image
