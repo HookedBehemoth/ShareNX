@@ -41,9 +41,9 @@ TARGET		:=	$(notdir $(CURDIR))
 APP_AUTHOR	:=	Behemoth & Huntereb
 APP_VERSION	:=	1.2.1
 BUILD		:=	build
-SOURCES		:=	source source/ui
+SOURCES		:=	source source/ui source/libffmpegthumbnailer
 DATA		:=	data
-INCLUDES	:=	include include/ui
+INCLUDES	:=	include include/ui include/libffmpegthumbnailer
 ROMFS		:=	romfs
 
 #---------------------------------------------------------------------------------
@@ -54,17 +54,20 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__DEBUG__ -DNXLINK_DEBUG
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -std=gnu++17
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= 	-lcurl -lz -lmbedtls -lmbedx509 -lmbedcrypto -lstdc++fs -lpu -lfreetype -lSDL2_ttf \
+LIBS	:= 	-lavfilter -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lvpx -lass -lfribidi -ltheora -lvorbis -logg \
+			-lcurl -lz -lmbedtls -lmbedx509 -lmbedcrypto -lstdc++fs -lpu -lfreetype -lSDL2_ttf \
 			-lSDL2_gfx -lSDL2_image -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
 			-lpng -ljpeg -lwebp \
-			`sdl2-config --libs` `freetype-config --libs` -lnx
+			-lexpat -lm -lopus -lopusfile \
+			`sdl2-config --libs` `freetype-config --libs` \
+			-lnx
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

@@ -20,7 +20,7 @@
 #include <string.h>
 
 #ifdef NXLINK_DEBUG
-#define LOG(format, ...) { fprintf(nxlinkout, "%s:%u: ", __func__, __LINE__); fprintf(nxlinkout, format, ##__VA_ARGS__); }
+#define LOG(format, ...) { fprintf(stdout, "%s:%u: ", __func__, __LINE__); fprintf(stdout, format, ##__VA_ARGS__); }
 #else
 #define LOG(format, ...) ;
 #endif
@@ -28,36 +28,39 @@
 namespace fs = std::filesystem;
 namespace scr::utl {
     struct mimepart {
-        char * name;
-        char * data;
+        std::string name;
+        std::string data;
         bool is_file_data;
     };
     struct theme {
-        char * color_text;
-        char * color_background;
-        char * color_focus;
-        char * color_topbar;
-        char * background_path;
-        char * image_path;
+        std::string color_text;
+        std::string color_background;
+        std::string color_focus;
+        std::string color_topbar;
+        std::string background_path;
+        std::string image_path;
         int32_t image_x;
         int32_t image_y;
         int32_t image_w;
         int32_t image_h;
     };
     struct hosterConfig {
-        char * m_name;
-        char * m_url;
-        std::vector<mimepart *> m_mimeparts;
-        theme m_theme;
+        std::string m_name;
+        std::string m_url;
+        std::vector<mimepart *> * m_mimeparts;
+        theme * m_theme;
     };
     struct entry {
-        char * path;
-        char * thumbnail;
-        char * time;
+        std::string path;
+        std::string small_thumbnail;
+        std::string thumbnail;
+        std::string title;
     };
-    std::string uploadFile(char * path, hosterConfig config);
+    void init();
+    std::string uploadFile(std::string path, hosterConfig * config);
     std::vector<hosterConfig *> getConfigs();
-    hosterConfig getDefaultConfig();
+    hosterConfig * getDefaultConfig();
+    std::string getThumbnail(std::string file, int width, int height);
     void setDefaultConfig(int i);
     std::vector<entry *> getEntries();
 }

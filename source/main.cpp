@@ -20,11 +20,21 @@
 using namespace pu::ui::render;
 int main(int argc, char* argv[])
 {
+    /*socketInitializeDefault();
+    nxlinkStdio();
+    auto configs = scr::utl::getConfigs();
+    LOG("config=%s, url=%s\n",configs[0]->m_name.c_str(), configs[0]->m_url.c_str());
+    socketExit();
+    return 0;
+}
+int nix()
+{*/
     socketInitializeDefault();
 #ifdef __DEBUG__
     nxlinkStdio();
 #endif
     romfsInit();
+    scr::utl::init();
     LOG("starting\n")
     try {
         auto renderer = Renderer::New(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER,

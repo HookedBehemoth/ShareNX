@@ -15,13 +15,15 @@
  */
 
 #include "utils.hpp"
-#include "ini.h"
+#include "INIReader.h"
+#include "libffmpegthumbnailer/videothumbnailerc.h"
 #include <algorithm>
 #include <emummc_cfg.h>
 #include <switch.h>
 #include <curl/curl.h>
-#define CONFIGPATH "sdmc:/config/screen-nx"
-#define SCRCONFIGPATH "sdmc:/config/screen-nx/config.ini"
+static const char * CONFIGPATH = "sdmc:/config/screen-nx";
+static const char * SCRCONFIGPATH = "sdmc:/config/screen-nx/config.ini";
+static const char * TEMPPATH = ".temp/";
 
 std::vector<fs::path> getDirectoryFiles(const std::string & dir, const std::vector<std::string> & extensions) {
     std::vector<fs::path> files;
@@ -84,85 +86,95 @@ size_t CurlWriteCallback(const char *contents, size_t size, size_t nmemb, std::s
 }
 
 static int hoster_handler(void* user, const char* section, const char* name, const char* value) {
-    scr::utl::hosterConfig *config = (scr::utl::hosterConfig *)user;
+/*scr::utl::hosterConfig *config = (scr::utl::hosterConfig *)user;
 
-    #define SECTION(s) strcmp(section, s) == 0
-    #define NAME(n) strcmp(name, n) == 0
+#define SECTION(s) strcmp(section, s) == 0
+#define NAME(n) strcmp(name, n) == 0
 
-    if (SECTION("hoster")) {
-        if (NAME("url")) config->m_url = strdup(value);
-        else if (NAME("name")) config->m_name = strdup(value);
-    } else if (strcmp(section, "theme") == 0) {
-        if (NAME("color_text")) {
-            config->m_theme.color_text = strdup(value);
-        } else if (NAME("color_background")) {
-            config->m_theme.color_background = strdup(value);
-        } else if (NAME("color_focus")) {
-            config->m_theme.color_focus = strdup(value);
-        } else if (NAME("color_topbar")) {
-            config->m_theme.color_topbar = strdup(value);
-        } else if (NAME("background_path")) {
-            config->m_theme.background_path = strdup(value);
-        } else if (NAME("image_path")) {
-            config->m_theme.image_path = strdup(value);
-        } else if (NAME("image_x")) {
-            config->m_theme.image_x = atoi(value);
-        } else if (NAME("image_y")) {
-            config->m_theme.image_y = atoi(value);
-        } else if (NAME("image_w")) {
-            config->m_theme.image_w = atoi(value);
-        } else if (NAME("image_h")) {
-            config->m_theme.image_h = atoi(value);
-        }
-    } else {
-        int index;
-        try {
-            index = atoi(section);
-        } catch (std::exception& e) {
-            LOG("An error occurred:\n%s", e.what());
-            return 0;
-        }
-		while (config->m_mimeparts.size() < index+1) {
-            config->m_mimeparts.push_back(new scr::utl::mimepart);
-        }
-        if (NAME("name")) {
-            config->m_mimeparts[index]->name = strdup(value);
-        } else if (NAME("data")) {
-            config->m_mimeparts[index]->data = strdup(value);
-        } else if (NAME("is_file_data")) {
-            config->m_mimeparts[index]->is_file_data = strcmp(value, "true") == 0 ? true: false;
-        } else {
-			return 0;
-		}
+if (SECTION("hoster")) {
+    if (NAME("url")) config->m_url = strdup(value);
+    else if (NAME("name")) config->m_name = strdup(value);
+} else if (strcmp(section, "theme") == 0) {
+    if (NAME("color_text")) {
+        config->m_theme->color_text = strdup(value);
+    } else if (NAME("color_background")) {
+        config->m_theme->color_background = strdup(value);
+    } else if (NAME("color_focus")) {
+        config->m_theme->color_focus = strdup(value);
+    } else if (NAME("color_topbar")) {
+        config->m_theme->color_topbar = strdup(value);
+    } else if (NAME("background_path")) {
+        config->m_theme->background_path = strdup(value);
+    } else if (NAME("image_path")) {
+        config->m_theme->image_path = strdup(value);
+    } else if (NAME("image_x")) {
+        config->m_theme->image_x = atoi(value);
+    } else if (NAME("image_y")) {
+        config->m_theme->image_y = atoi(value);
+    } else if (NAME("image_w")) {
+        config->m_theme->image_w = atoi(value);
+    } else if (NAME("image_h")) {
+        config->m_theme->image_h = atoi(value);
     }
-    return 1;
+} else {
+    int index;
+    try {
+        index = atoi(section);
+    } catch (std::exception& e) {
+        LOG("An error occurred:\n%s", e.what());
+        return 0;
+    }
+    while (config->m_mimeparts.size() < index+1) {
+        config->m_mimeparts.push_back(new scr::utl::mimepart);
+    }
+    if (NAME("name")) {
+        config->m_mimeparts[index]->name = strdup(value);
+    } else if (NAME("data")) {
+        config->m_mimeparts[index]->data = strdup(value);
+    } else if (NAME("is_file_data")) {
+        config->m_mimeparts[index]->is_file_data = (strcmp(value, "true") == 0) ? true: false;
+    } else {
+        return 0;
+    }
+}*/
+return 1;
 }
 
 static int config_handler(void* user, const char* section, const char* name, const char* value) {
-    if(strcmp(section, "screen-nx") == 0 && strcmp(name, "config_index") == 0)
-        *((int *)user) = atoi(value);
+    #define SECTION(s) strcmp(section, s) == 0
+    #define NAME(n) strcmp(name, n) == 0
+    int * userval = (int *)user;
+    if(SECTION("screen-nx")) {
+        if(NAME("config_index")) {
+            *userval = atoi(value);
+        }
+    }
     return 0;
 }
 
 namespace scr::utl {
+    void init() {
+        if (!std::filesystem::exists(TEMPPATH))
+            std::filesystem::create_directory(TEMPPATH);
+    }
     /**
      * @brief Uploads a file to a hoster.
      * @param path Path to the file to upload.
      * @param config HosterConfig to upload to.
      * @return url to the upload
      */
-    std::string uploadFile(char * path, hosterConfig config) {
+    std::string uploadFile(std::string path, hosterConfig * config) {
         CURL * curl = curl_easy_init();
         curl_mime * mime;
         mime = curl_mime_init(curl);
         
-        for (mimepart * m_mimepart : config.m_mimeparts) {
+        for (mimepart * m_mimepart : *config->m_mimeparts) {
             curl_mimepart * cmimepart = curl_mime_addpart(mime);
-            curl_mime_name(cmimepart, m_mimepart->name);
+            curl_mime_name(cmimepart, m_mimepart->name.c_str());
             if (m_mimepart->is_file_data) {
-                curl_mime_filedata(cmimepart, path);
+                curl_mime_filedata(cmimepart, path.c_str());
             } else {
-                curl_mime_data(cmimepart, m_mimepart->data, CURL_ZERO_TERMINATED);
+                curl_mime_data(cmimepart, m_mimepart->data.c_str(), CURL_ZERO_TERMINATED);
             }
         }
 
@@ -172,12 +184,12 @@ namespace scr::utl {
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)urlresponse);
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
         curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
-        curl_easy_setopt(curl, CURLOPT_URL, config.m_url);
+        curl_easy_setopt(curl, CURLOPT_URL, config->m_url.c_str());
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 
         CURLcode res = curl_easy_perform(curl);
         if (res != CURLE_OK) {
-            LOG("perform failed with %s\n", res);
+            LOG("perform failed with %d\n", res);
         }
 
         int rcode;
@@ -191,6 +203,37 @@ namespace scr::utl {
 
         return *urlresponse;        
     }
+
+    static void parseHoster(INIReader reader, hosterConfig * config) {
+        /* hoster */
+        config->m_name = reader.GetString("hoster", "name", "");
+        config->m_url = reader.GetString("hoster", "url", "");
+        /* mime */
+        config->m_mimeparts = new std::vector<mimepart *>();
+        for (int i = 0; i < reader.GetInteger("hoster", "mime_count", 0); i++) {
+            mimepart * part = new mimepart();
+            part->name = reader.GetString(std::to_string(i), "name", "");
+            part->data = reader.GetString(std::to_string(i), "data", "");
+            part->is_file_data = reader.GetBoolean(std::to_string(i), "is_file_data", false);
+            config->m_mimeparts->push_back(part);
+        }
+        /* theme */
+        #define THEMESTRING(name, def) reader.GetString("theme", name, def)
+        #define THEMEINT(name) reader.GetInteger("theme", name, 0)
+        config->m_theme = new theme();
+        config->m_theme->color_text = THEMESTRING("color_text", "#FFFFFFFF");
+        config->m_theme->color_background = THEMESTRING("color_background", "#6C0000FF");
+        config->m_theme->color_focus = THEMESTRING("color_focus", "#480001FF");
+        config->m_theme->color_topbar = THEMESTRING("color_topbar", "#170909FF");
+        config->m_theme->background_path = THEMESTRING("background_path", "");
+        config->m_theme->image_path = THEMESTRING("image_path", "");
+        config->m_theme->image_x = THEMEINT("image_x");
+        config->m_theme->image_y = THEMEINT("image_y");
+        config->m_theme->image_w = THEMEINT("image_w");
+        config->m_theme->image_h = THEMEINT("image_h");
+
+        LOG("parsed ini file: %s\n", config->m_name.c_str()); 
+    }
     
     /**
      * @brief reads all configs from /config/screen-nx
@@ -200,38 +243,83 @@ namespace scr::utl {
         for(fs::path file: getDirectoryFiles(CONFIGPATH, {".ini"})) {
             if (file.filename() == "config.ini") continue;
             hosterConfig * config = new hosterConfig;
-            if (ini_parse(file.c_str(), hoster_handler, config) < 0) {
-                LOG("Couldn't parse %s\n", file.c_str())
+            INIReader reader(file);
+            if (reader.ParseError()) {
+                LOG("unable to parse %s\n", file.filename().c_str());
                 continue;
             }
+            parseHoster(reader, config);
+            if (config->m_url.empty() || config->m_mimeparts->size() == 0)
+                continue;
             vector->push_back(config);
         }
         return *vector;
     }
 
-    /**
+    /**sdmc:/config/screen-nx/config.ini
      * @brief returns the default config
      */
-    hosterConfig getDefaultConfig() {
+    hosterConfig * getDefaultConfig() {
         std::vector<hosterConfig *> configs = getConfigs();
         int i = 0;
-        if (ini_parse(SCRCONFIGPATH, config_handler, &i) < 0) {
-            LOG("failed to parse own config\n")
+        LOG("parsing from %s\n", SCRCONFIGPATH);
+        INIReader reader(SCRCONFIGPATH);
+        if (!reader.ParseError()) {
+            i = reader.GetInteger("screen-nx", "config_index", 0);
+        } else {
+            LOG("failed to parse own config\n");
         }
         if (configs.size() > 0) {
-            return *configs[i%configs.size()];
+            if (!configs[i%configs.size()]->m_name.empty()) return configs[i%configs.size()];
         }
         /* load default config if everything fails */
-        return {"lewd.pics",
+        return new hosterConfig({"lewd.pics",
                 "https://lewd.pics/p/index.php",
-                { new mimepart({"fileToUpload", "", true}), new mimepart({"curl", "1", false})},
-                {"#FFFFFFFF","#6c0000FF","#480001FF","#170909FF","romfs:/bg.png","romfs:/owo.png",989,240,291,480}};
+                new std::vector({
+                    new mimepart({"fileToUpload", "", true}),
+                    new mimepart({"curl", "1", false})
+                }),
+                new theme({"#FFFFFFFF","#6cFF00FF","#48FF01FF","#170909FF","romfs:/bg.png","romfs:/owo.png",989,240,291,480})});
     }
 
     /**
      * @brief sets the default config from the config ini.
      */
     void setDefaultConfig(int i) {
+        std::string data("[screen-nx]\nconfig_index=" + std::to_string(i));
+        FILE * configFile = fopen(SCRCONFIGPATH, "w");
+        fwrite(data.c_str(), sizeof(char), data.size(), configFile);
+        fflush(configFile);
+        fsync(fileno(configFile));
+        fclose(configFile);
+    }
+
+    void callback(ThumbnailerLogLevel lvl, const char* msg) {
+        LOG("getThumbnail: %s: %s\n", (lvl == 0)? "warning": "error", msg);
+    }
+
+    std::string getThumbnail(std::string file, int width, int height) {
+        std::string thumbpath = TEMPPATH + fs::path(file).filename().string().append(std::to_string(width)).append("x").append(std::to_string(height)).append(".png");
+        if (std::filesystem::exists(thumbpath)) return thumbpath;
+        if (fs::path(file).extension() == ".jpg") {
+            // TODO: hf huntereb
+            return file;
+        } else if (fs::path(file).extension() == ".png") {
+            // TODO: hf huntereb
+            return file;
+        } else if (fs::path(file).extension() == ".mp4") {
+            video_thumbnailer * vth = video_thumbnailer_create();
+            video_thumbnailer_set_log_callback(vth, callback);
+            video_thumbnailer_set_size(vth, width, height);
+            vth->overlay_film_strip = 1;
+            int rc = video_thumbnailer_generate_thumbnail_to_file(vth, file.c_str(), thumbpath.c_str());
+            video_thumbnailer_destroy(vth);
+            LOG("thumbnail rc=%d\n", rc);
+            if (rc == 0 ) return thumbpath;
+            else return "romfs:/video.png";
+        } else {
+            return "romfs:/Sad.jpg";
+        }
     }
 
     /**
@@ -240,14 +328,14 @@ namespace scr::utl {
     std::vector<entry *> getEntries() {
         std::vector<entry *> * entries = new std::vector<entry *>;
         for (auto& file: getDirectoryFiles("sdmc:/" + getAlbumPath(), {".jpg", ".png", ".mp4"})) {
-            printf("%s\n", file.filename().c_str());
+            LOG("added %s\n", file.filename().c_str());
             entry * m_entry = new entry;
-            m_entry->path = strdup(file.c_str());
-            m_entry->thumbnail = "";
-            m_entry->time = strdup(file.filename().string().substr(0,12).insert(10,":").insert(8," ").insert(6,".").insert(4,".").c_str());
+            m_entry->path = file;
+            m_entry->title = file.filename().string().substr(0,12).insert(10,":").insert(8," ").insert(6,".").insert(4,".");
             entries->push_back(m_entry);
-            if (file.filename().extension() == ".mp4") m_entry->thumbnail = "romfs:/video.png";
-            else m_entry->thumbnail = m_entry->path;
+            if (file.filename().extension() == ".mp4")
+                m_entry->title.append(" (").append(file.extension().string().substr(1)).append(")");
+            m_entry->small_thumbnail = getThumbnail(file.string().substr(5), 224, 136);
         }
         return *entries;
     }
