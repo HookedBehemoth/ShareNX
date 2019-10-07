@@ -335,8 +335,6 @@ namespace scr::utl {
             m_entry->path = file;
             m_entry->title = file.filename().string().substr(0,12).insert(10,":").insert(8," ").insert(6,".").insert(4,".");
             entries->push_back(m_entry);
-            if (file.filename().extension() == ".mp4")
-                m_entry->title.append(" (").append(file.extension().string().substr(1)).append(")");
             m_entry->small_thumbnail = getThumbnail(file.string().substr(5), 224, 136);
         }
         return *entries;
