@@ -318,7 +318,7 @@ namespace scr::utl {
             if (rc == 0 ) return thumbpath;
             else return "romfs:/video.png";
         } else {
-            return "romfs:/Sad.jpg";
+            return file;
         }
     }
 
