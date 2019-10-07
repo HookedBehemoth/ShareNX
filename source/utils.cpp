@@ -21,9 +21,9 @@
 #include <emummc_cfg.h>
 #include <switch.h>
 #include <curl/curl.h>
-static const char * CONFIGPATH = "sdmc:/config/screen-nx";
-static const char * SCRCONFIGPATH = "sdmc:/config/screen-nx/config.ini";
-static const char * TEMPPATH = ".temp/";
+static const char * CONFIGPATH = "sdmc:/switch/screen-nx";
+static const char * SCRCONFIGPATH = "sdmc:/switch/screen-nx/config.ini";
+static const char * TEMPPATH = "sdmc:/switch/screen-nx/.temp/";
 
 std::vector<fs::path> getDirectoryFiles(const std::string & dir, const std::vector<std::string> & extensions) {
     std::vector<fs::path> files;
@@ -154,6 +154,8 @@ static int config_handler(void* user, const char* section, const char* name, con
 
 namespace scr::utl {
     void init() {
+        if (!std::filesystem::exists(CONFIGPATH))
+            std::filesystem::create_directory(CONFIGPATH);
         if (!std::filesystem::exists(TEMPPATH))
             std::filesystem::create_directory(TEMPPATH);
     }
