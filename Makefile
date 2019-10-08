@@ -61,11 +61,11 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -std=gnu++17
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= 	-lavfilter -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lvpx -lass -lfribidi -ltheora -lvorbis -logg \
+LIBS	:= 	-lavfilter -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lvpx -lass -lfribidi -ltheora -lvorbis \
 			-lcurl -lz -lmbedtls -lmbedx509 -lmbedcrypto -lstdc++fs -lpu -lfreetype -lSDL2_ttf \
-			-lSDL2_gfx -lSDL2_image -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
+			-lSDL2_mixer -lSDL2_gfx -lSDL2_image -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
 			-lpng -ljpeg -lwebp \
-			-lexpat -lm -lopus -lopusfile \
+			-lexpat -lm -lopus -lopusfile -lmodplug -lmpg123 -lvorbisidec -logg \
 			`sdl2-config --libs` `freetype-config --libs` \
 			-lnx
 

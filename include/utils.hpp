@@ -58,6 +58,7 @@ namespace scr::utl {
     };
     void init();
     void clearCacheMonthly();
+    std::string checkUploadCache(std::string path);
     std::string uploadFile(std::string path, hosterConfig * config);
     std::vector<hosterConfig *> getConfigs();
     hosterConfig * getDefaultConfig();

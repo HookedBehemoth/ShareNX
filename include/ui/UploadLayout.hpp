@@ -31,7 +31,7 @@ namespace scr::ui {
             TextBlock::Ref bottomText;
             Image::Ref preview;
             Image::Ref image;
-            bool uploading = false;
+            std::string url;
             scr::utl::entry m_entry;
     };
 }

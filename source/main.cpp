@@ -20,15 +20,6 @@
 using namespace pu::ui::render;
 int main(int argc, char* argv[])
 {
-    /*socketInitializeDefault();
-    nxlinkStdio();
-    auto configs = scr::utl::getConfigs();
-    LOG("config=%s, url=%s\n",configs[0]->m_name.c_str(), configs[0]->m_url.c_str());
-    socketExit();
-    return 0;
-}
-int nix()
-{*/
     socketInitializeDefault();
 #ifdef __DEBUG__
     nxlinkStdio();

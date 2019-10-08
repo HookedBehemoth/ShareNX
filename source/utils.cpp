@@ -21,7 +21,8 @@
 #include <emummc_cfg.h>
 #include <switch.h>
 #include <curl/curl.h>
-static const char * CONFIGPATH = "sdmc:/switch/screen-nx";
+static const char * SCRPATH = "sdmc:/switch/screen-nx/";
+static const char * CONFIGPATH = "sdmc:/switch/screen-nx/sites/";
 static const char * SCRCONFIGPATH = "sdmc:/switch/screen-nx/config.ini";
 static const char * TEMPPATH = "sdmc:/switch/screen-nx/.temp/";
 
@@ -73,8 +74,8 @@ std::string getAlbumPath() {
     emummc_config_t config;
 
     int x = smcGetEmummcConfig(EMUMMC_MMC_NAND, &config, &paths);
-    if(x != 0) return out;
-    if(config.base_cfg.type == 0) return out;
+    if (x != 0) return out;
+    if (config.base_cfg.type == 0) return out;
     out = paths.nintendo_path;
     out += "/Album";
     return out;
@@ -85,75 +86,10 @@ size_t CurlWriteCallback(const char *contents, size_t size, size_t nmemb, std::s
 	return size * nmemb;
 }
 
-static int hoster_handler(void* user, const char* section, const char* name, const char* value) {
-/*scr::utl::hosterConfig *config = (scr::utl::hosterConfig *)user;
-
-#define SECTION(s) strcmp(section, s) == 0
-#define NAME(n) strcmp(name, n) == 0
-
-if (SECTION("hoster")) {
-    if (NAME("url")) config->m_url = strdup(value);
-    else if (NAME("name")) config->m_name = strdup(value);
-} else if (strcmp(section, "theme") == 0) {
-    if (NAME("color_text")) {
-        config->m_theme->color_text = strdup(value);
-    } else if (NAME("color_background")) {
-        config->m_theme->color_background = strdup(value);
-    } else if (NAME("color_focus")) {
-        config->m_theme->color_focus = strdup(value);
-    } else if (NAME("color_topbar")) {
-        config->m_theme->color_topbar = strdup(value);
-    } else if (NAME("background_path")) {
-        config->m_theme->background_path = strdup(value);
-    } else if (NAME("image_path")) {
-        config->m_theme->image_path = strdup(value);
-    } else if (NAME("image_x")) {
-        config->m_theme->image_x = atoi(value);
-    } else if (NAME("image_y")) {
-        config->m_theme->image_y = atoi(value);
-    } else if (NAME("image_w")) {
-        config->m_theme->image_w = atoi(value);
-    } else if (NAME("image_h")) {
-        config->m_theme->image_h = atoi(value);
-    }
-} else {
-    int index;
-    try {
-        index = atoi(section);
-    } catch (std::exception& e) {
-        LOG("An error occurred:\n%s", e.what());
-        return 0;
-    }
-    while (config->m_mimeparts.size() < index+1) {
-        config->m_mimeparts.push_back(new scr::utl::mimepart);
-    }
-    if (NAME("name")) {
-        config->m_mimeparts[index]->name = strdup(value);
-    } else if (NAME("data")) {
-        config->m_mimeparts[index]->data = strdup(value);
-    } else if (NAME("is_file_data")) {
-        config->m_mimeparts[index]->is_file_data = (strcmp(value, "true") == 0) ? true: false;
-    } else {
-        return 0;
-    }
-}*/
-return 1;
-}
-
-static int config_handler(void* user, const char* section, const char* name, const char* value) {
-    #define SECTION(s) strcmp(section, s) == 0
-    #define NAME(n) strcmp(name, n) == 0
-    int * userval = (int *)user;
-    if(SECTION("screen-nx")) {
-        if(NAME("config_index")) {
-            *userval = atoi(value);
-        }
-    }
-    return 0;
-}
-
 namespace scr::utl {
     void init() {
+        if (!std::filesystem::exists(SCRPATH))
+            std::filesystem::create_directory(SCRPATH);
         if (!std::filesystem::exists(CONFIGPATH))
             std::filesystem::create_directory(CONFIGPATH);
         if (!std::filesystem::exists(TEMPPATH))
@@ -175,7 +111,7 @@ namespace scr::utl {
      */
     std::string checkUploadCache(std::string path) {
         std::string txtloc = TEMPPATH + fs::path(path).filename().string() + ".txt";
-        if(std::filesystem::exists(txtloc)) {
+        if (std::filesystem::exists(txtloc)) {
             std::time_t currentTime = std::time(nullptr);
             std::time_t lastWriteTimePlusADay = std::chrono::system_clock::to_time_t(std::filesystem::last_write_time(txtloc)) + 86400;
             if (currentTime < lastWriteTimePlusADay) {
@@ -308,7 +244,7 @@ namespace scr::utl {
         return *vector;
     }
 
-    /**sdmc:/config/screen-nx/config.ini
+    /**
      * @brief returns the default config
      */
     hosterConfig * getDefaultConfig() {
@@ -320,6 +256,7 @@ namespace scr::utl {
             i = reader.GetInteger("screen-nx", "config_index", 0);
         } else {
             LOG("failed to parse own config\n");
+            std::filesystem::remove(SCRCONFIGPATH);
         }
         if (configs.size() > 0) {
             if (!configs[i%configs.size()]->m_name.empty()) return configs[i%configs.size()];
@@ -338,6 +275,7 @@ namespace scr::utl {
      * @brief sets the default config from the config ini.
      */
     void setDefaultConfig(int i) {
+        std::filesystem::remove(SCRCONFIGPATH);
         std::string data("[screen-nx]\nconfig_index=" + std::to_string(i));
         FILE * configFile = fopen(SCRCONFIGPATH, "w");
         fwrite(data.c_str(), sizeof(char), data.size(), configFile);
@@ -346,7 +284,7 @@ namespace scr::utl {
         fclose(configFile);
     }
 
-    void callback(ThumbnailerLogLevel lvl, const char* msg) {
+    void ThumbnailerLogCallback(ThumbnailerLogLevel lvl, const char* msg) {
         LOG("getThumbnail: %s: %s\n", (lvl == 0)? "warning": "error", msg);
     }
 
@@ -361,7 +299,7 @@ namespace scr::utl {
             return file;
         } else if (fs::path(file).extension() == ".mp4") {
             video_thumbnailer * vth = video_thumbnailer_create();
-            video_thumbnailer_set_log_callback(vth, callback);
+            video_thumbnailer_set_log_callback(vth, ThumbnailerLogCallback);
             video_thumbnailer_set_size(vth, width, height);
             vth->overlay_film_strip = 1;
             int rc = video_thumbnailer_generate_thumbnail_to_file(vth, file.c_str(), thumbpath.c_str());

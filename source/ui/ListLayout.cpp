@@ -29,13 +29,7 @@ namespace scr::ui {
         this->topRect = Rectangle::New(0, 0, 1280, 30, COLOR(m_config->m_theme->color_topbar));
         this->topText = TextBlock::New(10, 0, m_config->m_name, 25);
         this->topText->SetColor(COLOR(m_config->m_theme->color_text));
-        if (!m_config->m_theme->image_path.empty()) {
-            this->image = Image::New(m_config->m_theme->image_x, m_config->m_theme->image_y, m_config->m_theme->image_path);
-            this->image->SetWidth(m_config->m_theme->image_w);
-            this->image->SetHeight(m_config->m_theme->image_h);
-            this->Add(this->image);
-        }
-        this->menu = FixedMenu::New(0,40,980,COLOR(m_config->m_theme->color_background),136,5,45);
+        this->menu = FixedMenu::New(0,40,1280,COLOR(m_config->m_theme->color_background),136,5,45);
         this->menu->SetOnFocusColor(COLOR(m_config->m_theme->color_focus));
         entries = scr::utl::getEntries();
         for (auto m_entry: entries) {
@@ -48,6 +42,12 @@ namespace scr::ui {
         this->Add(this->topRect);
         this->Add(this->topText);
         this->Add(this->menu);
+        if (!m_config->m_theme->image_path.empty()) {
+            this->image = Image::New(m_config->m_theme->image_x, m_config->m_theme->image_y, m_config->m_theme->image_path);
+            this->image->SetWidth(m_config->m_theme->image_w);
+            this->image->SetHeight(m_config->m_theme->image_h);
+            this->Add(this->image);
+        }
     }
 
     void ListLayout::onItemClick() {
@@ -64,13 +64,14 @@ namespace scr::ui {
 
         if (Down & KEY_X) {
             std::vector<scr::utl::hosterConfig *> configs = scr::utl::getConfigs();
+            if (configs.size() == 0) {
+                mainApp->CreateShowDialog("No config found", "Create your own config and put them in /switch/screen-nx/sites/.\n\nCheck the repo for examples or just use the default.", {"Cancel"}, true);
+                return;
+            }
             std::vector<pu::String> options;
             for (scr::utl::hosterConfig * config: configs) options.push_back(config->m_name);
             int opt = mainApp->CreateShowDialog("Select config", "select a config", options, false);
-            if(opt < 0)
-            {
-                return;
-            }
+            if (opt < 0) return;
             scr::utl::setDefaultConfig(opt);
             m_config = configs[opt];
             mainApp->listLayout = ListLayout::New();
