@@ -2,31 +2,19 @@
 
 namespace pu::ui::elm
 {
-    FixedMenuItem::FixedMenuItem(String Name)
+    FixedMenuItem::FixedMenuItem(scr::utl::entry * entry) : m_entry(entry)
     {
-        this->clr = { 10, 10, 10, 255 };
-        this->name = Name;
-        this->hasicon = false;
-    }
-
-    String FixedMenuItem::GetName()
-    {
-        return this->name;
-    }
-
-    void FixedMenuItem::SetName(String Name)
-    {
-        this->name = Name;
+        this->color = { 10, 10, 10, 255 };
     }
 
     Color FixedMenuItem::GetColor()
     {
-        return this->clr;
+        return this->color;
     }
 
     void FixedMenuItem::SetColor(Color Color)
     {
-        this->clr = Color;
+        this->color = Color;
     }
 
     void FixedMenuItem::AddOnClick(std::function<void()> Callback, u64 Key)
@@ -50,28 +38,7 @@ namespace pu::ui::elm
     {
         return this->cbipts[Index];
     }
-
-    std::string FixedMenuItem::GetIcon()
-    {
-        return this->icon;
-    }
-
-    void FixedMenuItem::SetIcon(std::string Icon)
-    {
-        std::ifstream ifs(Icon);
-        if(ifs.good())
-        {
-            this->icon = Icon;
-            this->hasicon = true;
-        }
-        ifs.close();
-    }
-
-    bool FixedMenuItem::HasIcon()
-    {
-        return this->hasicon;
-    }
-
+    
     FixedMenu::FixedMenu(s32 X, s32 Y, s32 Width, Color OptionColor, s32 ItemSize, s32 ItemsToShow, s32 fontSize) : Element::Element()
     {
         this->x = X;
@@ -281,18 +248,15 @@ namespace pu::ui::elm
                 }
                 else Drawer->RenderRectangleFill(this->clr, cx, cy, cw, ch);
                 auto itm = this->itms[i];
-                s32 xh = render::GetTextHeight(this->font, itm->GetName());
+                s32 xh = render::GetTextHeight(this->font, itm->m_entry->title);
                 s32 tx = (cx + 25);
                 s32 ty = ((ch - xh) / 2) + cy;
-                if(itm->HasIcon())
-                {
-                    s32 ich = (this->isize - 10);
-                    s32 icw = ((ich * 16) / 9);
-                    s32 icx = (cx + 10);
-                    s32 icy = (cy + 5);
-                    tx = (icx + icw + 25);
-                    Drawer->RenderTexture(curicon, icx, icy, { -1, icw, ich, -1.0f });
-                }
+                s32 ich = (this->isize - 10);
+                s32 icw = ((ich * 16) / 9);
+                s32 icx = (cx + 10);
+                s32 icy = (cy + 5);
+                tx = (icx + icw + 25);
+                Drawer->RenderTexture(curicon, icx, icy, { -1, icw, ich, -1.0f });
                 Drawer->RenderTexture(curname, tx, ty);
                 cy += ch;
             }
@@ -498,16 +462,16 @@ namespace pu::ui::elm
         if((its + this->fisel) > this->itms.size()) its = this->itms.size() - this->fisel;
         for(s32 i = this->fisel; i < (its + this->fisel); i++)
         {
-            auto strname = this->itms[i]->GetName();
+            /* name */
+            auto strname = this->itms[i]->m_entry->title;
             auto tex = render::RenderText(this->font, strname, this->itms[i]->GetColor());
             this->loadednames.push_back(tex);
-            if(this->itms[i]->HasIcon())
-            {
-                auto stricon = this->itms[i]->GetIcon();
-                auto icontex = render::LoadImage(stricon);
-                this->loadedicons.push_back(icontex);
-            }
-            else this->loadedicons.push_back(NULL);
+            /* icon */
+            if (this->itms[i]->m_entry->small_thumbnail.empty())
+                this->itms[i]->m_entry->small_thumbnail = scr::utl::getThumbnail(this->itms[i]->m_entry->path.substr(5), 224, 136);
+            auto stricon = this->itms[i]->m_entry->small_thumbnail;
+            auto icontex = render::LoadImage(stricon);
+            this->loadedicons.push_back(icontex);
         }
     }
 }

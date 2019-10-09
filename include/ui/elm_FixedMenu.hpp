@@ -17,31 +17,24 @@
 #include <vector>
 #include <chrono>
 #include <functional>
+#include "utils.hpp"
 
 namespace pu::ui::elm
 {
     class FixedMenuItem
     {
         public:
-            FixedMenuItem(String Name);
+            FixedMenuItem(scr::utl::entry * entry);
             PU_SMART_CTOR(FixedMenuItem)
-
-            String GetName();
-            void SetName(String Name);
+            scr::utl::entry * m_entry;
             Color GetColor();
             void SetColor(Color Color);
             void AddOnClick(std::function<void()> Callback, u64 Key = KEY_A);
             s32 GetCallbackCount();
             std::function<void()> GetCallback(s32 Index);
             u64 GetCallbackKey(s32 Index);
-            std::string GetIcon();
-            void SetIcon(std::string Icon);
-            bool HasIcon();
         private:
-            String name;
-            Color clr;
-            bool hasicon;
-            std::string icon;
+            Color color;
             std::vector<std::function<void()>> cbs;
             std::vector<u64> cbipts;
     };

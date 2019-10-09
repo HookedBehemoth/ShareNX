@@ -33,9 +33,9 @@ namespace scr::ui {
         this->menu->SetOnFocusColor(COLOR(m_config->m_theme->color_focus));
         entries = scr::utl::getEntries();
         for (auto m_entry: entries) {
-            auto itm = FixedMenuItem::New(m_entry->title);
+            auto itm = FixedMenuItem::New(m_entry);
             itm->SetColor(COLOR(m_config->m_theme->color_text));
-            itm->SetIcon(m_entry->small_thumbnail);
+            //itm->SetIcon(m_entry->small_thumbnail);
             itm->AddOnClick(std::bind(&ListLayout::onItemClick, this));
             this->menu->AddItem(itm);
         }
