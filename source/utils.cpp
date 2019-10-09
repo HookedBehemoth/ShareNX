@@ -21,6 +21,7 @@
 #include <emummc_cfg.h>
 #include <switch.h>
 #include <curl/curl.h>
+#include <gd.h>
 static const char * SCRPATH = "sdmc:/switch/screen-nx/";
 static const char * CONFIGPATH = "sdmc:/switch/screen-nx/sites/";
 static const char * SCRCONFIGPATH = "sdmc:/switch/screen-nx/config.ini";
@@ -97,7 +98,7 @@ namespace scr::utl {
     }
 
     void clearCacheMonthly() {
-        for(fs::path file: getDirectoryFiles(TEMPPATH, {".txt",".png"})) {
+        for(fs::path file: getDirectoryFiles(TEMPPATH, {".txt",".jpg"})) {
             std::time_t currentTime = std::time(nullptr);
             std::time_t lastWriteTimePlusAMonth = std::chrono::system_clock::to_time_t(std::filesystem::last_write_time(file)) + 2592000;
             if (currentTime > lastWriteTimePlusAMonth) remove(file);
@@ -289,18 +290,23 @@ namespace scr::utl {
     }
 
     std::string getThumbnail(std::string file, int width, int height) {
-        std::string thumbpath = TEMPPATH + fs::path(file).filename().string().append(std::to_string(width)).append("x").append(std::to_string(height)).append(".png");
+        std::string thumbpath = TEMPPATH + fs::path(file).filename().string().append(std::to_string(width)).append("x").append(std::to_string(height)).append(".jpg");
         if (std::filesystem::exists(thumbpath)) return thumbpath;
         if (fs::path(file).extension() == ".jpg") {
-            // TODO: hf huntereb
-            return file;
-        } else if (fs::path(file).extension() == ".png") {
-            // TODO: hf huntereb
-            return file;
+            gdImagePtr im;
+            FILE *in = fopen(file.c_str(), "rb");
+            im = gdImageCreateFromJpeg(in);
+            fclose(in);
+            FILE *out = fopen(thumbpath.c_str(), "wb");
+            gdImageJpeg(gdImageScale(im,width,height), out, -1);
+            fclose(out);
+            gdImageDestroy(im);
+            return thumbpath;
         } else if (fs::path(file).extension() == ".mp4") {
             video_thumbnailer * vth = video_thumbnailer_create();
             video_thumbnailer_set_log_callback(vth, ThumbnailerLogCallback);
             video_thumbnailer_set_size(vth, width, height);
+            vth->thumbnail_image_type = ThumbnailerImageType::Jpeg;
             vth->overlay_film_strip = 1;
             int rc = video_thumbnailer_generate_thumbnail_to_file(vth, file.c_str(), thumbpath.c_str());
             video_thumbnailer_destroy(vth);
@@ -317,7 +323,7 @@ namespace scr::utl {
      */
     std::vector<entry *> getEntries() {
         std::vector<entry *> * entries = new std::vector<entry *>;
-        for (auto& file: getDirectoryFiles("sdmc:/" + getAlbumPath(), {".jpg", ".png", ".mp4"})) {
+        for (auto& file: getDirectoryFiles("sdmc:/" + getAlbumPath(), {".jpg", ".mp4"})) {
             LOG("added %s\n", file.filename().c_str());
             entry * m_entry = new entry;
             m_entry->path = file;
