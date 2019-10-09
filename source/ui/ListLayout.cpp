@@ -29,7 +29,7 @@ namespace scr::ui {
         this->topRect = Rectangle::New(0, 0, 1280, 30, COLOR(m_config->m_theme->color_topbar));
         this->topText = TextBlock::New(10, 0, m_config->m_name, 25);
         this->topText->SetColor(COLOR(m_config->m_theme->color_text));
-        this->menu = FixedMenu::New(0,40,1280,COLOR(m_config->m_theme->color_background),136,5,45);
+        this->menu = FixedMenu::New(0,40,1280,COLOR("#00000000"),136,5,45);
         this->menu->SetOnFocusColor(COLOR(m_config->m_theme->color_focus));
         entries = scr::utl::getEntries();
         for (auto m_entry: entries) {
