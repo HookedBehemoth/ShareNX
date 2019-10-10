@@ -55,8 +55,9 @@ namespace scr::ui {
 
     void ListLayout::onItemClick() {
         scr::utl::entry * m_entry = entries[this->menu->GetSelectedIndex()];
-        mainApp->uploadLayout = UploadLayout::New(*m_entry);
-        mainApp->uploadLayout->SetOnInput(std::bind(&UploadLayout::onInput, mainApp->uploadLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+        mainApp->uploadLayout->setEntry(m_entry);
+        //mainApp->uploadLayout = UploadLayout::New(*m_entry);
+        //mainApp->uploadLayout->SetOnInput(std::bind(&UploadLayout::onInput, mainApp->uploadLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         mainApp->LoadLayout(mainApp->uploadLayout);
     }
 
