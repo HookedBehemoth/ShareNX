@@ -27,6 +27,7 @@ namespace scr::ui {
             void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
         private:
             TextBlock::Ref topText;
+            TextBlock::Ref infoText;
             Rectangle::Ref topRect;
             TextBlock::Ref bottomText;
             Image::Ref preview;

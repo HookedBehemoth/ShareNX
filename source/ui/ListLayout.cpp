@@ -26,10 +26,12 @@ namespace scr::ui {
     ListLayout::ListLayout() : Layout::Layout() {
         this->SetBackgroundColor(COLOR(m_config->m_theme->color_background));
         this->SetBackgroundImage(m_config->m_theme->background_path);
-        this->topRect = Rectangle::New(0, 0, 1280, 30, COLOR(m_config->m_theme->color_topbar));
-        this->topText = TextBlock::New(10, 0, m_config->m_name, 25);
+        this->topRect = Rectangle::New(0, 0, 1280, 45, COLOR(m_config->m_theme->color_topbar));
+        this->topText = TextBlock::New(10, 2, m_config->m_name, 35);
+        this->infoText = TextBlock::New(945, 9, "(A)Select (X)Config (B)Exit", 25);
         this->topText->SetColor(COLOR(m_config->m_theme->color_text));
-        this->menu = FixedMenu::New(0,40,1280,COLOR("#00000000"),136,5,45);
+        this->infoText->SetColor(COLOR(m_config->m_theme->color_text));
+        this->menu = FixedMenu::New(0,45,1280,COLOR("#00000000"),136,5,45);
         this->menu->SetOnFocusColor(COLOR(m_config->m_theme->color_focus));
         entries = scr::utl::getEntries();
         for (auto m_entry: entries) {
@@ -41,6 +43,7 @@ namespace scr::ui {
         }
         this->Add(this->topRect);
         this->Add(this->topText);
+        this->Add(this->infoText);
         this->Add(this->menu);
         if (!m_config->m_theme->image_path.empty()) {
             this->image = Image::New(m_config->m_theme->image_x, m_config->m_theme->image_y, m_config->m_theme->image_path);
@@ -65,12 +68,12 @@ namespace scr::ui {
         if (Down & KEY_X) {
             std::vector<scr::utl::hosterConfig *> configs = scr::utl::getConfigs();
             if (configs.size() == 0) {
-                mainApp->CreateShowDialog("No config found", "Create your own config and put them in /switch/screen-nx/sites/.\n\nCheck the repo for examples or just use the default.", {"Cancel"}, true);
+                mainApp->CreateShowDialog("No site configs found", "Create your own configs and put them in /switch/screen-nx/sites/.\n\nCheck the repo for examples, or just use the default!", {"Cancel"}, true);
                 return;
             }
             std::vector<pu::String> options;
             for (scr::utl::hosterConfig * config: configs) options.push_back(config->m_name);
-            int opt = mainApp->CreateShowDialog("Select config", "select a config", options, false);
+            int opt = mainApp->CreateShowDialog("Select a site config", "Selecting different site configs will change the theme and website to upload to!", options, false);
             if (opt < 0) return;
             scr::utl::setDefaultConfig(opt);
             m_config = configs[opt];

@@ -269,7 +269,7 @@ namespace scr::utl {
                     new mimepart({"fileToUpload", "", true}),
                     new mimepart({"curl", "1", false})
                 }),
-                new theme({"#FFFFFFFF","#6C0000FF","#480001FF","#170909FF","romfs:/bg.png","romfs:/owo.png",989,240,292,480})});
+                new theme({"#FFFFFFFF","#6C0000FF","#480001FF","#170909FF","romfs:/bg.jpg","romfs:/owo.png",975,240,292,480})});
     }
 
     /**

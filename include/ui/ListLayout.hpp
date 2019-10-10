@@ -29,6 +29,7 @@ namespace scr::ui {
         private:
             void onItemClick();
             TextBlock::Ref topText;
+            TextBlock::Ref infoText;
             Rectangle::Ref topRect;
             FixedMenu::Ref menu;
             Image::Ref image;
