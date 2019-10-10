@@ -79,7 +79,9 @@ namespace scr::ui {
             scr::utl::setDefaultConfig(opt);
             m_config = configs[opt];
             mainApp->listLayout = ListLayout::New();
+            mainApp->uploadLayout = UploadLayout::New();
             mainApp->listLayout->SetOnInput(std::bind(&ListLayout::onInput, mainApp->listLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+            mainApp->uploadLayout->SetOnInput(std::bind(&UploadLayout::onInput, mainApp->uploadLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
             mainApp->LoadLayout(mainApp->listLayout);
         }
     }
