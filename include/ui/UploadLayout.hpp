@@ -22,8 +22,9 @@ namespace scr::ui {
     class UploadLayout : public pu::ui::Layout
     {
         public:
-            UploadLayout(scr::utl::entry m_entry);
+            UploadLayout();
             PU_SMART_CTOR(UploadLayout)
+            void setEntry(scr::utl::entry * Entry);
             void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
         private:
             TextBlock::Ref topText;
@@ -32,6 +33,6 @@ namespace scr::ui {
             Image::Ref preview;
             Image::Ref image;
             std::string url;
-            scr::utl::entry m_entry;
+            scr::utl::entry * m_entry;
     };
 }

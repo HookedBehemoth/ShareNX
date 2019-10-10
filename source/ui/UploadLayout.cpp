@@ -23,26 +23,15 @@ namespace scr::ui {
     extern MainApplication *mainApp;
     extern scr::utl::hosterConfig * m_config;
 
-    UploadLayout::UploadLayout(scr::utl::entry Entry) : Layout::Layout(), m_entry(Entry) {
+    UploadLayout::UploadLayout() : Layout::Layout() {
         this->SetBackgroundColor(COLOR(m_config->m_theme->color_background));
         this->SetBackgroundImage(m_config->m_theme->background_path);
         this->topRect = Rectangle::New(0, 0, 1280, 30, COLOR(m_config->m_theme->color_topbar));
         this->topText = TextBlock::New(10, 0, m_config->m_name, 25);
         this->topText->SetColor(COLOR(m_config->m_theme->color_text));
-        url = scr::utl::checkUploadCache(m_entry.path);
-        if (!url.empty()) this->bottomText = TextBlock::New(80, 640, url, 45);
-        else this->bottomText = TextBlock::New(80, 640, "Press A to upload, B to go back!", 45);
+        this->bottomText = TextBlock::New(80, 640, "loading...", 45);
         this->bottomText->SetColor(COLOR(m_config->m_theme->color_text));
-        if (m_entry.path.find(".mp4") != std::string::npos) { // Is video
-            if (m_entry.thumbnail.empty()) {
-                m_entry.thumbnail = scr::utl::getThumbnail(m_entry.path.substr(5), 485, 273);
-            }
-            this->preview = Image::New(10, 40, m_entry.thumbnail);
-        } else { // Is image
-            this->preview = Image::New(10, 40, m_entry.path);
-        }
-        this->preview->SetWidth(970);
-        this->preview->SetHeight(545);
+        this->preview = Image::New(10, 40, "");
         this->Add(this->topRect);
         this->Add(this->topText);
         this->Add(this->bottomText);
@@ -55,6 +44,24 @@ namespace scr::ui {
         }
     }
 
+    void UploadLayout::setEntry(scr::utl::entry * Entry) {
+        m_entry = new scr::utl::entry(*Entry);
+        this->m_entry = Entry;
+        url = scr::utl::checkUploadCache(m_entry->path);
+        if (!url.empty()) this->bottomText->SetText(url);
+        else this->bottomText->SetText("Press A to upload, B to go back!");
+        if (m_entry->path.find(".mp4") != std::string::npos) { // Is video
+            if (m_entry->thumbnail.empty()) {
+                m_entry->thumbnail = scr::utl::getThumbnail(m_entry->path.substr(5), 485, 273);
+            }
+            this->preview->SetImage(m_entry->thumbnail);
+        } else { // Is image
+            this->preview->SetImage(m_entry->path);
+        }
+        this->preview->SetWidth(970);
+        this->preview->SetHeight(545);
+    }
+
     void UploadLayout::onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos) {
         if ((Down & KEY_PLUS) || (Down & KEY_MINUS)) {
             mainApp->Close(); 
@@ -64,7 +71,7 @@ namespace scr::ui {
             if (!url.empty()) return;
             this->bottomText->SetText("Uploading... Please wait!");
             mainApp->CallForRender();
-            url = scr::utl::uploadFile(m_entry.path, m_config);
+            url = scr::utl::uploadFile(m_entry->path, m_config);
             if (url.compare("")) {
                 this->bottomText->SetText(url);
             } else {
