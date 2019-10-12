@@ -39,7 +39,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	$(notdir $(CURDIR))
 APP_AUTHOR	:=	Behemoth & Huntereb
-APP_VERSION	:=	1.2.1
+APP_VERSION	:=	2.0.0
 BUILD		:=	build
 SOURCES		:=	source source/ui source/libffmpegthumbnailer
 DATA		:=	data
