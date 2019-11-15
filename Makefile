@@ -73,7 +73,7 @@ LIBS	:= 	-lavfilter -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/Plutonium/Plutonium/Output
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/Plutonium/Plutonium/Output-switch
 
 
 #---------------------------------------------------------------------------------

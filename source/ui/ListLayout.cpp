@@ -28,7 +28,7 @@ namespace scr::ui {
         this->SetBackgroundImage(m_config->m_theme->background_path);
         this->topRect = Rectangle::New(0, 0, 1280, 45, COLOR(m_config->m_theme->color_topbar));
         this->topText = TextBlock::New(10, 2, m_config->m_name, 35);
-        this->infoText = TextBlock::New(900, 9, "(A) Select (X) Config (B) Exit", 25);
+        this->infoText = TextBlock::New(900, 9, "\uE0E0 Select \uE0E2 Config \uE0E1 Exit", 25);
         this->topText->SetColor(COLOR(m_config->m_theme->color_text));
         this->infoText->SetColor(COLOR(m_config->m_theme->color_text));
         this->menu = FixedMenu::New(0,45,1280,COLOR("#00000000"),136,5,45);

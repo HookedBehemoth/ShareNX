@@ -28,7 +28,7 @@ namespace scr::ui {
         this->SetBackgroundImage(m_config->m_theme->background_path);
         this->topRect = Rectangle::New(0, 0, 1280, 45, COLOR(m_config->m_theme->color_topbar));
         this->topText = TextBlock::New(10, 2, m_config->m_name, 35);
-        this->infoText = TextBlock::New(1000, 9, "(A) Upload (B) Back", 25);
+        this->infoText = TextBlock::New(1000, 9, "\uE0E0 Upload \uE0E1 Back", 25);
         this->topText->SetColor(COLOR(m_config->m_theme->color_text));
         this->infoText->SetColor(COLOR(m_config->m_theme->color_text));
         this->bottomText = TextBlock::New(70, 640, "", 45);
