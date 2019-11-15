@@ -1,4 +1,4 @@
 [submodule "Plutonium"]
 	path = Plutonium
-	url = https://github.com/XorTroll/Plutonium
+	url = https://github.com/HookedBehemoth/Plutonium
 	branch = master
