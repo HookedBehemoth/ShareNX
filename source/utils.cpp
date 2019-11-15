@@ -22,6 +22,7 @@
 #include <switch.h>
 #include <curl/curl.h>
 #include <gd.h>
+
 static const char * SCRPATH = "sdmc:/switch/screen-nx/";
 static const char * CONFIGPATH = "sdmc:/switch/screen-nx/sites/";
 static const char * SCRCONFIGPATH = "sdmc:/switch/screen-nx/config.ini";

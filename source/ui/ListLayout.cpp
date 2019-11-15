@@ -28,7 +28,7 @@ namespace scr::ui {
         this->SetBackgroundImage(m_config->m_theme->background_path);
         this->topRect = Rectangle::New(0, 0, 1280, 45, COLOR(m_config->m_theme->color_topbar));
         this->topText = TextBlock::New(10, 2, m_config->m_name, 35);
-        this->infoText = TextBlock::New(945, 9, "(A)Select (X)Config (B)Exit", 25);
+        this->infoText = TextBlock::New(900, 9, "(A) Select (X) Config (B) Exit", 25);
         this->topText->SetColor(COLOR(m_config->m_theme->color_text));
         this->infoText->SetColor(COLOR(m_config->m_theme->color_text));
         this->menu = FixedMenu::New(0,45,1280,COLOR("#00000000"),136,5,45);
@@ -37,7 +37,6 @@ namespace scr::ui {
         for (auto m_entry: entries) {
             auto itm = FixedMenuItem::New(m_entry);
             itm->SetColor(COLOR(m_config->m_theme->color_text));
-            //itm->SetIcon(m_entry->small_thumbnail);
             itm->AddOnClick(std::bind(&ListLayout::onItemClick, this));
             this->menu->AddItem(itm);
         }
@@ -56,8 +55,6 @@ namespace scr::ui {
     void ListLayout::onItemClick() {
         scr::utl::entry * m_entry = entries[this->menu->GetSelectedIndex()];
         mainApp->uploadLayout->setEntry(m_entry);
-        //mainApp->uploadLayout = UploadLayout::New(*m_entry);
-        //mainApp->uploadLayout->SetOnInput(std::bind(&UploadLayout::onInput, mainApp->uploadLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         mainApp->LoadLayout(mainApp->uploadLayout);
     }
 
