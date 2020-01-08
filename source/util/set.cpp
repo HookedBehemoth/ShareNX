@@ -1,3 +1,4 @@
+#include "util/common.hpp"
 #include "util/set.hpp"
 #include "json.hpp"
 #include <fstream>
@@ -35,13 +36,21 @@ Result GetDefaultHoster() {
 
 namespace set {
 
-Settings::Settings(const nlohmann::json& json) {
+Settings::Settings() {
+    std::ifstream ifs(CONFIGPATH);
+    if (!ifs.good()) {
+        printf("FAILED TO OPEN SETTINGS FILE FOR READING");
+        return;
+    }
+    nlohmann::json json;
+    json.parse(ifs);
+    g_Hoster = Hoster(json);
+    ifs.close();
 }
 
 Settings::~Settings() {
     std::ofstream ofs(CONFIGPATH);
     if (!ofs.good()) {
-        printf("FAILED TO OPEN SETTINGS FILE FOR WRITING");
         return;
     }
     nlohmann::json json = {
@@ -53,11 +62,23 @@ Settings::~Settings() {
 }
 
 void Settings::SetHoster(std::string name) {
-
+    std::ifstream ifs(name);
+    if (!ifs.good())
+        return;
+    nlohmann::json json;
+    json.parse(ifs);
+    g_Hoster = Hoster(json);
+    ifs.close();
 }
 
-void SetTheme(std::string name) {
-
+void Settings::SetTheme(std::string name) {
+    std::ifstream ifs(name);
+    if (!ifs.good())
+        return;
+    nlohmann::json json;
+    json.parse(ifs);
+    g_Theme = Theme(json);
+    ifs.close();
 }
 
 }

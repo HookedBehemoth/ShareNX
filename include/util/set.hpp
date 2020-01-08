@@ -7,7 +7,7 @@
 
 class Settings {
 public:
-    Settings(const nlohmann::json& json);
+    Settings();
     ~Settings();
     void SetHoster(std::string name);
     void SetTheme(std::string name);

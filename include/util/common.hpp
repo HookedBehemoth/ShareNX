@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <json.hpp>
+#include <switch/types.h>
 
 namespace common {
 
@@ -20,5 +21,7 @@ std::string getString(const nlohmann::json& json, std::string key, std::string d
 u32 getInt(const nlohmann::json& json, std::string key, u32 def) {
     return GetEntry<u32>(json, key, def, nlohmann::detail::value_t::number_integer);
 }
+
+
 
 }
