@@ -1,13 +1,15 @@
 #include "ui/elm_FixedMenu.hpp"
+#include "utils.hpp"
 
 namespace pu::ui::elm
 {
-    FixedMenuItem::FixedMenuItem(scr::utl::entry * entry) : m_entry(entry)
+    FixedMenuItem::FixedMenuItem(const CapsAlbumEntry& entry) : m_entry(entry)
     {
         this->color = { 10, 10, 10, 255 };
+        this->height = 0;
     }
 
-    Color FixedMenuItem::GetColor()
+    Color FixedMenuItem::GetColor() const
     {
         return this->color;
     }
@@ -23,31 +25,36 @@ namespace pu::ui::elm
         this->cbipts.push_back(Key);
     }
 
-    s32 FixedMenuItem::GetCallbackCount()
+    s32 FixedMenuItem::GetCallbackCount() const
     {
         return this->cbs.size();
     }
 
-    std::function<void()> FixedMenuItem::GetCallback(s32 Index)
+    std::function<void()> FixedMenuItem::GetCallback(s32 Index) const
     {
         if(this->cbs.empty()) return [&](){};
         return this->cbs[Index];
     }
 
-    u64 FixedMenuItem::GetCallbackKey(s32 Index)
+    u64 FixedMenuItem::GetCallbackKey(s32 Index) const
     {
         return this->cbipts[Index];
     }
-    
-    FixedMenu::FixedMenu(s32 X, s32 Y, s32 Width, Color OptionColor, s32 ItemSize, s32 ItemsToShow, s32 fontSize) : Element::Element()
+
+    void FixedMenuItem::SetHeight(s32 Height)
     {
-        this->x = X;
-        this->y = Y;
-        this->w = Width;
-        this->clr = OptionColor;
+        this->height = Height;
+    }
+
+    s32 FixedMenuItem::GetHeight() const
+    {
+        return this->height;
+    }
+    
+    FixedMenu::FixedMenu(s32 X, s32 Y, s32 Width, Color OptionColor, s32 ItemSize, s32 ItemsToShow, s32 fontSize)
+        : Element::Element(), x(X), y(Y), w(Width), clr(OptionColor), isize(ItemSize), ishow(ItemsToShow)
+    {
         this->scb = { 110, 110, 110, 255 };
-        this->isize = ItemSize;
-        this->ishow = ItemsToShow;
         this->previsel = 0;
         this->isel = 0;
         this->fisel = 0;
@@ -59,6 +66,7 @@ namespace pu::ui::elm
         this->fcs = { 40, 40, 40, 255 };
         this->basestatus = 0;
         this->font = render::LoadDefaultFont(fontSize);
+        this->meme = render::LoadSharedFont(render::SharedFont::NintendoExtended, fontSize);
     }
 
     s32 FixedMenu::GetX()
@@ -96,7 +104,7 @@ namespace pu::ui::elm
         return (this->isize * this->ishow);
     }
 
-    s32 FixedMenu::GetItemSize()
+    s32 FixedMenu::GetItemSize() const
     {
         return this->isize;
     }
@@ -106,7 +114,7 @@ namespace pu::ui::elm
         this->isize = ItemSize;
     }
 
-    s32 FixedMenu::GetNumberOfItemsToShow()
+    s32 FixedMenu::GetNumberOfItemsToShow() const
     {
         return this->ishow;
     }
@@ -116,7 +124,7 @@ namespace pu::ui::elm
         this->ishow = ItemsToShow;
     }
 
-    Color FixedMenu::GetColor()
+    Color FixedMenu::GetColor() const
     {
         return this->clr;
     }
@@ -126,7 +134,7 @@ namespace pu::ui::elm
         this->clr = Color;
     }
     
-    Color FixedMenu::GetOnFocusColor()
+    Color FixedMenu::GetOnFocusColor() const
     {
         return this->fcs;
     }
@@ -136,7 +144,7 @@ namespace pu::ui::elm
         this->fcs = Color;
     }
 
-    Color FixedMenu::GetScrollbarColor()
+    Color FixedMenu::GetScrollbarColor() const
     {
         return this->scb;
     }
@@ -159,8 +167,11 @@ namespace pu::ui::elm
     void FixedMenu::ClearItems()
     {
         this->itms.clear();
-        this->loadednames.clear();
-        this->loadedicons.clear();
+        for (auto [icon,text]: this->ntexs) {
+            if (icon != nullptr) render::DeleteTexture(icon);
+            if (text != nullptr) render::DeleteTexture(text);
+        }
+        this->ntexs.clear();
     }
 
     void FixedMenu::SetCooldownEnabled(bool Cooldown)
@@ -168,17 +179,17 @@ namespace pu::ui::elm
         this->icdown = Cooldown;
     }
 
-    FixedMenuItem::Ref &FixedMenu::GetSelectedItem()
+    FixedMenuItem::Ref FixedMenu::GetSelectedItem() const
     {
         return this->itms[this->isel];
     }
 
-    std::vector<FixedMenuItem::Ref> &FixedMenu::GetItems()
+    std::vector<FixedMenuItem::Ref> FixedMenu::GetItems() const
     {
         return this->itms;
     }
 
-    s32 FixedMenu::GetSelectedIndex()
+    s32 FixedMenu::GetSelectedIndex() const
     {
         return this->isel;
     }
@@ -193,7 +204,8 @@ namespace pu::ui::elm
             else if(this->isel < this->ishow) this->fisel = 0;
             else this->fisel = this->isel;
 
-            ReloadItemRenders();
+            for(s32 i = this->fisel; i < (this->ishow + this->fisel); i++)
+                ReloadItemRender(i);
             this->selfact = 255;
             this->pselfact = 0;
         }
@@ -210,7 +222,13 @@ namespace pu::ui::elm
             s32 its = this->ishow;
             if(its > this->itms.size()) its = this->itms.size();
             if((its + this->fisel) > this->itms.size()) its = this->itms.size() - this->fisel;
-            if(this->loadednames.empty()) ReloadItemRenders();
+            if(this->ntexs.empty()) {
+                for (s32 i = this->fisel; i < (its + this->fisel); i++) {
+                    std::pair<render::NativeTexture,render::NativeTexture> pair = std::make_pair(nullptr, nullptr);
+                    this->ntexs.push_back(pair);
+                    this->ReloadItemRender(i);
+                }
+            }
             for(s32 i = this->fisel; i < (its + this->fisel); i++)
             {
                 s32 clrr = this->clr.R;
@@ -223,9 +241,7 @@ namespace pu::ui::elm
                 s32 nb = clrb - 70;
                 if(nb < 0) nb = 0;
                 Color nclr(nr, ng, nb, this->clr.A);
-                auto loadedidx = i - this->fisel;
-                auto curname = this->loadednames[loadedidx];
-                auto curicon = this->loadedicons[loadedidx];
+                auto [curicon,curname] = this->ntexs[i%this->ishow];
                 if(this->isel == i)
                 {
                     Drawer->RenderRectangleFill(this->clr, cx, cy, cw, ch);
@@ -248,7 +264,9 @@ namespace pu::ui::elm
                 }
                 else Drawer->RenderRectangleFill(this->clr, cx, cy, cw, ch);
                 auto itm = this->itms[i];
-                s32 xh = render::GetTextHeight(this->font, itm->m_entry->title);
+                if (itm->GetHeight() == 0)
+                    itm->SetHeight(render::GetTextureHeight(curname));
+                s32 xh = itm->GetHeight();
                 s32 tx = (cx + 25);
                 s32 ty = ((ch - xh) / 2) + cy;
                 s32 ich = (this->isize - 10);
@@ -334,7 +352,7 @@ namespace pu::ui::elm
         }
         else
         {
-            if((Down & KEY_DDOWN) || (Down & KEY_LSTICK_DOWN) || (Held & KEY_RSTICK_DOWN))
+            if((Down & KEY_DOWN) || (Held & KEY_RSTICK_DOWN))
             {
                 bool move = true;
                 if(Held & KEY_RSTICK_DOWN)
@@ -360,7 +378,7 @@ namespace pu::ui::elm
                             this->fisel++;
                             this->isel++;
                             (this->onselch)();
-                            ReloadItemRenders();
+                            ReloadItemRender(this->isel);
                         }
                         else
                         {
@@ -378,14 +396,15 @@ namespace pu::ui::elm
                     {
                         this->isel = 0;
                         this->fisel = 0;
-                        if(this->itms.size() >= this->ishow)
+                        if(this->itms.size() > this->ishow)
                         {
-                            ReloadItemRenders();
+                            for(s32 i = this->fisel; i < (this->ishow + this->fisel); i++)
+                                ReloadItemRender(i);
                         }
                     }
                 }
             }
-            else if((Down & KEY_DUP) || (Down & KEY_LSTICK_UP) || (Held & KEY_RSTICK_UP))
+            else if((Down & KEY_UP) || (Held & KEY_RSTICK_UP))
             {
                 bool move = true;
                 if(Held & KEY_RSTICK_UP)
@@ -411,7 +430,7 @@ namespace pu::ui::elm
                             this->fisel--;
                             this->isel--;
                             (this->onselch)();
-                            ReloadItemRenders();
+                            ReloadItemRender(this->isel);
                         }
                         else
                         {
@@ -429,9 +448,10 @@ namespace pu::ui::elm
                     {
                         this->isel = this->itms.size() - 1;
                         this->fisel = 0;
-                        if(this->itms.size() >= this->ishow) {
+                        if(this->itms.size() > this->ishow) {
                             this->fisel = this->itms.size() - this->ishow;
-                            ReloadItemRenders();
+                            for(s32 i = this->fisel; i < (this->ishow + this->fisel); i++)
+                                ReloadItemRender(i);
                         }
                     }
                 }
@@ -450,28 +470,33 @@ namespace pu::ui::elm
             }
         }
     }
-    
-    void FixedMenu::ReloadItemRenders()
+
+    void FixedMenu::ReloadItemRender(int i)
     {
-        for(u32 i = 0; i < this->loadednames.size(); i++) render::DeleteTexture(this->loadednames[i]);
-        for(u32 i = 0; i < this->loadedicons.size(); i++) render::DeleteTexture(this->loadedicons[i]);
-        this->loadednames.clear();
-        this->loadedicons.clear();
-        s32 its = this->ishow;
-        if(its > this->itms.size()) its = this->itms.size();
-        if((its + this->fisel) > this->itms.size()) its = this->itms.size() - this->fisel;
-        for(s32 i = this->fisel; i < (its + this->fisel); i++)
-        {
-            /* name */
-            auto strname = this->itms[i]->m_entry->title;
-            auto tex = render::RenderText(this->font, strname, this->itms[i]->GetColor());
-            this->loadednames.push_back(tex);
-            /* icon */
-            if (this->itms[i]->m_entry->small_thumbnail.empty())
-                this->itms[i]->m_entry->small_thumbnail = scr::utl::getThumbnail(this->itms[i]->m_entry->path.substr(5), 224, 136);
-            auto stricon = this->itms[i]->m_entry->small_thumbnail;
-            auto icontex = render::LoadImage(stricon);
-            this->loadedicons.push_back(icontex);
+        std::pair<render::NativeTexture,render::NativeTexture>& item = this->ntexs[i%this->ishow];
+        if (item.first != nullptr) render::DeleteTexture(item.first);
+        if (item.second != nullptr) render::DeleteTexture(item.second);
+        item.second = render::RenderText(this->font, this->meme, caps::dateToString(this->itms[i]->m_entry.file_id.datetime), this->itms[i]->GetColor());
+
+        u64 img_size = 320*180*4;
+        void* img = malloc(img_size);
+        u64 width, height;
+        Result rc = caps::getThumbnail(&width, &height, this->itms[i]->m_entry, CapsAlbumStorage_Sd, img, img_size);
+        if (width != 320 && height != 180) {
+            LOG("wrong thumbnail size")
+        }
+        if (R_SUCCEEDED(rc)) {
+            u32 rmask = 0x000000ff;
+            u32 gmask = 0x0000ff00;
+            u32 bmask = 0x00ff0000;
+            u32 amask = 0xff000000;
+
+            auto icontex = render::ConvertToTexture(SDL_CreateRGBSurfaceFrom(img, width, height, 32, 4*width, rmask, gmask, bmask, amask));
+            item.first = icontex;
+            free(img);
+        } else {
+            LOG("Failed loading thumbnail with 0x%x\n", rc);
+            item.first = render::LoadImage("romfs:/video.png");
         }
     }
 }

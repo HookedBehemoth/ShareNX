@@ -18,6 +18,7 @@
 #include <filesystem>
 #include <vector>
 #include <string.h>
+#include <switch.h>
 
 #ifdef NXLINK_DEBUG
 #define LOG(format, ...) { fprintf(stdout, "%s:%u: ", __func__, __LINE__); fprintf(stdout, format, ##__VA_ARGS__); }
@@ -27,42 +28,38 @@
 
 namespace fs = std::filesystem;
 namespace scr::utl {
-    struct mimepart {
+    class mimepart {
+    public:
         std::string name;
         std::string data;
         bool is_file_data;
     };
-    struct theme {
+    class theme {
+    public:
         std::string color_text;
         std::string color_background;
         std::string color_focus;
         std::string color_topbar;
         std::string background_path;
         std::string image_path;
-        int32_t image_x;
-        int32_t image_y;
-        int32_t image_w;
-        int32_t image_h;
+        u32 image_x;
+        u32 image_y;
+        u32 image_w;
+        u32 image_h;
     };
-    struct hosterConfig {
+    class hosterConfig {
+    public:
         std::string m_name;
         std::string m_url;
-        std::vector<mimepart *> * m_mimeparts;
-        theme * m_theme;
-    };
-    struct entry {
-        std::string path;
-        std::string small_thumbnail;
-        std::string thumbnail;
-        std::string title;
+        std::vector<mimepart> m_mimeparts;
+        theme m_theme;
+        hosterConfig() {}
+        hosterConfig(std::string name, std::string url, std::vector<mimepart> mime, theme theme) : m_name(name), m_url(url), m_mimeparts(mime), m_theme(theme) {}
     };
     void init();
-    void clearCacheMonthly();
-    std::string checkUploadCache(std::string path);
-    std::string uploadFile(std::string path, hosterConfig * config);
-    std::vector<hosterConfig *> getConfigs();
-    hosterConfig * getDefaultConfig();
-    std::string getThumbnail(std::string file, int width, int height);
+    std::string uploadFile(const std::string& path, const hosterConfig& config);
+    std::vector<hosterConfig> getConfigs();
+    hosterConfig getDefaultConfig();
     void setDefaultConfig(int i);
-    std::vector<entry *> getEntries();
+    std::string formatResult(Result rc);
 }

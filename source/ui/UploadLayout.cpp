@@ -17,51 +17,55 @@
 #include "MainApplication.hpp"
 #include "ui/UploadLayout.hpp"
 #include "utils.hpp"
+#include "caps/caps_utils.hpp"
 #define COLOR(hex) pu::ui::Color::FromHex(hex)
 
 namespace scr::ui {
     extern MainApplication *mainApp;
-    extern scr::utl::hosterConfig * m_config;
+    extern scr::utl::hosterConfig m_config;
 
     UploadLayout::UploadLayout() : Layout::Layout() {
-        this->SetBackgroundColor(COLOR(m_config->m_theme->color_background));
-        this->SetBackgroundImage(m_config->m_theme->background_path);
-        this->topRect = Rectangle::New(0, 0, 1280, 45, COLOR(m_config->m_theme->color_topbar));
-        this->topText = TextBlock::New(10, 2, m_config->m_name, 35);
+        this->SetBackgroundColor(COLOR(m_config.m_theme.color_background));
+        this->SetBackgroundImage(m_config.m_theme.background_path);
+        this->topRect = Rectangle::New(0, 0, 1280, 45, COLOR(m_config.m_theme.color_topbar));
+        this->topText = TextBlock::New(10, 2, m_config.m_name, 35);
         this->infoText = TextBlock::New(1000, 9, "\uE0E0 Upload \uE0E1 Back", 25);
-        this->topText->SetColor(COLOR(m_config->m_theme->color_text));
-        this->infoText->SetColor(COLOR(m_config->m_theme->color_text));
+        this->topText->SetColor(COLOR(m_config.m_theme.color_text));
+        this->infoText->SetColor(COLOR(m_config.m_theme.color_text));
         this->bottomText = TextBlock::New(70, 640, "", 45);
-        this->bottomText->SetColor(COLOR(m_config->m_theme->color_text));
-        this->preview = Image::New(10, 55, "");
+        this->bottomText->SetColor(COLOR(m_config.m_theme.color_text));
+        this->preview = MImage::New(10, 55, "");
         this->Add(this->topRect);
         this->Add(this->topText);
         this->Add(this->infoText);
         this->Add(this->bottomText);
         this->Add(this->preview);
-        if (!m_config->m_theme->image_path.empty()) {
-            this->image = Image::New(m_config->m_theme->image_x, m_config->m_theme->image_y, m_config->m_theme->image_path);
-            this->image->SetWidth(m_config->m_theme->image_w);
-            this->image->SetHeight(m_config->m_theme->image_h);
+        if (!m_config.m_theme.image_path.empty()) {
+            this->image = Image::New(m_config.m_theme.image_x, m_config.m_theme.image_y, m_config.m_theme.image_path);
+            this->image->SetWidth(m_config.m_theme.image_w);
+            this->image->SetHeight(m_config.m_theme.image_h);
             this->Add(this->image);
         }
     }
 
-    void UploadLayout::setEntry(scr::utl::entry * Entry) {
-        m_entry = new scr::utl::entry(*Entry);
-        this->m_entry = Entry;
-        if (m_entry->path.find(".mp4") != std::string::npos) { // Is video
-            if (m_entry->thumbnail.empty()) {
-                m_entry->thumbnail = scr::utl::getThumbnail(m_entry->path.substr(5), 485, 273);
-            }
-            this->preview->SetImage(m_entry->thumbnail);
-            this->bottomText->SetText("Upload this recording to " + m_config->m_name + "?");
-        } else { // Is image
-            this->preview->SetImage(m_entry->path);
-            this->bottomText->SetText("Upload this screenshot to " + m_config->m_name + "?");
+    void UploadLayout::setEntry(const CapsAlbumEntry& entry) {
+        this->m_entry = entry;
+        u64 img_size = 1280*720*4;
+        u64 w, h;
+        void* buffer = malloc(img_size);
+        Result rc = caps::getImage(&w, &h, entry, CapsAlbumStorage_Sd, buffer, img_size);
+        if (R_SUCCEEDED(rc)) {
+            this->preview->SetRawImage(buffer, w, h);
         }
-        url = scr::utl::checkUploadCache(m_entry->path);
-        if (!url.empty()) this->bottomText->SetText(url);
+        free(buffer);
+        /*u64 image_size = entry.v1.size;
+        void* buffer = malloc(image_size);
+        Result rc = caps::getFile(this->m_entry, CapsAlbumStorage_Sd, buffer);
+        if (R_SUCCEEDED(rc)) {
+            this->preview->SetImage(buffer, image_size);
+        }
+        free(buffer);*/
+        this->bottomText->SetText("Upload this screenshot to " + m_config.m_name + "?");
         this->preview->SetWidth(970);
         this->preview->SetHeight(545);
     }
@@ -75,7 +79,7 @@ namespace scr::ui {
             if (!url.empty()) return;
             this->bottomText->SetText("Uploading... Please wait!");
             mainApp->CallForRender();
-            url = scr::utl::uploadFile(m_entry->path, m_config);
+            //url = scr::utl::uploadFile(m_entry->path, m_config);
             if (url.compare("")) {
                 this->bottomText->SetText(url);
             } else {

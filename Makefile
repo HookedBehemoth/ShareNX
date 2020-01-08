@@ -41,9 +41,9 @@ TARGET		:=	$(notdir $(CURDIR))
 APP_AUTHOR	:=	Behemoth & Huntereb
 APP_VERSION	:=	2.0.0
 BUILD		:=	build
-SOURCES		:=	source source/ui source/libffmpegthumbnailer
+SOURCES		:=	source source/ui source/caps
 DATA		:=	data
-INCLUDES	:=	include include/ui include/libffmpegthumbnailer
+INCLUDES	:=	include include/ui include/caps
 ROMFS		:=	romfs
 
 #---------------------------------------------------------------------------------
@@ -56,16 +56,16 @@ CFLAGS	:=	-g -Wall -ffunction-sections \
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__DEBUG__ -DNXLINK_DEBUG
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -std=gnu++17
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -std=gnu++2a
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 LIBS	:= 	-lavfilter -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lvpx -lass -lfribidi -ltheora -lvorbis \
 			-lcurl -lz -lmbedtls -lmbedx509 -lmbedcrypto -lstdc++fs -lpu -lfreetype -lSDL2_ttf \
-			-lSDL2_mixer -lSDL2_gfx -lSDL2_image -lEGL -lGLESv2 -lglapi -ldrm_nouveau -lgd \
+			-lSDL2_mixer -lSDL2_gfx -lSDL2_image -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
 			-lpng -ljpeg -lwebp \
-			-lexpat -lm -lopus -lopusfile -lmodplug -lmpg123 -lvorbisidec -logg \
+			-lexpat -lm -lopusfile -lopus -lmodplug -lmpg123 -lvorbisidec -logg \
 			`sdl2-config --libs` `freetype-config --libs` \
 			-lnx
 
@@ -73,7 +73,7 @@ LIBS	:= 	-lavfilter -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/Plutonium/Plutonium/Output-switch
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/Plutonium/Plutonium/Output
 
 
 #---------------------------------------------------------------------------------
@@ -170,13 +170,13 @@ all: $(BUILD)
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	@$(MAKE) --no-print-directory -C Plutonium/Plutonium -f Makefile
+	#@$(MAKE) --no-print-directory -C Plutonium/Plutonium -f Makefile
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@$(MAKE) --no-print-directory -C Plutonium/Plutonium -f Makefile clean
+	#@$(MAKE) --no-print-directory -C Plutonium/Plutonium -f Makefile clean
 	@rm -fr $(BUILD) $(TARGET).nro $(TARGET).nacp $(TARGET).elf
 
 

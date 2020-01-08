@@ -19,14 +19,16 @@
 
 namespace scr::ui {
     MainApplication *mainApp;
-    scr::utl::hosterConfig * m_config;
+    scr::utl::hosterConfig m_config;
 
     void MainApplication::OnLoad() {
         mainApp = this;
         m_config = scr::utl::getDefaultConfig();
 
+        LOG("Creating UploadLayout\n");
         this->uploadLayout = UploadLayout::New();
         this->uploadLayout->SetOnInput(std::bind(&UploadLayout::onInput, this->uploadLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+        LOG("Creating ListLayout\n");
         this->listLayout = ListLayout::New();
         this->listLayout->SetOnInput(std::bind(&ListLayout::onInput, this->listLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         this->LoadLayout(this->listLayout);

@@ -16,6 +16,7 @@
 
 #pragma once
 #include <pu/Plutonium>
+#include "ui/elm_MemImage.hpp"
 
 using namespace pu::ui::elm;
 namespace scr::ui {
@@ -24,16 +25,16 @@ namespace scr::ui {
         public:
             UploadLayout();
             PU_SMART_CTOR(UploadLayout)
-            void setEntry(scr::utl::entry * Entry);
+            void setEntry(const CapsAlbumEntry& Entry);
             void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
         private:
             TextBlock::Ref topText;
             TextBlock::Ref infoText;
             Rectangle::Ref topRect;
             TextBlock::Ref bottomText;
-            Image::Ref preview;
+            MImage::Ref preview;
             Image::Ref image;
             std::string url;
-            scr::utl::entry * m_entry;
+            CapsAlbumEntry m_entry;
     };
 }

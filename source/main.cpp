@@ -24,10 +24,12 @@ int main(int argc, char* argv[])
 #ifdef __DEBUG__
     nxlinkStdio();
 #endif
-    romfsInit();
+    capsaInitialize();
+    printf("\n\n\ncapsa: 0x%x\n", capsaInitialize());
+    printf("capsdc: 0x%x\n", capsdcInitialize());
+    printf("romfs: 0x%x\n", romfsInit());
     scr::utl::init();
-    scr::utl::clearCacheMonthly();
-    LOG("starting\n")
+    LOG("starting...\n")
     try {
         auto renderer = Renderer::New(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER,
             RendererInitOptions::RendererNoSound, RendererHardwareFlags);
@@ -47,6 +49,7 @@ int main(int argc, char* argv[])
         }
     }
     romfsExit();
+    capsdcExit();
     LOG("exiting\n")
     socketExit();
     return 0;
