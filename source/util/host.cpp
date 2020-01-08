@@ -16,7 +16,9 @@ Hoster g_Hoster;
 
 Hoster::Hoster() {}
 
-Hoster::Hoster(const nlohmann::json& json) {
+Hoster::~Hoster() {}
+
+void Hoster::Initialize(const nlohmann::json& json) {
     this->name = common::GetString(json, "Name", "Lewd");
     this->url = common::GetString(json, "Url", "https://lewd.pics/p/index.php");
     this->regex = common::GetString(json, "Regex", "");
@@ -24,7 +26,10 @@ Hoster::Hoster(const nlohmann::json& json) {
     this->videoMimeName = common::GetString(json, "VideoName", "file");
 }
 
-Hoster::~Hoster() {}
+void Hoster::SetDefault() {
+    this->name = "Lewd.pics";
+    this->url = "SetDefault()";
+}
 
 std::string Hoster::GetName() {
     return this->name;

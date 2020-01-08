@@ -15,12 +15,16 @@
  */
 
 #include "ui/MainApplication.hpp"
+#include "util/set.hpp"
 
-namespace scr::ui {
+extern Settings g_Settings;
+
+namespace ui {
     MainApplication *mainApp;
 
     void MainApplication::OnLoad() {
         mainApp = this;
+        g_Settings.Initialize();
 
         printf("Creating UploadLayout\n");
         this->uploadLayout = UploadLayout::New();

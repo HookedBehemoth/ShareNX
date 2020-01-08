@@ -19,7 +19,7 @@
 #include "ui/elm_MemImage.hpp"
 
 using namespace pu::ui::elm;
-namespace scr::ui {
+namespace ui {
     class UploadLayout : public pu::ui::Layout
     {
         public:

@@ -19,7 +19,7 @@
 #include "ui/elm_FixedMenu.hpp"
 
 using namespace pu::ui::elm;
-namespace scr::ui {
+namespace ui {
     class ListLayout : public pu::ui::Layout {
         public:
             ListLayout();

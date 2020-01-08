@@ -24,7 +24,7 @@
 extern Theme g_Theme;
 extern Hoster g_Hoster;
 
-namespace scr::ui {
+namespace ui {
     extern MainApplication *mainApp;
 
     UploadLayout::UploadLayout() : Layout::Layout() {

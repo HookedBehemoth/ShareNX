@@ -14,16 +14,11 @@ Settings g_Settings;
 #define HOSTERPATH   BASE_PATH "hoster/"
 #define THEMESPATH   BASE_PATH "themes/"
 
-Settings::Settings() {
-    createDirectory(BASE_PATH);
-    createDirectory(HOSTERPATH);
-    createDirectory(THEMESPATH);
-    auto set = common::LoadConfig(CONFIGPATH, "romfs:/config.json");
-    SetHoster(common::GetString(set, "Hoster", ""));
-    SetTheme(common::GetString(set, "Theme", ""));
-}
+Settings::Settings() {}
 
 Settings::~Settings() {
+    if (this->hoster == "" && this->theme == "")
+        return;
     std::ofstream ofs(CONFIGPATH);
     if (!ofs.good()) {
         return;
@@ -36,16 +31,36 @@ Settings::~Settings() {
     ofs.close();
 }
 
+void Settings::Initialize() {
+    createDirectory(BASE_PATH);
+    createDirectory(HOSTERPATH);
+    createDirectory(THEMESPATH);
+    auto json = common::LoadConfig(CONFIGPATH);
+    if (json.is_object()) {
+        SetHoster(common::GetString(json, "Hoster", ""));
+        SetTheme(common::GetString(json, "Theme", ""));
+    } else {
+        std::filesystem::remove(CONFIGPATH);
+        SetDefault();
+    }
+}
+
 void Settings::SetHoster(const std::string& name) {
     this->hoster = name;
-    const std::string setHoster = HOSTERPATH "/" + this->hoster + ".json";
-    g_Hoster = Hoster(common::LoadConfig(setHoster, "romfs:/host.json"));
+    const std::string setHoster = HOSTERPATH + this->hoster + ".json";
+    const nlohmann::json set = common::LoadConfig(setHoster);
+    g_Hoster.Initialize(set);
 }
 
 void Settings::SetTheme(const std::string& name) {
     this->theme = name;
-    const std::string setTheme = THEMESPATH "/" + this->theme + ".json";
-    g_Theme = Theme(common::LoadConfig(setTheme, "romfs:/theme.json"));
+    const std::string setTheme = THEMESPATH + this->theme + ".json";
+    g_Theme.Initialize(common::LoadConfig(setTheme));
+}
+
+void Settings::SetDefault() {
+    g_Hoster.Initialize(common::LoadConfig("romfs:/host.json"));
+    g_Theme.Initialize(common::LoadConfig("romfs:/theme.json"));
 }
 
 std::vector<std::string> Settings::GetJsonEntries(const std::string& path) {

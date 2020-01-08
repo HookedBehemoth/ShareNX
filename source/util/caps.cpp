@@ -1,5 +1,7 @@
 #include "util/caps.hpp"
 #include <fstream>
+#include <algorithm>
+
 namespace caps {
 
 std::string dateToString(const CapsAlbumFileDateTime& date) {
@@ -58,6 +60,24 @@ std::vector<CapsAlbumEntry> getAllEntries() {
             combined.reserve(nand_entries.size() + sd_entries.size());
             combined.insert(combined.begin(), nand_entries.begin(), nand_entries.end());
             combined.insert(combined.end(),sd_entries.begin(),sd_entries.end());
+            std::sort(combined.begin(), combined.end(), [](const CapsAlbumEntry& a, const CapsAlbumEntry& b) {
+                auto& date_a = a.file_id.datetime;
+                auto& date_b = b.file_id.datetime;
+                if (date_a.year          !=  date_b.year) {
+                    return date_a.year   >   date_b.year;
+                } else if (date_a.month  !=  date_b.month) {
+                    return date_a.month  >   date_b.month;
+                } else if (date_a.day    !=  date_b.day) {
+                    return date_a.day    >   date_b.day;
+                } else if (date_a.hour   !=  date_b.hour) {
+                    return date_a.hour   >   date_b.hour;
+                } else if (date_a.minute !=  date_b.minute) {
+                    return date_a.minute >   date_b.minute;
+                } else if (date_a.second !=  date_b.second) {
+                    return date_a.second >   date_b.second;
+                }
+                return date_a.id > date_b.id;
+            });
             return combined;
         }
         return nand_entries;

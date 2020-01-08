@@ -19,7 +19,7 @@
 #include "ui/ListLayout.hpp"
 #include "ui/UploadLayout.hpp"
 
-namespace scr::ui {
+namespace ui {
     class MainApplication : public pu::ui::Application {
         public:
             using Application::Application;

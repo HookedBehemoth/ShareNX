@@ -18,9 +18,8 @@
 #include "switch.h"
 #include "util/set.hpp"
 
-extern Settings g_Settings;
-
 using namespace pu::ui::render;
+
 int main(int argc, char* argv[])
 {
     socketInitializeDefault();
@@ -28,12 +27,11 @@ int main(int argc, char* argv[])
     nxlinkStdio();
 #endif
     capsaInitialize();
-    g_Settings = Settings();
     printf("starting...\n");
     try {
         auto renderer = Renderer::New(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER,
             RendererInitOptions::RendererNoSound, RendererHardwareFlags);
-        auto main = scr::ui::MainApplication::New(renderer);
+        auto main = ui::MainApplication::New(renderer);
         main->Prepare();
         main->Show();
     } catch (std::exception& e) {

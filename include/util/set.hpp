@@ -9,12 +9,14 @@ class Settings {
 public:
     Settings();
     ~Settings();
+    void Initialize();
     void SetHoster(const std::string& name);
     void SetTheme(const std::string& name);
     std::vector<std::string> GetJsonEntries(const std::string& path);
     std::vector<std::string> GetHoster();
     std::vector<std::string> GetThemes();
 private:
+    void SetDefault();
     void createDirectory(const std::string& path);
     std::string hoster;
     std::string theme;

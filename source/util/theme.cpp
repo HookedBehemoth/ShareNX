@@ -6,7 +6,7 @@ Theme g_Theme;
 
 Theme::Theme() {}
 
-Theme::Theme(const nlohmann::json& json) {
+void Theme::Initialize(const nlohmann::json& json) {
     this->color.background = pu::ui::Color::FromHex(common::GetString(json, "Background", "#6c0000FF"));
     this->color.focus = pu::ui::Color::FromHex(common::GetString(json, "Focus", "#480001FF"));
     this->color.text = pu::ui::Color::FromHex(common::GetString(json, "Text", "#FFFFFFFF"));
