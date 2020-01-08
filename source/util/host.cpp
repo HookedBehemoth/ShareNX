@@ -14,12 +14,14 @@ size_t StringWrite(const char *contents, size_t size, size_t nmemb, std::string 
 
 Hoster g_Hoster;
 
+Hoster::Hoster() {}
+
 Hoster::Hoster(const nlohmann::json& json) {
-    this->name = common::getString(json, "Name", "Lewd");
-    this->url = common::getString(json, "Url", "https://lewd.pics/p/index.php");
-    this->regex = common::getString(json, "Regex", "");
-    this->imageMimeName = common::getString(json, "ImageName", "file");
-    this->videoMimeName = common::getString(json, "VideoName", "file");
+    this->name = common::GetString(json, "Name", "Lewd");
+    this->url = common::GetString(json, "Url", "https://lewd.pics/p/index.php");
+    this->regex = common::GetString(json, "Regex", "");
+    this->imageMimeName = common::GetString(json, "ImageName", "file");
+    this->videoMimeName = common::GetString(json, "VideoName", "file");
 }
 
 Hoster::~Hoster() {}

@@ -2,10 +2,9 @@
 #include <switch.h>
 #include <json.hpp>
 
-extern Hoster g_Hoster;
-
 class Hoster {
 public:
+    Hoster();
     Hoster(const nlohmann::json& json);
     ~Hoster();
     std::string GetName();

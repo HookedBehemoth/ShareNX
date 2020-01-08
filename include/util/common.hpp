@@ -14,14 +14,9 @@ T GetEntry(const nlohmann::json& json, std::string key, T def, nlohmann::detail:
     return def;
 }
 
-std::string getString(const nlohmann::json& json, std::string key, std::string def) {
-    return GetEntry<std::string>(json, key, def, nlohmann::detail::value_t::string);
-}
+std::string GetString(const nlohmann::json& json, std::string key, std::string def);
+u32 GetInt(const nlohmann::json& json, std::string key, u32 def);
 
-u32 getInt(const nlohmann::json& json, std::string key, u32 def) {
-    return GetEntry<u32>(json, key, def, nlohmann::detail::value_t::number_integer);
-}
-
-
+nlohmann::json LoadConfig(const std::string& path, const std::string& defaultPath);
 
 }

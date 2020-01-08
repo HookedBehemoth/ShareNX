@@ -41,9 +41,9 @@ TARGET		:=	$(notdir $(CURDIR))
 APP_AUTHOR	:=	Behemoth & Huntereb
 APP_VERSION	:=	2.0.0
 BUILD		:=	build
-SOURCES		:=	source source/ui source/caps
+SOURCES		:=	source source/ui source/util
 DATA		:=	data
-INCLUDES	:=	include include/ui include/caps
+INCLUDES	:=	include include/ui include/util
 ROMFS		:=	romfs
 
 #---------------------------------------------------------------------------------
@@ -56,16 +56,14 @@ CFLAGS	:=	-g -Wall -ffunction-sections \
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__DEBUG__ -DNXLINK_DEBUG
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -std=gnu++2a
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -std=gnu++17
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= 	-lavfilter -lavformat -lavcodec -lswresample -lswscale -lavutil -lbz2 -lvpx -lass -lfribidi -ltheora -lvorbis \
-			-lcurl -lz -lmbedtls -lmbedx509 -lmbedcrypto -lstdc++fs -lpu -lfreetype -lSDL2_ttf \
-			-lSDL2_mixer -lSDL2_gfx -lSDL2_image -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
+LIBS	:= 	-lpu -lSDL2_mixer -lSDL2_gfx -lSDL2_image -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
 			-lpng -ljpeg -lwebp \
-			-lexpat -lm -lopusfile -lopus -lmodplug -lmpg123 -lvorbisidec -logg \
+			-lopusfile -lopus -lmodplug -lmpg123 -lvorbisidec -logg \
 			`sdl2-config --libs` `freetype-config --libs` \
 			-lnx
 

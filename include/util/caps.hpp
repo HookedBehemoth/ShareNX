@@ -10,8 +10,8 @@ extern "C" {
 namespace caps {
 
 std::string dateToString(const CapsAlbumFileDateTime& date);
-Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, const CapsAlbumStorage& storage, void* buffer, u64 raw_buffer_size);
-Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, const CapsAlbumStorage& storage, void* buffer, u64 raw_buffer_size);
+Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, void* buffer, u64 raw_buffer_size);
+Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, void* buffer, u64 raw_buffer_size);
 Result getFile(const CapsAlbumEntry& entry, void* buffer);
 std::pair<Result,std::vector<CapsAlbumEntry>> getEntries(const CapsAlbumStorage& storage);
 std::vector<CapsAlbumEntry> getAllEntries();

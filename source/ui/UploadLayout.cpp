@@ -16,34 +16,37 @@
 
 #include "MainApplication.hpp"
 #include "ui/UploadLayout.hpp"
-#include "utils.hpp"
-#include "caps/caps_utils.hpp"
+#include "util/caps.hpp"
+#include "util/host.hpp"
+#include "util/theme.hpp"
 #define COLOR(hex) pu::ui::Color::FromHex(hex)
+
+extern Theme g_Theme;
+extern Hoster g_Hoster;
 
 namespace scr::ui {
     extern MainApplication *mainApp;
-    extern scr::utl::hosterConfig m_config;
 
     UploadLayout::UploadLayout() : Layout::Layout() {
-        this->SetBackgroundColor(COLOR(m_config.m_theme.color_background));
-        this->SetBackgroundImage(m_config.m_theme.background_path);
-        this->topRect = Rectangle::New(0, 0, 1280, 45, COLOR(m_config.m_theme.color_topbar));
-        this->topText = TextBlock::New(10, 2, m_config.m_name, 35);
+        this->SetBackgroundColor(g_Theme.color.background);
+        this->SetBackgroundImage(g_Theme.background_path);
+        this->topRect = Rectangle::New(0, 0, 1280, 45, g_Theme.color.topbar);
+        this->topText = TextBlock::New(10, 2, g_Hoster.GetName(), 35);
         this->infoText = TextBlock::New(1000, 9, "\uE0E0 Upload \uE0E1 Back", 25);
-        this->topText->SetColor(COLOR(m_config.m_theme.color_text));
-        this->infoText->SetColor(COLOR(m_config.m_theme.color_text));
+        this->topText->SetColor(g_Theme.color.text);
+        this->infoText->SetColor(g_Theme.color.text);
         this->bottomText = TextBlock::New(70, 640, "", 45);
-        this->bottomText->SetColor(COLOR(m_config.m_theme.color_text));
+        this->bottomText->SetColor(g_Theme.color.text);
         this->preview = MImage::New(10, 55, "");
         this->Add(this->topRect);
         this->Add(this->topText);
         this->Add(this->infoText);
         this->Add(this->bottomText);
         this->Add(this->preview);
-        if (!m_config.m_theme.image_path.empty()) {
-            this->image = Image::New(m_config.m_theme.image_x, m_config.m_theme.image_y, m_config.m_theme.image_path);
-            this->image->SetWidth(m_config.m_theme.image_w);
-            this->image->SetHeight(m_config.m_theme.image_h);
+        if (!g_Theme.image.path.empty()) {
+            this->image = Image::New(g_Theme.image.x, g_Theme.image.y, g_Theme.image.path);
+            this->image->SetWidth(g_Theme.image.w);
+            this->image->SetHeight(g_Theme.image.h);
             this->Add(this->image);
         }
     }
@@ -53,7 +56,7 @@ namespace scr::ui {
         u64 img_size = 1280*720*4;
         u64 w, h;
         void* buffer = malloc(img_size);
-        Result rc = caps::getImage(&w, &h, entry, CapsAlbumStorage_Sd, buffer, img_size);
+        Result rc = caps::getImage(&w, &h, entry, buffer, img_size);
         if (R_SUCCEEDED(rc)) {
             this->preview->SetRawImage(buffer, w, h);
         }
@@ -65,7 +68,7 @@ namespace scr::ui {
             this->preview->SetImage(buffer, image_size);
         }
         free(buffer);*/
-        this->bottomText->SetText("Upload this screenshot to " + m_config.m_name + "?");
+        this->bottomText->SetText("Upload this screenshot to " + g_Hoster.GetName() + "?");
         this->preview->SetWidth(970);
         this->preview->SetHeight(545);
     }

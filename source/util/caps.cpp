@@ -1,5 +1,4 @@
 #include "util/caps.hpp"
-#include "utils.hpp"
 #include <fstream>
 namespace caps {
 
@@ -10,19 +9,17 @@ std::string dateToString(const CapsAlbumFileDateTime& date) {
     return std::string(dateString);
 }
 
-Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, const CapsAlbumStorage& storage, void* raw_buffer, u64 raw_buffer_size) {
+Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, void* raw_buffer, u64 raw_buffer_size) {
     void* work_buffer = malloc(entry.size);
-    void* meme = malloc(0x20);
-    Result rc = capsaLoadAlbumScreenShotThumbnailImageEx(width, height, entry.file_id, {{0}}, work_buffer, entry.size, raw_buffer, raw_buffer_size);
+    Result rc = capsaLoadAlbumScreenShotThumbnailImage(width, height, entry.file_id, work_buffer, entry.size, raw_buffer, raw_buffer_size);
     printf("capsaLoadAlbumScreenShotThumbnailImage: 0x%x\n", rc);
     free(work_buffer);
-    free(meme);
     return rc;
 }
 
-Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, const CapsAlbumStorage& storage, void* raw_buffer, u64 raw_buffer_size) {
+Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, void* raw_buffer, u64 raw_buffer_size) {
     void* work_buffer = malloc(entry.size);
-    Result rc = capsaLoadAlbumScreenShotImageEx(width, height, entry.file_id, {{0}}, work_buffer, entry.size, raw_buffer, raw_buffer_size);
+    Result rc = capsaLoadAlbumScreenShotImage(width, height, entry.file_id, work_buffer, entry.size, raw_buffer, raw_buffer_size);
     printf("capsaLoadAlbumScreenShotImage: 0x%x\n", rc);
     free(work_buffer);
     return rc;
@@ -37,11 +34,11 @@ std::pair<Result,std::vector<CapsAlbumEntry>> getEntries(const CapsAlbumStorage&
     u64 count;
     std::vector<CapsAlbumEntry> out_vector;
     Result rc = capsaGetAlbumFileCount(storage, &count);
-    LOG("capsaGetAlbumFileCount %ld\n", count);
+    printf("capsaGetAlbumFileCount %ld\n", count);
     if (R_SUCCEEDED(rc)) {
         CapsAlbumEntry entries[count];
         rc = capsaGetAlbumFileList(storage, &count, entries, sizeof(entries));
-        LOG("capsaGetAlbumFileList %ld\n", count);
+        printf("capsaGetAlbumFileList %ld\n", count);
         out_vector.reserve(count);
         if (R_SUCCEEDED(rc)) {
             for (u64 i = 0; i < count; i++) {
@@ -92,7 +89,7 @@ size_t MovieReader::Read(char* buffer, size_t max) {
     if (max > remaining)
         max = remaining;
     /* STUFF */
-    this->progress - max;
+    this->progress -= max;
     return 0;
 }
 

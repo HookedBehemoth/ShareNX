@@ -1,5 +1,5 @@
 #include "ui/elm_FixedMenu.hpp"
-#include "utils.hpp"
+#include "util/caps.hpp"
 
 namespace pu::ui::elm
 {
@@ -481,9 +481,9 @@ namespace pu::ui::elm
         u64 img_size = 320*180*4;
         void* img = malloc(img_size);
         u64 width, height;
-        Result rc = caps::getThumbnail(&width, &height, this->itms[i]->m_entry, CapsAlbumStorage_Sd, img, img_size);
+        Result rc = caps::getThumbnail(&width, &height, this->itms[i]->m_entry, img, img_size);
         if (width != 320 && height != 180) {
-            LOG("wrong thumbnail size")
+            printf("wrong thumbnail size");
         }
         if (R_SUCCEEDED(rc)) {
             u32 rmask = 0x000000ff;
@@ -495,7 +495,7 @@ namespace pu::ui::elm
             item.first = icontex;
             free(img);
         } else {
-            LOG("Failed loading thumbnail with 0x%x\n", rc);
+            printf("Failed loading thumbnail with 0x%x\n", rc);
             item.first = render::LoadImage("romfs:/video.png");
         }
     }

@@ -2,10 +2,9 @@
 #include <pu/ui/ui_Types.hpp>
 #include <json.hpp>
 
-extern Theme g_Theme;
-
 class Theme {
 public:
+    Theme();
     Theme(const nlohmann::json& json);
     struct {
         pu::ui::Color background;

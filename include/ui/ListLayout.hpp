@@ -17,7 +17,6 @@
 #pragma once
 #include <pu/Plutonium>
 #include "ui/elm_FixedMenu.hpp"
-#include "utils.hpp"
 
 using namespace pu::ui::elm;
 namespace scr::ui {

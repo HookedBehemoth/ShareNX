@@ -1,0 +1,14 @@
+{
+    "Background": "#6c0000FF",
+    "Focus": "#480001FF",
+    "Text": "#FFFFFFFF",
+    "Topbar": "#170909FF",
+    "Background Image": "romfs:/bg.jpg",
+    "Image": {
+        "Path": "romfs:/owo.png",
+        "X": "975",
+        "Y": "240",
+        "W": "292",
+        "H": "480"
+    }
+}
