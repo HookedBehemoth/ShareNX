@@ -21,7 +21,6 @@
 #include "util/host.hpp"
 #include "util/set.hpp"
 #include "util/theme.hpp"
-#define COLOR(hex) pu::ui::Color::FromHex(hex)
 
 extern Settings g_Settings;
 extern Theme g_Theme;
@@ -39,7 +38,7 @@ namespace ui {
         this->infoText = TextBlock::New(900, 9, "\uE0E0 Select \uE0E2 Config \uE0E1 Exit", 25);
         this->topText->SetColor(g_Theme.color.text);
         this->infoText->SetColor(g_Theme.color.text);
-        this->menu = FixedMenu::New(0,45,1280,COLOR("#00000000"),136,5,45);
+        this->menu = FixedMenu::New(0, 45, 1280, pu::ui::Color(0, 0, 0, 0), 136, 5, 45);
         this->menu->SetOnFocusColor(g_Theme.color.focus);
         m_entries = caps::getAllEntries();
         printf("succeeded loading images\n");

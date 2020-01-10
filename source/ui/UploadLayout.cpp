@@ -19,7 +19,6 @@
 #include "util/caps.hpp"
 #include "util/host.hpp"
 #include "util/theme.hpp"
-#define COLOR(hex) pu::ui::Color::FromHex(hex)
 
 extern Theme g_Theme;
 extern Hoster g_Hoster;
@@ -61,13 +60,6 @@ namespace ui {
             this->preview->SetRawImage(buffer, w, h);
         }
         free(buffer);
-        /*u64 image_size = entry.v1.size;
-        void* buffer = malloc(image_size);
-        Result rc = caps::getFile(this->m_entry, CapsAlbumStorage_Sd, buffer);
-        if (R_SUCCEEDED(rc)) {
-            this->preview->SetImage(buffer, image_size);
-        }
-        free(buffer);*/
         this->bottomText->SetText("Upload this screenshot to " + g_Hoster.GetName() + "?");
         this->preview->SetWidth(970);
         this->preview->SetHeight(545);

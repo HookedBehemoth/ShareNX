@@ -13,7 +13,7 @@ std::string dateToString(const CapsAlbumFileDateTime& date) {
 
 Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, void* raw_buffer, u64 raw_buffer_size) {
     void* work_buffer = malloc(entry.size);
-    Result rc = capsaLoadAlbumScreenShotThumbnailImage(width, height, entry.file_id, work_buffer, entry.size, raw_buffer, raw_buffer_size);
+    Result rc = capsaLoadAlbumScreenShotThumbnailImage(width, height, &entry.file_id, work_buffer, entry.size, raw_buffer, raw_buffer_size);
     printf("capsaLoadAlbumScreenShotThumbnailImage: 0x%x\n", rc);
     free(work_buffer);
     return rc;
@@ -21,7 +21,7 @@ Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, void* 
 
 Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, void* raw_buffer, u64 raw_buffer_size) {
     void* work_buffer = malloc(entry.size);
-    Result rc = capsaLoadAlbumScreenShotImage(width, height, entry.file_id, work_buffer, entry.size, raw_buffer, raw_buffer_size);
+    Result rc = capsaLoadAlbumScreenShotImage(width, height, &entry.file_id, work_buffer, entry.size, raw_buffer, raw_buffer_size);
     printf("capsaLoadAlbumScreenShotImage: 0x%x\n", rc);
     free(work_buffer);
     return rc;
@@ -29,7 +29,7 @@ Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, void* raw_
 
 Result getFile(const CapsAlbumEntry& entry, void* buffer) {
     u64 tmp;
-    return capsaLoadAlbumFile(entry.file_id, &tmp, buffer, entry.size);
+    return capsaLoadAlbumFile(&entry.file_id, &tmp, buffer, entry.size);
 }
 
 std::pair<Result,std::vector<CapsAlbumEntry>> getEntries(const CapsAlbumStorage& storage) {
@@ -89,10 +89,10 @@ std::vector<CapsAlbumEntry> getAllEntries() {
 
 Result moveFile(const CapsAlbumEntry& entry) {
     CapsAlbumStorage dest = entry.file_id.storage == CapsAlbumStorage_Nand ? CapsAlbumStorage_Sd : CapsAlbumStorage_Nand;
-    Result rc = capsaStorageCopyAlbumFile(entry.file_id, dest);
+    Result rc = capsaStorageCopyAlbumFile(&entry.file_id, dest);
     printf("copy: 0x%x\n", rc);
     if (R_SUCCEEDED(rc)) {
-        rc = capsaDeleteAlbumFile(entry.file_id);
+        rc = capsaDeleteAlbumFile(&entry.file_id);
         printf("delete: 0x%x\n", rc);
     }
     return rc;
