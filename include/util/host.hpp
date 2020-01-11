@@ -2,6 +2,10 @@
 #include <switch.h>
 #include <json.hpp>
 
+struct Mime {
+    std::string name, data;
+};
+
 class Hoster {
 public:
     Hoster();
@@ -18,4 +22,5 @@ private:
     std::string imageMimeName;
     std::string videoMimeName;
     std::string regex;
+    std::vector<Mime> mimeData;
 };

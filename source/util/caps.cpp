@@ -1,6 +1,7 @@
 #include "util/caps.hpp"
 #include <fstream>
 #include <algorithm>
+#include <string.h>
 
 namespace caps {
 
@@ -11,25 +12,33 @@ std::string dateToString(const CapsAlbumFileDateTime& date) {
     return std::string(dateString);
 }
 
-Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, void* raw_buffer, u64 raw_buffer_size) {
-    void* work_buffer = malloc(entry.size);
-    Result rc = capsaLoadAlbumScreenShotThumbnailImage(width, height, &entry.file_id, work_buffer, entry.size, raw_buffer, raw_buffer_size);
+std::string entryToFileName(const CapsAlbumEntry& entry) {
+    auto& date = entry.file_id.datetime;
+    const char* temp ="%04d.%02d.%02d %02d:%02d:%02d.%s";
+    char fileName[24];
+    snprintf(fileName, 24, temp, date.year, date.month, date.day, date.hour, date.minute, date.second, entry.file_id.content == CapsAlbumFileContents_ScreenShot ? "jpg": "mp4");
+    return std::string(fileName);
+}
+
+Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, void* image, u64 image_size) {
+    void* workbuf = malloc(entry.size);
+    Result rc = capsaLoadAlbumScreenShotThumbnailImage(width, height, &entry.file_id, image, image_size, workbuf, entry.size);
     printf("capsaLoadAlbumScreenShotThumbnailImage: 0x%x\n", rc);
-    free(work_buffer);
+    free(workbuf);
     return rc;
 }
 
-Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, void* raw_buffer, u64 raw_buffer_size) {
-    void* work_buffer = malloc(entry.size);
-    Result rc = capsaLoadAlbumScreenShotImage(width, height, &entry.file_id, work_buffer, entry.size, raw_buffer, raw_buffer_size);
+Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, void* image, u64 image_size) {
+    void* workbuf = malloc(entry.size);
+    Result rc = capsaLoadAlbumScreenShotImage(width, height, &entry.file_id, image, image_size, workbuf, entry.size);
     printf("capsaLoadAlbumScreenShotImage: 0x%x\n", rc);
-    free(work_buffer);
+    free(workbuf);
     return rc;
 }
 
-Result getFile(const CapsAlbumEntry& entry, void* buffer) {
+Result getFile(const CapsAlbumEntry& entry, void* filebuf) {
     u64 tmp;
-    return capsaLoadAlbumFile(&entry.file_id, &tmp, buffer, entry.size);
+    return capsaLoadAlbumFile(&entry.file_id, &tmp, filebuf, entry.size);
 }
 
 std::pair<Result,std::vector<CapsAlbumEntry>> getEntries(const CapsAlbumStorage& storage) {
@@ -99,18 +108,50 @@ Result moveFile(const CapsAlbumEntry& entry) {
 }
 
 MovieReader::MovieReader(const CapsAlbumEntry& entry) : m_entry(entry) {
+    printf("Init MovieReader\n");
+    capsaOpenAlbumMovieStream(&this->stream, &m_entry.file_id);
+    readBuffer = malloc(bufferSize);
+    memset(readBuffer, 0, bufferSize);
+    capsaGetAlbumMovieStreamSize(stream, &this->streamSize);
+    printf("stream size: 0x%lx\n", this->streamSize);
 }
 
 MovieReader::~MovieReader() {
+    printf("Exit MovieReader\n");
+    free (readBuffer);
+    capsaCloseAlbumMovieStream(stream);
+}
+
+u64 MovieReader::GetStreamSize() {
+    return this->streamSize;
 }
 
 size_t MovieReader::Read(char* buffer, size_t max) {
-    size_t remaining = m_entry.size - this->progress;
-    if (max > remaining)
-        max = remaining;
-    /* STUFF */
-    this->progress -= max;
-    return 0;
+    printf("progress: 0x%lx/0x%lx\tbufsize 0x%lx\t", this->progress, this->streamSize, max);
+    u64 remaining = this->streamSize - this->progress;
+    if (remaining <= 0) {
+        printf("returning 0\n");
+        return 0;
+    }
+    int bufferCount = this->progress / this->bufferSize;
+    printf("buf %d at 0x%lx\t", bufferCount, bufferCount * this->bufferSize);
+    u64 actualSize = 0;
+    Result rc = capsaReadMovieDataFromAlbumMovieReadStream(this->stream, bufferCount * this->bufferSize, this->readBuffer, this->bufferSize, &actualSize);
+    size_t curOffset = progress % this->bufferSize;
+    u64 readSize = std::min(std::min(max, this->bufferSize - curOffset), remaining);
+    void* startBuffer = readBuffer + curOffset;
+    printf("buffer at 0x%lx, offset: 0x%lx\t", buffer, curOffset);
+    memcpy(buffer, startBuffer, readSize);
+    this->progress += readSize;
+    memset(readBuffer, 0, bufferSize);
+    if (R_SUCCEEDED(rc)) {
+        printf("returning 0x%lx\n", readSize);
+        return readSize;
+    } else {
+        printf("Error: 0x%x\n", rc);
+        this->error = rc;
+        return 0;
+    }
 }
 
 }

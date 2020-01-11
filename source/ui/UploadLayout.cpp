@@ -74,7 +74,7 @@ namespace ui {
             if (!url.empty()) return;
             this->bottomText->SetText("Uploading... Please wait!");
             mainApp->CallForRender();
-            //url = scr::utl::uploadFile(m_entry->path, m_config);
+            url = g_Hoster.uploadEntry(this->m_entry);
             if (url.compare("")) {
                 this->bottomText->SetText(url);
             } else {
@@ -83,6 +83,7 @@ namespace ui {
         }
 
         if (Down & KEY_B) {
+            url = "";
             mainApp->LoadLayout(mainApp->listLayout);
         }
     }

@@ -2,12 +2,12 @@
     "Name": "Lewd.pics",
     "Url": "https://lewd.pics/p/index.php",
     "Regex": "",
-    "ImageName": "file",
-    "VideoName": "file",
+    "ImageName": "fileToUpload",
+    "VideoName": "fileToUpload",
     "Mimepart": [
         {
             "Name": "curl",
-            "Data": 1
+            "Data": "1"
         }
     ]
 }
