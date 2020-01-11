@@ -108,6 +108,7 @@ std::string Hoster::uploadEntry(const CapsAlbumEntry& entry) {
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &rcode);
 
     std::string out = *response;
+    delete movieReader;
 
     printf("response code: %d\n", rcode);
     printf("urlresponse: %s\n", out.c_str());
