@@ -2,8 +2,6 @@
 #include "util/common.hpp"
 #include <pu/Plutonium>
 
-Theme g_Theme;
-
 Theme::Theme() {}
 
 void Theme::Initialize(const nlohmann::json& json) {

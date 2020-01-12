@@ -1,6 +1,7 @@
 #pragma once
 #include <switch.h>
 #include <json.hpp>
+#include "ui/UploadLayout.hpp"
 
 struct Mime {
     std::string name, data;
@@ -15,7 +16,7 @@ public:
     std::string GetName();
     std::string GetUrl();
     std::string GetRegex();
-    std::string uploadEntry(const CapsAlbumEntry& entry);
+    std::string uploadEntry(const CapsAlbumEntry& entry, ui::UploadLayout* cb_data);
 private:
     std::string name;
     std::string url;

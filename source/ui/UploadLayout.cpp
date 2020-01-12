@@ -36,11 +36,14 @@ namespace ui {
         this->infoText->SetColor(g_Theme.color.text);
         this->bottomText = TextBlock::New(70, 640, "", 45);
         this->bottomText->SetColor(g_Theme.color.text);
+        this->progressBar = ProgressBar::New(70, 640, 800, 40, 100);
+        this->progressBar->SetVisible(false);
         this->preview = MImage::New(10, 55, "");
         this->Add(this->topRect);
         this->Add(this->topText);
         this->Add(this->infoText);
         this->Add(this->bottomText);
+        this->Add(this->progressBar);
         this->Add(this->preview);
         if (!g_Theme.image.path.empty()) {
             this->image = Image::New(g_Theme.image.x, g_Theme.image.y, g_Theme.image.path);
@@ -72,9 +75,12 @@ namespace ui {
 
         if (Down & KEY_A) {
             if (!url.empty()) return;
-            this->bottomText->SetText("Uploading... Please wait!");
-            mainApp->CallForRender();
-            url = g_Hoster.uploadEntry(this->m_entry);
+            this->bottomText->SetVisible(false);
+            this->progressBar->SetVisible(true);
+            url = g_Hoster.uploadEntry(this->m_entry, this);
+            //url = g_Hoster.uploadEntry(this->m_entry, std::bind(&UploadLayout::setProgress, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
+            this->bottomText->SetVisible(true);
+            this->progressBar->SetVisible(false);
             if (url.compare("")) {
                 this->bottomText->SetText(url);
             } else {
@@ -86,5 +92,10 @@ namespace ui {
             url = "";
             mainApp->LoadLayout(mainApp->listLayout);
         }
+    }
+
+    void UploadLayout::setProgress(double progress) {
+        this->progressBar->SetProgress(progress);
+        mainApp->CallForRender();
     }
 }

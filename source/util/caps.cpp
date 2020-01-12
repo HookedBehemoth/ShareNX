@@ -38,6 +38,7 @@ Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, void* imag
 
 Result getFile(const CapsAlbumEntry& entry, void* filebuf) {
     u64 tmp;
+    memset(filebuf, 0, entry.size);
     return capsaLoadAlbumFile(&entry.file_id, &tmp, filebuf, entry.size);
 }
 
@@ -123,29 +124,31 @@ MovieReader::~MovieReader() {
 }
 
 u64 MovieReader::GetStreamSize() {
+    if (this->streamSize > 0x80000000)
+        return 0;
     return this->streamSize;
 }
 
 size_t MovieReader::Read(char* buffer, size_t max) {
-    printf("progress: 0x%lx/0x%lx\tbufsize 0x%lx\t", this->progress, this->streamSize, max);
+    Result rc = 0;
     u64 remaining = this->streamSize - this->progress;
+    u64 bufferIndex = this->progress / this->bufferSize;
+    u64 curOffset = progress % this->bufferSize;
+    u64 readSize = std::min(std::min(max, this->bufferSize - curOffset), remaining);
+    double percentage = ((double)this->progress / (double)this->streamSize) * 100;
+    printf("progress: 0x%lx/0x%lx %f \n", this->progress, this->streamSize, percentage);
     if (remaining <= 0) {
-        printf("returning 0\n");
         return 0;
     }
-    int bufferCount = this->progress / this->bufferSize;
-    printf("buf %d at 0x%lx\t", bufferCount, bufferCount * this->bufferSize);
-    u64 actualSize = 0;
-    Result rc = capsaReadMovieDataFromAlbumMovieReadStream(this->stream, bufferCount * this->bufferSize, this->readBuffer, this->bufferSize, &actualSize);
-    size_t curOffset = progress % this->bufferSize;
-    u64 readSize = std::min(std::min(max, this->bufferSize - curOffset), remaining);
+    if (bufferIndex != this->lastBufferIndex) {
+        u64 actualSize = 0;
+        rc = capsaReadMovieDataFromAlbumMovieReadStream(this->stream, bufferIndex * this->bufferSize, this->readBuffer, this->bufferSize, &actualSize);
+        this->lastBufferIndex = bufferIndex;
+    }
     void* startBuffer = readBuffer + curOffset;
-    printf("buffer at 0x%lx, offset: 0x%lx\t", buffer, curOffset);
     memcpy(buffer, startBuffer, readSize);
     this->progress += readSize;
-    memset(readBuffer, 0, bufferSize);
     if (R_SUCCEEDED(rc)) {
-        printf("returning 0x%lx\n", readSize);
         return readSize;
     } else {
         printf("Error: 0x%x\n", rc);

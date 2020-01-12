@@ -5,8 +5,8 @@
 #include <iomanip>
 #include <filesystem>
 
-extern Hoster g_Hoster;
-extern Theme g_Theme;
+Hoster g_Hoster;
+Theme g_Theme;
 Settings g_Settings;
 
 #define BASE_PATH    "/switch/screen-nx/"

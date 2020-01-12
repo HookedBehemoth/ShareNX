@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 extern "C" {
     #include <switch/services/capsa.h>
@@ -25,9 +26,10 @@ public:
     u64 GetStreamSize();
     size_t Read(char* buffer, size_t max);
 private:
+    u32 lastBufferIndex = -1;
     u64 streamSize = 0;
     CapsAlbumEntry m_entry;
-    size_t progress = 0;
+    u64 progress = 0;
     u64 stream = 0;
     void* readBuffer;
     u64 bufferSize = 0x40000;

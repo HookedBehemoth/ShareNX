@@ -17,6 +17,7 @@
 #pragma once
 #include <pu/Plutonium>
 #include "ui/elm_MemImage.hpp"
+#include <curl/curl.h>
 
 using namespace pu::ui::elm;
 namespace ui {
@@ -27,11 +28,13 @@ namespace ui {
             PU_SMART_CTOR(UploadLayout)
             void setEntry(const CapsAlbumEntry& Entry);
             void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
+            void setProgress(double progress);
         private:
             TextBlock::Ref topText;
             TextBlock::Ref infoText;
             Rectangle::Ref topRect;
             TextBlock::Ref bottomText;
+            ProgressBar::Ref progressBar;
             MImage::Ref preview;
             Image::Ref image;
             std::string url;
