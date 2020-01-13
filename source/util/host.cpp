@@ -4,16 +4,16 @@
 #include <curl/curl.h>
 #include "util/common.hpp"
 
-static size_t MovieRead(char *buffer, size_t size, size_t nitems, void* reader) {
-    return ((caps::MovieReader*)reader)->Read(buffer, size * nitems);
+static size_t MovieRead(char *buffer, size_t size, size_t nitems, void* userdata) {
+    return ((caps::MovieReader*)userdata)->Read(buffer, size * nitems);
 }
 
-static size_t StringWrite(void *contents, size_t size, size_t nmemb, void *userp) {
-	((std::string*)userp)->append((char*)contents, size * nmemb);
+static size_t StringWrite(void *contents, size_t size, size_t nmemb, void *userdata) {
+	((std::string*)userdata)->append((char*)contents, size * nmemb);
     return size * nmemb;
 }
 
-int xferCb(void *userdata, u32 dltotal, u32 dlnow, u32 ultotal, u32 ulnow) {
+static size_t xferCb(void *userdata, u32 dltotal, u32 dlnow, u32 ultotal, u32 ulnow) {
     auto layout = static_cast<ui::UploadLayout*>(userdata);
     layout->setProgress(((double)ulnow / (double)ultotal) * 100.0);
     return 0;
@@ -23,31 +23,41 @@ Hoster::Hoster() {}
 
 Hoster::~Hoster() {}
 
-void Hoster::Initialize(const nlohmann::json& json) {
-    this->name = common::GetString(json, "Name", "Lewd");
-    this->url = common::GetString(json, "Url", "https://lewd.pics/p/index.php");
+void Hoster::Initialize(const nlohmann::json& json, std::string name) {
+    this->name = name;
+    this->url = common::GetString(json, "Url", "");
     this->regex = common::GetString(json, "Regex", "");
-    this->imageMimeName = common::GetString(json, "ImageName", "file");
-    this->videoMimeName = common::GetString(json, "VideoName", "file");
-    if (json.contains("Mimepart")) {
-        auto& mime = json["Mimepart"];
-        if (mime != nullptr) {
-            for (auto& elm: mime) {
-                this->mimeData.push_back( {
-                    common::GetString(elm, "Name", "name"),
-                    common::GetString(elm, "Data", "1")
-                } );
-            }
-        }
+    this->imageMimeName = common::GetString(json, "ImageName", "");
+    this->videoMimeName = common::GetString(json, "VideoName", "");
+    if (!json.contains("Mimepart"))
+        return;
+    auto& mime = json["Mimepart"];
+    if (mime == nullptr || !mime.is_array())
+        return;
+    for (auto& elm: mime) {
+        this->mimeData.push_back( {
+            common::GetString(elm, "Name", "name"),
+            common::GetString(elm, "Data", "1")
+        } );
     }
 }
 
 void Hoster::SetDefault() {
-    this->name = "Lewd.pics";
-    this->url = "SetDefault()";
+    this->name = "";
+    this->url = "https://lewd.pics/p/index.php";
+    this->imageMimeName = "fileToUpload";
+    this->videoMimeName = "fileToUpload";
+    this->mimeData.push_back(
+        {
+            "curl", "1"
+        }
+    );
 }
 
 std::string Hoster::GetName() {
+    if (this->name.empty()) {
+        return "default";
+    }
     return this->name;
 }
 

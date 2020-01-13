@@ -11,15 +11,19 @@ u32 GetInt(const nlohmann::json& json, std::string key, u32 def) {
     return GetEntry<u32>(json, key, def, nlohmann::detail::value_t::number_unsigned);
 }
 
-nlohmann::json LoadConfig(const std::string& path) {
+std::pair<bool,nlohmann::json> LoadConfig(const std::string& path) {
     std::ifstream ifs(path);
     if (!ifs.good()) {
         printf("Failed loading config file from %s\n", path.c_str());
-        return nlohmann::json();
+        return std::make_pair(false, nlohmann::json());
     }
     nlohmann::json json = nlohmann::json::parse(ifs);
     ifs.close();
-    return json;
+    if (json == nullptr || !json.is_object()) {
+        printf("Parsing config file %s failed\n", path.c_str());
+        return std::make_pair(false, nlohmann::json());
+    }
+    return std::make_pair(true, json);
 }
 
 }

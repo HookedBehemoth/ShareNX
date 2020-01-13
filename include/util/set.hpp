@@ -18,6 +18,4 @@ public:
 private:
     void SetDefault();
     void createDirectory(const std::string& path);
-    std::string hoster;
-    std::string theme;
 };

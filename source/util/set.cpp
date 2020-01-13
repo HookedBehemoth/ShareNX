@@ -9,25 +9,28 @@ Hoster g_Hoster;
 Theme g_Theme;
 Settings g_Settings;
 
-#define BASE_PATH    "/switch/screen-nx/"
-#define CONFIGPATH   BASE_PATH "config.json"
-#define HOSTERPATH   BASE_PATH "hoster/"
-#define THEMESPATH   BASE_PATH "themes/"
+#define BASE_PATH   "/switch/screen-nx/"
+#define CONFIGPATH  BASE_PATH "config.json"
+#define HOSTERPATH  BASE_PATH "hoster/"
+#define THEMESPATH  BASE_PATH "themes/"
+#define HOST        "Hoster"
+#define THEME       "Theme"
 
 Settings::Settings() {}
 
 Settings::~Settings() {
-    if (this->hoster == "" && this->theme == "")
-        return;
+    const std::string hoster = g_Hoster.GetName();
+    const std::string theme = g_Theme.name;
     std::ofstream ofs(CONFIGPATH);
     if (!ofs.good()) {
         return;
     }
-    nlohmann::json json = {
-        { "Hoster", this->hoster },
-        { "Theme", this->theme }
-    };
-    ofs << std::setw(4) << json << std::endl;
+    auto cfg = nlohmann::json();
+    if (!hoster.empty())
+        cfg[HOST] = hoster;
+    if (!theme.empty())
+        cfg[THEME] = theme;
+    ofs << std::setw(4) << cfg << std::endl;
     ofs.close();
 }
 
@@ -35,10 +38,13 @@ void Settings::Initialize() {
     createDirectory(BASE_PATH);
     createDirectory(HOSTERPATH);
     createDirectory(THEMESPATH);
-    auto json = common::LoadConfig(CONFIGPATH);
-    if (json.is_object()) {
-        SetHoster(common::GetString(json, "Hoster", ""));
-        SetTheme(common::GetString(json, "Theme", ""));
+    const auto [loaded,json] = common::LoadConfig(CONFIGPATH);
+    if (loaded) {
+        auto host = common::GetString(json, "Hoster", "");
+        if (!host.empty())
+            this->SetHoster(host);
+        auto theme = common::GetString(json, "Theme", "");
+            this->SetTheme(theme);
     } else {
         std::filesystem::remove(CONFIGPATH);
         SetDefault();
@@ -46,21 +52,28 @@ void Settings::Initialize() {
 }
 
 void Settings::SetHoster(const std::string& name) {
-    this->hoster = name;
-    const std::string setHoster = HOSTERPATH + this->hoster + ".json";
-    const nlohmann::json set = common::LoadConfig(setHoster);
-    g_Hoster.Initialize(set);
+    const std::string path = HOSTERPATH + name + ".json";
+    const auto [loaded,json] = common::LoadConfig(path);
+    if (loaded) {
+        g_Hoster.Initialize(json, name);
+    } else {
+        g_Hoster.SetDefault();
+    }
 }
 
 void Settings::SetTheme(const std::string& name) {
-    this->theme = name;
-    const std::string setTheme = THEMESPATH + this->theme + ".json";
-    g_Theme.Initialize(common::LoadConfig(setTheme));
+    const std::string path = THEMESPATH + name + ".json";
+    const auto [loaded,json] = common::LoadConfig(path);
+    if (loaded) {
+        g_Theme.Initialize(json, name);
+    } else {
+        g_Theme.SetDefault();
+    }
 }
 
 void Settings::SetDefault() {
-    g_Hoster.Initialize(common::LoadConfig("romfs:/host.json"));
-    g_Theme.Initialize(common::LoadConfig("romfs:/theme.json"));
+    g_Hoster.SetDefault();
+    g_Theme.SetDefault();
 }
 
 std::vector<std::string> Settings::GetJsonEntries(const std::string& path) {

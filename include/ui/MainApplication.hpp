@@ -25,7 +25,7 @@ namespace ui {
             using Application::Application;
             PU_SMART_CTOR(MainApplication)
             void OnLoad() override;
-            void upload(char * m_entry);
+            void Load();
             ListLayout::Ref listLayout;
             UploadLayout::Ref uploadLayout;
     };

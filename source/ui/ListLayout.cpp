@@ -87,14 +87,32 @@ namespace ui {
                 mainApp->CreateShowDialog("No site configs found", "Create your own configs and put them in /switch/screen-nx/sites/.\n\nCheck the repo for examples, or just use the default!", {"Cancel"}, true);
                 return;
             }
-            int opt = mainApp->CreateShowDialog("Select a site config", "Selecting different site configs will change the theme and\nwebsite to upload to! Selecting different\nsite configs will change the theme and website to upload to!\nSelecting different site\nconfigs will change the theme\nand website to upload to!", hoster, false);
+            hoster.push_back("default");
+            u64 opt = mainApp->CreateShowDialog("Select a site config", "Selecting different site configs will change the theme and\nwebsite to upload to! Selecting different\nsite configs will change the theme and website to upload to!\nSelecting different site\nconfigs will change the theme\nand website to upload to!", hoster, false);
             if (opt < 0) return;
-            g_Settings.SetHoster(hoster[opt]);
-            mainApp->listLayout = ListLayout::New();
-            mainApp->uploadLayout = UploadLayout::New();
-            mainApp->listLayout->SetOnInput(std::bind(&ListLayout::onInput, mainApp->listLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-            mainApp->uploadLayout->SetOnInput(std::bind(&UploadLayout::onInput, mainApp->uploadLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-            mainApp->LoadLayout(mainApp->listLayout);
+            if (opt == hoster.size() - 1) {
+                g_Hoster.SetDefault();
+            } else {
+                g_Settings.SetHoster(hoster[opt]);
+            }
+            mainApp->Load();
+        }
+
+        if (Down & KEY_Y) {
+            std::vector<std::string> themes = g_Settings.GetThemes();
+            if (themes.size() == 0) {
+                mainApp->CreateShowDialog("No site configs found", "Create your own configs and put them in /switch/screen-nx/sites/.\n\nCheck the repo for examples, or just use the default!", {"Cancel"}, true);
+                return;
+            }
+            themes.push_back("default");
+            u64 opt = mainApp->CreateShowDialog("Select a site config", "Selecting different site configs will change the theme and\nwebsite to upload to! Selecting different\nsite configs will change the theme and website to upload to!\nSelecting different site\nconfigs will change the theme\nand website to upload to!", themes, false);
+            if (opt < 0) return;
+            if (opt == themes.size() - 1) {
+                g_Theme.SetDefault();
+            } else {
+                g_Settings.SetTheme(themes[opt]);
+            }
+            mainApp->Load();
         }
     }
 }

@@ -5,7 +5,9 @@
 class Theme {
 public:
     Theme();
-    void Initialize(const nlohmann::json& json);
+    void Initialize(const nlohmann::json& json, std::string name);
+    void SetDefault();
+    std::string name;
     struct {
         pu::ui::Color background;
         pu::ui::Color focus;

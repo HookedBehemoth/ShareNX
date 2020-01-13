@@ -26,6 +26,10 @@ namespace ui {
         mainApp = this;
         g_Settings.Initialize();
 
+        this->Load();
+    }
+
+    void MainApplication::Load() {
         printf("Creating UploadLayout\n");
         this->uploadLayout = UploadLayout::New();
         this->uploadLayout->SetOnInput(std::bind(&UploadLayout::onInput, this->uploadLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
@@ -33,9 +37,5 @@ namespace ui {
         this->listLayout = ListLayout::New();
         this->listLayout->SetOnInput(std::bind(&ListLayout::onInput, this->listLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         this->LoadLayout(this->listLayout);
-    }
-
-    void MainApplication::upload(char * m_entry) {
-
     }
 }

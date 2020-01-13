@@ -1,0 +1,12 @@
+{
+    "Url": "https://api.telegram.org/[YOUR_BOT_TOKEN]/sendPhoto",
+    "Regex": "",
+    "ImageName": "photo",
+    "VideoName": "",
+    "Mimepart": [
+        {
+            "Name": "chat_id",
+            "Data": "[YOUR_USER_ID_HERE]"
+        }
+    ]
+}

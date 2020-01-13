@@ -11,7 +11,7 @@ class Hoster {
 public:
     Hoster();
     ~Hoster();
-    void Initialize(const nlohmann::json& json);
+    void Initialize(const nlohmann::json& json, std::string name);
     void SetDefault();
     std::string GetName();
     std::string GetUrl();
