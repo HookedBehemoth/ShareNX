@@ -41,7 +41,6 @@ namespace ui {
         this->menu = FixedMenu::New(0, 45, 1280, pu::ui::Color(0, 0, 0, 0), 136, 5, 45);
         this->menu->SetOnFocusColor(g_Theme.color.focus);
         m_entries = caps::getAllEntries();
-        printf("succeeded loading images\n");
         for (auto entry: m_entries) {
             auto itm = FixedMenuItem::New(entry);
             itm->SetColor(g_Theme.color.text);

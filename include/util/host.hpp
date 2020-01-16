@@ -17,8 +17,8 @@ public:
     std::string GetUrl();
     std::string GetRegex();
     std::string uploadEntry(const CapsAlbumEntry& entry, ui::UploadLayout* cb_data);
-private:
     std::string name;
+private:
     std::string url;
     std::string imageMimeName;
     std::string videoMimeName;

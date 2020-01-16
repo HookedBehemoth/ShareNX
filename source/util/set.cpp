@@ -19,7 +19,7 @@ Settings g_Settings;
 Settings::Settings() {}
 
 Settings::~Settings() {
-    const std::string hoster = g_Hoster.GetName();
+    const std::string hoster = g_Hoster.name;
     const std::string theme = g_Theme.name;
     std::ofstream ofs(CONFIGPATH);
     if (!ofs.good()) {

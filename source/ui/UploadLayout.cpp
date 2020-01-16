@@ -38,7 +38,7 @@ namespace ui {
         this->bottomText->SetColor(g_Theme.color.text);
         this->progressBar = ProgressBar::New(70, 640, 800, 40, 100);
         this->progressBar->SetVisible(false);
-        this->preview = MImage::New(10, 55, "");
+        this->preview = Image::New(10, 55, "");
         this->Add(this->topRect);
         this->Add(this->topText);
         this->Add(this->infoText);
@@ -60,7 +60,7 @@ namespace ui {
         void* buffer = malloc(img_size);
         Result rc = caps::getImage(&w, &h, entry, buffer, img_size);
         if (R_SUCCEEDED(rc)) {
-            this->preview->SetRawImage(buffer, w, h);
+            this->preview->SetRgbImage(buffer, w, h);
         }
         free(buffer);
         this->bottomText->SetText("Upload this screenshot to " + g_Hoster.GetName() + "?");
@@ -78,7 +78,6 @@ namespace ui {
             this->bottomText->SetVisible(false);
             this->progressBar->SetVisible(true);
             url = g_Hoster.uploadEntry(this->m_entry, this);
-            //url = g_Hoster.uploadEntry(this->m_entry, std::bind(&UploadLayout::setProgress, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
             this->bottomText->SetVisible(true);
             this->progressBar->SetVisible(false);
             if (url.compare("")) {

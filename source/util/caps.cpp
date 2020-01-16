@@ -23,7 +23,7 @@ std::string entryToFileName(const CapsAlbumEntry& entry) {
 Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, void* image, u64 image_size) {
     void* workbuf = malloc(entry.size);
     Result rc = capsaLoadAlbumScreenShotThumbnailImage(width, height, &entry.file_id, image, image_size, workbuf, entry.size);
-    printf("capsaLoadAlbumScreenShotThumbnailImage: 0x%x\n", rc);
+    if(R_FAILED(rc)) printf("capsaLoadAlbumScreenShotThumbnailImage: 0x%x\n", rc);
     free(workbuf);
     return rc;
 }
@@ -31,7 +31,7 @@ Result getThumbnail(u64* width, u64* height, const CapsAlbumEntry& entry, void* 
 Result getImage(u64* width, u64* height, const CapsAlbumEntry& entry, void* image, u64 image_size) {
     void* workbuf = malloc(entry.size);
     Result rc = capsaLoadAlbumScreenShotImage(width, height, &entry.file_id, image, image_size, workbuf, entry.size);
-    printf("capsaLoadAlbumScreenShotImage: 0x%x\n", rc);
+    if(R_FAILED(rc)) printf("capsaLoadAlbumScreenShotImage: 0x%x\n", rc);
     free(workbuf);
     return rc;
 }
@@ -43,20 +43,20 @@ Result getFile(const CapsAlbumEntry& entry, void* filebuf) {
 }
 
 std::pair<Result,std::vector<CapsAlbumEntry>> getEntries(const CapsAlbumStorage& storage) {
-    u64 count;
+    u64 count, loaded;
     std::vector<CapsAlbumEntry> out_vector;
     Result rc = capsaGetAlbumFileCount(storage, &count);
     printf("capsaGetAlbumFileCount %ld\n", count);
     if (R_SUCCEEDED(rc)) {
-        CapsAlbumEntry entries[count];
-        rc = capsaGetAlbumFileList(storage, &count, entries, sizeof(entries));
-        printf("capsaGetAlbumFileList %ld\n", count);
-        out_vector.reserve(count);
-        if (R_SUCCEEDED(rc)) {
-            for (u64 i = 0; i < count; i++) {
-                out_vector.push_back(entries[i]);
-            }
+        out_vector.resize(count);
+        rc = capsaGetAlbumFileList(storage, &loaded, out_vector.data(), count);
+        printf("capsaGetAlbumFileList %ld\n", loaded);
+        if (count != loaded) {
+            printf("resizing vector to actual size\n");
+            out_vector.resize(loaded);
         }
+    } else {
+        printf("loading entries failed with 0x%x\n", rc);
     }
     return { rc, out_vector };
 }
@@ -92,7 +92,10 @@ std::vector<CapsAlbumEntry> getAllEntries() {
         }
         return nand_entries;
     } else if (R_SUCCEEDED(sd_rc)) {
+        printf("loading sd entries failed with 0x%x\n", sd_rc);
         return sd_entries;
+    } else {
+        printf("loading entries failed with 0x%x and 0x%x\n", nand_rc, sd_rc);
     }
     return {};
 }

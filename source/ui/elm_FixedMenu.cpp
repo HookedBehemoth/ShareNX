@@ -486,17 +486,11 @@ namespace pu::ui::elm
             printf("wrong thumbnail size");
         }
         if (R_SUCCEEDED(rc)) {
-            u32 rmask = 0x000000ff;
-            u32 gmask = 0x0000ff00;
-            u32 bmask = 0x00ff0000;
-            u32 amask = 0xff000000;
-
-            auto icontex = render::ConvertToTexture(SDL_CreateRGBSurfaceFrom(img, width, height, 32, 4*width, rmask, gmask, bmask, amask));
-            item.first = icontex;
-            free(img);
+            item.first = render::LoadRgbImage(img, width, height, 4);
         } else {
             printf("Failed loading thumbnail with 0x%x\n", rc);
             item.first = render::LoadImage("romfs:/video.png");
         }
+        free(img);
     }
 }

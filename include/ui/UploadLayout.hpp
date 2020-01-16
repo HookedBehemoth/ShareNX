@@ -16,8 +16,6 @@
 
 #pragma once
 #include <pu/Plutonium>
-#include "ui/elm_MemImage.hpp"
-#include <curl/curl.h>
 
 using namespace pu::ui::elm;
 namespace ui {
@@ -35,7 +33,7 @@ namespace ui {
             Rectangle::Ref topRect;
             TextBlock::Ref bottomText;
             ProgressBar::Ref progressBar;
-            MImage::Ref preview;
+            Image::Ref preview;
             Image::Ref image;
             std::string url;
             CapsAlbumEntry m_entry;
