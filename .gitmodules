@@ -1,4 +1,0 @@
-[submodule "Plutonium"]
-	path = Plutonium
-	url = git@github.com:HookedBehemoth/Plutonium.git
-	branch = mem
