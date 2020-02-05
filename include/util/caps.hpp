@@ -31,7 +31,7 @@ private:
     CapsAlbumEntry m_entry;
     u64 progress = 0;
     u64 stream = 0;
-    void* readBuffer;
+    unsigned char* readBuffer;
     u64 bufferSize = 0x40000;
     Result error = 0;
 };

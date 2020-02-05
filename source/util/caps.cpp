@@ -114,7 +114,7 @@ Result moveFile(const CapsAlbumEntry& entry) {
 MovieReader::MovieReader(const CapsAlbumEntry& entry) : m_entry(entry) {
     printf("Init MovieReader\n");
     capsaOpenAlbumMovieStream(&this->stream, &m_entry.file_id);
-    readBuffer = malloc(bufferSize);
+    readBuffer = (unsigned char*)malloc(bufferSize);
     memset(readBuffer, 0, bufferSize);
     capsaGetAlbumMovieStreamSize(stream, &this->streamSize);
     printf("stream size: 0x%lx\n", this->streamSize);
@@ -148,7 +148,7 @@ size_t MovieReader::Read(char* buffer, size_t max) {
         rc = capsaReadMovieDataFromAlbumMovieReadStream(this->stream, bufferIndex * this->bufferSize, this->readBuffer, this->bufferSize, &actualSize);
         this->lastBufferIndex = bufferIndex;
     }
-    void* startBuffer = readBuffer + curOffset;
+    unsigned char* startBuffer = readBuffer + curOffset;
     memcpy(buffer, startBuffer, readSize);
     this->progress += readSize;
     if (R_SUCCEEDED(rc)) {

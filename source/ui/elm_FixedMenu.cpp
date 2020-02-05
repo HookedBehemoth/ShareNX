@@ -168,8 +168,8 @@ namespace pu::ui::elm
     {
         this->itms.clear();
         for (auto [icon,text]: this->ntexs) {
-            if (icon != nullptr) render::DeleteTexture(icon);
-            if (text != nullptr) render::DeleteTexture(text);
+            render::DeleteTexture(icon);
+            render::DeleteTexture(text);
         }
         this->ntexs.clear();
     }

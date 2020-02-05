@@ -71,7 +71,7 @@ std::string Hoster::GetRegex() {
 
 std::string Hoster::uploadEntry(const CapsAlbumEntry& entry, ui::UploadLayout* cb_data) {
     CURL *curl;
-    CURLcode res;
+    CURLcode res = CURLE_OK;
     std::string readBuffer;
     long http_code = 0;
     void* imageBuffer = nullptr;
