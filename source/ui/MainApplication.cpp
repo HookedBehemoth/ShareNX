@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "ui/MainApplication.hpp"
+
 #include "util/set.hpp"
 
 extern Settings g_Settings;

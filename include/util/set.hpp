@@ -14,11 +14,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <string>
+#include <vector>
+
 #include "json.hpp"
 #include "util/host.hpp"
 #include "util/theme.hpp"
-#include <string>
-#include <vector>
 
 class Settings {
 public:

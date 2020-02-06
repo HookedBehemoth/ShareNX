@@ -12,11 +12,12 @@
 */
 
 #pragma once
-#include "util/caps.hpp"
 #include <chrono>
 #include <functional>
 #include <pu/ui/elm/elm_Element.hpp>
 #include <vector>
+
+#include "util/caps.hpp"
 
 namespace pu::ui::elm {
 class FixedMenuItem {

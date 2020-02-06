@@ -14,9 +14,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "json.hpp"
-#include <string>
 #include <switch/types.h>
+
+#include <string>
+
+#include "json.hpp"
 
 namespace common {
 

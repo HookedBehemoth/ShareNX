@@ -14,8 +14,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "json.hpp"
 #include <pu/ui/ui_Types.hpp>
+
+#include "json.hpp"
 
 class Theme {
 public:

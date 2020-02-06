@@ -14,9 +14,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "util/caps.hpp"
+
+#include <string.h>
+
 #include <algorithm>
 #include <fstream>
-#include <string.h>
 
 namespace caps {
 

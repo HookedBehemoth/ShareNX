@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "ui/UploadLayout.hpp"
+
 #include "ui/MainApplication.hpp"
 #include "util/caps.hpp"
 #include "util/host.hpp"

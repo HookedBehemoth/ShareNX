@@ -14,12 +14,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "ui/ListLayout.hpp"
+
+#include <switch/result.h>
+
 #include "MainApplication.hpp"
 #include "util/caps.hpp"
 #include "util/host.hpp"
 #include "util/set.hpp"
 #include "util/theme.hpp"
-#include <switch/result.h>
 
 extern Settings g_Settings;
 extern Theme g_Theme;

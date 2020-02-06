@@ -14,9 +14,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <switch.h>
+
 #include "json.hpp"
 #include "ui/UploadLayout.hpp"
-#include <switch.h>
 
 struct Mime {
 	std::string name, data;

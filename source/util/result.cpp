@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "result.hpp"
+
 #include <iomanip>
 
 namespace result {

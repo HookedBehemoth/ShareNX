@@ -14,10 +14,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "util/host.hpp"
+
+#include <curl/curl.h>
+
+#include <chrono>
+
 #include "util/caps.hpp"
 #include "util/common.hpp"
-#include <chrono>
-#include <curl/curl.h>
 
 static size_t MovieRead(char *buffer, size_t size, size_t nitems, void *userdata) {
 	return ((caps::MovieReader *)userdata)->Read(buffer, size * nitems);

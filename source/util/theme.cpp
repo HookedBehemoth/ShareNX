@@ -14,8 +14,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "util/theme.hpp"
-#include "util/common.hpp"
+
 #include <pu/Plutonium>
+
+#include "util/common.hpp"
 
 Theme::Theme() {}
 

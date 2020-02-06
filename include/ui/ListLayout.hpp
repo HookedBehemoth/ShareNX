@@ -14,8 +14,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "ui/elm_FixedMenu.hpp"
 #include <pu/Plutonium>
+
+#include "ui/elm_FixedMenu.hpp"
 
 using namespace pu::ui::elm;
 namespace ui {

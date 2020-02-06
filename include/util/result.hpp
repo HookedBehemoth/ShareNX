@@ -14,8 +14,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <string>
 #include <switch.h>
+
+#include <string>
 
 namespace scr {
 namespace utl {

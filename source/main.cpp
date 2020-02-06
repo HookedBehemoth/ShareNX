@@ -13,9 +13,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <switch.h>
+
 #include "ui/MainApplication.hpp"
 #include "util/set.hpp"
-#include <switch.h>
 
 using namespace pu::ui::render;
 
