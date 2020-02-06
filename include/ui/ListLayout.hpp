@@ -13,24 +13,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #pragma once
-#include <pu/Plutonium>
 #include "ui/elm_FixedMenu.hpp"
+#include <pu/Plutonium>
 
 using namespace pu::ui::elm;
 namespace ui {
-    class ListLayout : public pu::ui::Layout {
-        public:
-            ListLayout();
-            PU_SMART_CTOR(ListLayout)
-            void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
-        private:
-            void onItemClick();
-            TextBlock::Ref topText;
-            TextBlock::Ref infoText;
-            Rectangle::Ref topRect;
-            FixedMenu::Ref menu;
-            Image::Ref image;
-    };
-}
+
+class ListLayout : public pu::ui::Layout {
+public:
+	ListLayout();
+	PU_SMART_CTOR(ListLayout)
+	void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
+
+private:
+	void onItemClick();
+	TextBlock::Ref topText;
+	TextBlock::Ref infoText;
+	Rectangle::Ref topRect;
+	FixedMenu::Ref menu;
+	Image::Ref image;
+};
+
+} // namespace ui

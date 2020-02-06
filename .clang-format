@@ -1,0 +1,16 @@
+﻿---
+AccessModifierOffset: -4
+AlignConsecutiveAssignments: 'true'
+BasedOnStyle: LLVM
+BreakBeforeBraces: Attach
+IndentWidth: 4
+TabWidth: 4
+AllowShortIfStatementsOnASingleLine: false
+IncludeBlocks: Regroup
+ColumnLimit: 0
+IndentCaseLabels: 'true'
+PointerAlignment: Right
+SortIncludes: 'true'
+Standard: Cpp17
+
+...

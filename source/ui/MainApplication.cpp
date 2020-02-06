@@ -13,29 +13,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "ui/MainApplication.hpp"
 #include "util/set.hpp"
 
 extern Settings g_Settings;
 
 namespace ui {
-    MainApplication *mainApp;
 
-    void MainApplication::OnLoad() {
-        mainApp = this;
-        g_Settings.Initialize();
+MainApplication *mainApp;
 
-        this->Load();
-    }
+void MainApplication::OnLoad() {
+	mainApp = this;
+	g_Settings.Initialize();
 
-    void MainApplication::Load() {
-        printf("Creating UploadLayout\n");
-        this->uploadLayout = UploadLayout::New();
-        this->uploadLayout->SetOnInput(std::bind(&UploadLayout::onInput, this->uploadLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-        printf("Creating ListLayout\n");
-        this->listLayout = ListLayout::New();
-        this->listLayout->SetOnInput(std::bind(&ListLayout::onInput, this->listLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-        this->LoadLayout(this->listLayout);
-    }
+	this->Load();
 }
+
+void MainApplication::Load() {
+	printf("Creating UploadLayout\n");
+	this->uploadLayout = UploadLayout::New();
+	this->uploadLayout->SetOnInput(std::bind(&UploadLayout::onInput, this->uploadLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	printf("Creating ListLayout\n");
+	this->listLayout = ListLayout::New();
+	this->listLayout->SetOnInput(std::bind(&ListLayout::onInput, this->listLayout, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	this->LoadLayout(this->listLayout);
+}
+
+} // namespace ui
