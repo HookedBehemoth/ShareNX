@@ -21,19 +21,19 @@
 using namespace pu::ui::elm;
 namespace ui {
 
-class ListLayout : public pu::ui::Layout {
-public:
-	ListLayout();
-	PU_SMART_CTOR(ListLayout)
-	void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
+	class ListLayout : public pu::ui::Layout {
+	public:
+		ListLayout();
+		PU_SMART_CTOR(ListLayout)
+		void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
 
-private:
-	void onItemClick();
-	TextBlock::Ref topText;
-	TextBlock::Ref infoText;
-	Rectangle::Ref topRect;
-	FixedMenu::Ref menu;
-	Image::Ref image;
-};
+	private:
+		void onItemClick();
+		TextBlock::Ref topText;
+		TextBlock::Ref infoText;
+		Rectangle::Ref topRect;
+		FixedMenu::Ref menu;
+		Image::Ref image;
+	};
 
-} // namespace ui
+}

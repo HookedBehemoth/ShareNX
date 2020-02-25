@@ -1,5 +1,5 @@
 ﻿---
-AccessModifierOffset: -2
+AccessModifierOffset: -4
 BasedOnStyle: LLVM
 BreakBeforeBraces: Attach
 NamespaceIndentation: All

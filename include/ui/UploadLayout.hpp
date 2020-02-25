@@ -19,24 +19,24 @@
 using namespace pu::ui::elm;
 namespace ui {
 
-class UploadLayout : public pu::ui::Layout {
-public:
-	UploadLayout();
-	PU_SMART_CTOR(UploadLayout)
-	void setEntry(const CapsAlbumEntry &Entry);
-	void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
-	void setProgress(double progress);
+	class UploadLayout : public pu::ui::Layout {
+	public:
+		UploadLayout();
+		PU_SMART_CTOR(UploadLayout)
+		void setEntry(const CapsAlbumEntry &Entry);
+		void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
+		void setProgress(double progress);
 
-private:
-	TextBlock::Ref topText;
-	TextBlock::Ref infoText;
-	Rectangle::Ref topRect;
-	TextBlock::Ref bottomText;
-	ProgressBar::Ref progressBar;
-	Image::Ref preview;
-	Image::Ref image;
-	std::string url;
-	CapsAlbumEntry m_entry;
-};
+	private:
+		TextBlock::Ref topText;
+		TextBlock::Ref infoText;
+		Rectangle::Ref topRect;
+		TextBlock::Ref bottomText;
+		ProgressBar::Ref progressBar;
+		Image::Ref preview;
+		Image::Ref image;
+		std::string url;
+		CapsAlbumEntry m_entry;
+	};
 
-} // namespace ui
+}

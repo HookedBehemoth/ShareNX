@@ -34,7 +34,6 @@ public:
 	std::string GetRegex();
 	std::string uploadEntry(const CapsAlbumEntry &entry, ui::UploadLayout *cb_data);
 	std::string name;
-
 private:
 	std::string url;
 	std::string imageMimeName;
