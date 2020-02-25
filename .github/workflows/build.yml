@@ -27,6 +27,7 @@ jobs:
         export PATH=${DEVKITPRO}/tools/bin:$PATH
         git clone https://github.com/switchbrew/libnx.git
         make -C libnx -j$(nproc)
+        sudo -E make install
         
     - name: Building ShareNX
       run: |
@@ -34,5 +35,4 @@ jobs:
         export DEVKITARM=${DEVKITPRO}/devkitARM
         export DEVKITPPC=${DEVKITPRO}/devkitPPC
         export PATH=${DEVKITPRO}/tools/bin:$PATH
-        sed -i 's/\$(LIBNX)/\$(CURDIR)\/libnx\/nx\/lib/g' Makefile
         make -j$(nproc)
