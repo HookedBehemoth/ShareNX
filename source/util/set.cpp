@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 screen-nx
+ * Copyright (c) 2019-2020 ShareNX
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -26,7 +26,7 @@ Hoster g_Hoster;
 Theme g_Theme;
 Settings g_Settings;
 
-#define BASE_PATH "/switch/screen-nx/"
+#define BASE_PATH "/switch/ShareNX/"
 #define CONFIGPATH BASE_PATH "config.json"
 #define HOSTERPATH BASE_PATH "hoster/"
 #define THEMESPATH BASE_PATH "themes/"

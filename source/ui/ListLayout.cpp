@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 screen-nx
+ * Copyright (c) 2019-2020 ShareNX
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -85,7 +85,7 @@ namespace ui {
 		if (Down & KEY_X) {
 			std::vector<std::string> hoster = g_Settings.GetHoster();
 			if (hoster.size() == 0) {
-				mainApp->CreateShowDialog("No site configs found", "Create your own configs and put them in /switch/screen-nx/sites/.\n\nCheck the repo for examples, or just use the default!", {"Cancel"}, true);
+				mainApp->CreateShowDialog("No site configs found", "Create your own configs and put them in /switch/ShareNX/sites/.\n\nCheck the repo for examples, or just use the default!", {"Cancel"}, true);
 				return;
 			}
 			hoster.push_back("default");
@@ -103,7 +103,7 @@ namespace ui {
 		if (Down & KEY_Y) {
 			std::vector<std::string> themes = g_Settings.GetThemes();
 			if (themes.size() == 0) {
-				mainApp->CreateShowDialog("No site configs found", "Create your own configs and put them in /switch/screen-nx/sites/.\n\nCheck the repo for examples, or just use the default!", {"Cancel"}, true);
+				mainApp->CreateShowDialog("No site configs found", "Create your own configs and put them in /switch/ShareNX/sites/.\n\nCheck the repo for examples, or just use the default!", {"Cancel"}, true);
 				return;
 			}
 			themes.push_back("default");
