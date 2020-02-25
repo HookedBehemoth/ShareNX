@@ -1,0 +1,32 @@
+name: Build ShareNX
+
+on: [push]
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Update repo.
+      run: git submodule update --init --recursive
+        
+    - name: Install devkitpro
+      run: |
+        wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb
+        sudo dpkg -i devkitpro-pacman.deb
+        sudo dkp-pacman -S $(dkp-pacman -Ssq switch-*) --noconfirm
+    - name: Build and install libnx master
+      run: |
+        git clone git@github.com:switchbrew/libnx.git
+        make -C libnx -j$(nproc)
+        sudo make -C libnx install
+        
+    - name: Building Goldleaf
+      run: |
+        export PATH=${DEVKITPRO}/tools/bin:$PATH
+        make -j$(nproc)
+      env:
+        DEVKITPRO: /opt/devkitpro
+        DEVKITA64: /opt/devkitpro/devkitA64
+        DEVKITARM: /opt/devkitpro/devkitARM
