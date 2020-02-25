@@ -19,12 +19,16 @@
 
 namespace common {
 
-	std::string GetString(const nlohmann::json &json, std::string key, std::string def) {
+	std::string GetString(const nlohmann::json &json, const char* key, const std::string& def) {
 		return GetEntry<std::string>(json, key, def, nlohmann::detail::value_t::string);
 	}
 
-	u32 GetInt(const nlohmann::json &json, std::string key, u32 def) {
+	u32 GetInt(const nlohmann::json &json, const char* key, u32 def) {
 		return GetEntry<u32>(json, key, def, nlohmann::detail::value_t::number_unsigned);
+	}
+
+	bool GetBool(const nlohmann::json &json, const char* key, bool def) {
+		return GetEntry<bool>(json, key, def, nlohmann::detail::value_t::boolean);
 	}
 
 	std::pair<bool, nlohmann::json> LoadConfig(const std::string &path) {

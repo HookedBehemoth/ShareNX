@@ -23,11 +23,14 @@ Theme::Theme() {}
 
 void Theme::Initialize(const nlohmann::json &json, std::string name) {
 	this->name = name;
-	this->color.background = pu::ui::Color::FromHex(common::GetString(json, "Background", "#6c0000FF"));
+	this->color.background = pu::ui::Color::FromHex(common::GetString(json, "Background", "#000000FF"));
 	this->color.focus = pu::ui::Color::FromHex(common::GetString(json, "Focus", "#480001FF"));
 	this->color.text = pu::ui::Color::FromHex(common::GetString(json, "Text", "#FFFFFFFF"));
 	this->color.topbar = pu::ui::Color::FromHex(common::GetString(json, "Topbar", "#170909FF"));
-	this->background_path = common::GetString(json, "Background Image", "romfs:/bg.jpg");
+	if (json.contains("Background Image"))
+		this->background_path = common::GetString(json, "Background Image", "");
+	else
+		this->background_path = "";
 	if (!json.contains("Image"))
 		return;
 	auto &img = json["Image"];

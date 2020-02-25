@@ -47,6 +47,8 @@ void Hoster::Initialize(const nlohmann::json &json, std::string name) {
 	this->regex = common::GetString(json, "Regex", "");
 	this->imageMimeName = common::GetString(json, "ImageName", "");
 	this->videoMimeName = common::GetString(json, "VideoName", "");
+	this->parse = common::GetBool(json, "Show Response", true);
+	this->mimeData.clear();
 	if (!json.contains("Mimepart"))
 		return;
 	auto &mime = json["Mimepart"];
@@ -61,10 +63,11 @@ void Hoster::Initialize(const nlohmann::json &json, std::string name) {
 void Hoster::SetDefault() {
 	this->name = "";
 	this->url = "https://lewd.pics/p/index.php";
+	this->regex = "";
 	this->imageMimeName = "fileToUpload";
 	this->videoMimeName = "fileToUpload";
-	this->mimeData.push_back(
-		{"curl", "1"});
+	this->parse = true;
+	this->mimeData = {{"curl", "1"}};
 }
 
 std::string Hoster::GetName() {
@@ -127,7 +130,6 @@ std::string Hoster::uploadEntry(const CapsAlbumEntry &entry, ui::UploadLayout *c
 		auto start = std::chrono::steady_clock::now();
 		res = curl_easy_perform(curl);
 		auto end = std::chrono::steady_clock::now();
-		printf("took %f ns\n", std::chrono::duration<double, std::nano>(end - start).count());
 		printf("took %f ms\n", std::chrono::duration<double, std::milli>(end - start).count());
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 		curl_easy_cleanup(curl);
@@ -156,5 +158,5 @@ std::string Hoster::uploadEntry(const CapsAlbumEntry &entry, ui::UploadLayout *c
 
 	printf("urlresponse: %s\n", readBuffer.c_str());
 
-	return readBuffer;
+	return this->parse ? readBuffer : "Success!";
 }

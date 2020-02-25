@@ -35,6 +35,7 @@ public:
 	std::string uploadEntry(const CapsAlbumEntry &entry, ui::UploadLayout *cb_data);
 	std::string name;
 private:
+	bool parse;
 	std::string url;
 	std::string imageMimeName;
 	std::string videoMimeName;

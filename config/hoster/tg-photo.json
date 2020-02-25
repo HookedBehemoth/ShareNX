@@ -8,5 +8,6 @@
             "Name": "chat_id",
             "Data": "[YOUR_USER_ID_HERE]"
         }
-    ]
+    ],
+    "Show Response": false
 }
