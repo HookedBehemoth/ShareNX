@@ -9,7 +9,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Update repo.
-      run: git submodule update --init --recursive
+      run: |
+        sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
+        git submodule update --init --recursive
         
     - name: Install devkitpro
       run: |
@@ -18,7 +20,7 @@ jobs:
         sudo dkp-pacman -S $(dkp-pacman -Ssq switch-*) --noconfirm
     - name: Build and install libnx master
       run: |
-        git clone git@github.com:switchbrew/libnx.git
+        git clone git://github.com:switchbrew/libnx.git
         make -C libnx -j$(nproc)
         sudo make -C libnx install
         
