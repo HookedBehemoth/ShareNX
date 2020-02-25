@@ -21,10 +21,7 @@ jobs:
 
     - name: Build and install libnx master
       run: |
-        export DEVKITPRO=/opt/devkitpro
-        export DEVKITARM=${DEVKITPRO}/devkitARM
-        export DEVKITPPC=${DEVKITPRO}/devkitPPC
-        export PATH=${DEVKITPRO}/tools/bin:$PATH
+        source /etc/profile.d/devkit-env.sh
         git clone https://github.com/switchbrew/libnx.git
         sed -i 's/ lib\/libnxd\.a//g' libnx/nx/Makefile
         make -C libnx -j$(nproc)
@@ -32,8 +29,5 @@ jobs:
         
     - name: Building ShareNX
       run: |
-        export DEVKITPRO=/opt/devkitpro
-        export DEVKITARM=${DEVKITPRO}/devkitARM
-        export DEVKITPPC=${DEVKITPRO}/devkitPPC
-        export PATH=${DEVKITPRO}/tools/bin:$PATH
+        source /etc/profile.d/devkit-env.sh
         make -j$(nproc)
