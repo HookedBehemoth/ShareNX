@@ -34,10 +34,10 @@ void Theme::Initialize(const nlohmann::json &json, std::string name) {
 	if (!img.is_object())
 		return;
 	this->image.path = common::GetString(img, "Path", "romfs:/owo.png");
-	this->image.x = common::GetInt(img, "X", 500);
-	this->image.y = common::GetInt(img, "Y", 500);
-	this->image.w = common::GetInt(img, "W", 200);
-	this->image.h = common::GetInt(img, "H", 200);
+	this->image.x = common::GetInt(img, "X", 989);
+	this->image.y = common::GetInt(img, "Y", 240);
+	this->image.w = common::GetInt(img, "W", 291);
+	this->image.h = common::GetInt(img, "H", 480);
 }
 
 void Theme::SetDefault() {
@@ -48,8 +48,8 @@ void Theme::SetDefault() {
 	this->color.topbar = pu::ui::Color(0x17, 0x09, 0x09, 0xFF);
 	this->background_path = "romfs:/bg.jpg";
 	this->image.path = "romfs:/owo.png";
-	this->image.x = 975;
+	this->image.x = 989;
 	this->image.y = 240;
-	this->image.w = 292;
+	this->image.w = 291;
 	this->image.h = 480;
 }

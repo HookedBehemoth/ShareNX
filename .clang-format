@@ -1,7 +1,9 @@
 ﻿---
-AccessModifierOffset: -4
+AccessModifierOffset: -2
 BasedOnStyle: LLVM
 BreakBeforeBraces: Attach
+NamespaceIndentation: All
+FixNamespaceComments: false
 IndentWidth: 4
 TabWidth: 4
 AllowShortIfStatementsOnASingleLine: false
