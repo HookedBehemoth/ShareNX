@@ -23,6 +23,10 @@ jobs:
         git clone https://github.com/switchbrew/libnx.git
         make -C libnx -j$(nproc)
         sudo make -C libnx install
+      env:
+        DEVKITPRO: /opt/devkitpro
+        DEVKITA64: /opt/devkitpro/devkitA64
+        DEVKITARM: /opt/devkitpro/devkitARM
         
     - name: Building Goldleaf
       run: |
