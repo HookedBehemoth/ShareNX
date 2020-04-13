@@ -14,26 +14,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <pu/Plutonium>
+#include <string>
+#include <vector>
 
-#include "ui/elm_FixedMenu.hpp"
+#include "json.hpp"
+#include "util/host.hpp"
+#include "util/theme.hpp"
 
-using namespace pu::ui::elm;
-namespace ui {
+class Settings {
+public:
+	Settings();
+	~Settings();
+	void Initialize();
+	void SetHoster(const std::string &name);
+	void SetTheme(const std::string &name);
+	std::vector<std::string> GetJsonEntries(const std::string &path);
+	std::vector<std::string> GetHoster();
+	std::vector<std::string> GetThemes();
 
-	class ListLayout : public pu::ui::Layout {
-	public:
-		ListLayout();
-		PU_SMART_CTOR(ListLayout)
-		void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
-
-	private:
-		void onItemClick();
-		TextBlock::Ref topText;
-		TextBlock::Ref infoText;
-		Rectangle::Ref topRect;
-		FixedMenu::Ref menu;
-		Image::Ref image;
-	};
-
-}
+private:
+	void SetDefault();
+	void createDirectory(const std::string &path);
+};

@@ -1,0 +1,27 @@
+﻿---
+AccessModifierOffset: -4
+BasedOnStyle: LLVM
+BreakBeforeBraces: Attach
+NamespaceIndentation: All
+FixNamespaceComments: false
+IndentWidth: 4
+TabWidth: 4
+AllowShortIfStatementsOnASingleLine: false
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<pu/Plutonium>'
+    Priority: 2
+  - Regex: '^<.*\.h>'
+    Priority: 1
+  - Regex: '^<.*'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3
+ColumnLimit: 0
+IndentCaseLabels: 'true'
+PointerAlignment: Right
+SortIncludes: 'true'
+Standard: Cpp11
+UseTab: Always
+
+...

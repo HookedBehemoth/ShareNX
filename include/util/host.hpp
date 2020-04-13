@@ -14,26 +14,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <pu/Plutonium>
+#include <switch.h>
 
-#include "ui/elm_FixedMenu.hpp"
+#include "json.hpp"
+#include "ui/UploadLayout.hpp"
 
-using namespace pu::ui::elm;
-namespace ui {
+struct Mime {
+	std::string name, data;
+};
 
-	class ListLayout : public pu::ui::Layout {
-	public:
-		ListLayout();
-		PU_SMART_CTOR(ListLayout)
-		void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
-
-	private:
-		void onItemClick();
-		TextBlock::Ref topText;
-		TextBlock::Ref infoText;
-		Rectangle::Ref topRect;
-		FixedMenu::Ref menu;
-		Image::Ref image;
-	};
-
-}
+class Hoster {
+public:
+	Hoster();
+	~Hoster();
+	void Initialize(const nlohmann::json &json, std::string name);
+	void SetDefault();
+	std::string GetName();
+	std::string GetUrl();
+	std::string GetRegex();
+	std::string uploadEntry(const CapsAlbumEntry &entry, ui::UploadLayout *cb_data);
+	std::string name;
+private:
+	bool parse;
+	std::string url;
+	std::string imageMimeName;
+	std::string videoMimeName;
+	std::string regex;
+	std::vector<Mime> mimeData;
+};

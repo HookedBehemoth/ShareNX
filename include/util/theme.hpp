@@ -14,26 +14,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <pu/Plutonium>
+#include <pu/ui/ui_Types.hpp>
 
-#include "ui/elm_FixedMenu.hpp"
+#include "json.hpp"
 
-using namespace pu::ui::elm;
-namespace ui {
-
-	class ListLayout : public pu::ui::Layout {
-	public:
-		ListLayout();
-		PU_SMART_CTOR(ListLayout)
-		void onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos);
-
-	private:
-		void onItemClick();
-		TextBlock::Ref topText;
-		TextBlock::Ref infoText;
-		Rectangle::Ref topRect;
-		FixedMenu::Ref menu;
-		Image::Ref image;
-	};
-
-}
+class Theme {
+public:
+	Theme();
+	void Initialize(const nlohmann::json &json, std::string name);
+	void SetDefault();
+	std::string name;
+	struct {
+		pu::ui::Color background;
+		pu::ui::Color focus;
+		pu::ui::Color text;
+		pu::ui::Color topbar;
+	} color;
+	std::string background_path;
+	struct {
+		std::string path;
+		u32 x, y, w, h;
+	} image;
+};

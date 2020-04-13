@@ -1,0 +1,12 @@
+{
+    "Url": "https://lewd.pics/p/index.php",
+    "Regex": "",
+    "ImageName": "fileToUpload",
+    "VideoName": "fileToUpload",
+    "Mimepart": [
+        {
+            "Name": "curl",
+            "Data": "1"
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+{
+  "Url": "https://discordapp.com/api/webhooks/[ID]/[KEY]",
+  "Regex": "$json:attachments[0].url$",
+  "ImageName": "file",
+  "VideoName": "file",
+  "Show Response": false
+}
