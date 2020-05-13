@@ -44,7 +44,10 @@ DATA		:=	data
 INCLUDES	:=	libs/json libs/borealis common
 APP_TITLE	:=	ShareNX
 APP_AUTHOR	:=	Behemoth & Huntereb
-APP_VERSION	:=	3.0.0
+
+ifeq ($(RELEASE),)
+	APP_VERSION	:=	$(APP_VERSION)-$(shell git describe --dirty --always)
+endif
 
 ROMFS				:=	libs/borealis/resources
 BOREALIS_PATH		:=	libs/borealis

@@ -44,7 +44,6 @@ DATA		:=	data
 INCLUDES	:=	libs/libtesla/include libs/json common
 APP_TITLE	:=	ShareNX
 APP_AUTHOR	:=	Behemoth & Huntereb
-APP_VERSION	:=	3.0.0
 
 ifeq ($(RELEASE),)
 	APP_VERSION	:=	$(APP_VERSION)-$(shell git describe --dirty --always)
