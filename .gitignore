@@ -1,5 +1,6 @@
 *.elf
 *.nacp
 *.nro
-build
+*.ovl
+build*
 .vscode
