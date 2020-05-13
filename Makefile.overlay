@@ -39,9 +39,9 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	ovlShareNX
 BUILD		:=	build.ovl
-SOURCES		:=	overlay common/util
+SOURCES		:=	overlay common/translation common/util
 DATA		:=	data
-INCLUDES	:=	libs/libtesla/include common
+INCLUDES	:=	libs/libtesla/include libs/json common
 APP_TITLE	:=	ShareNX
 APP_AUTHOR	:=	Behemoth & Huntereb
 APP_VERSION	:=	3.0.0
@@ -60,9 +60,11 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -O3 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DVERSION=\"v$(APP_VERSION)\"
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DVERSION=\"v$(APP_VERSION)\"\
+			-DIMGUR_CLIENT_ID="\"$(SHARENX_IMGUR_CLIENT_ID)\""\
+			-DIMGUR_CLIENT_SECRET="\"$(SHARENX_IMGUR_CLIENT_SECRET)\""
 
-CXXFLAGS	:= $(CFLAGS) -fno-exceptions -std=c++2a
+CXXFLAGS	:= $(CFLAGS) -std=c++2a
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)

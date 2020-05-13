@@ -3,8 +3,6 @@
 #include <cstring>
 #include <string>
 
-#include <concepts>
-
 namespace fmt {
 
     /* This will have to do till P0645 comes to be. */

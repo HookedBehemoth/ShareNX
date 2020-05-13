@@ -1,8 +1,6 @@
 #include "uploader.hpp"
 
-#include "translation/translation.hpp"
-#include "fmt.hpp"
-#include "result.hpp"
+#include "common.hpp"
 
 #include <cstring>
 #include <filesystem>

@@ -1,8 +1,6 @@
 #include "album.hpp"
 
-#include "translation/translation.hpp"
-#include "util/fmt.hpp"
-#include "util/uploader.hpp"
+#include "common.hpp"
 
 #include <borealis.hpp>
 

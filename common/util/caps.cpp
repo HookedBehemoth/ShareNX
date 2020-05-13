@@ -1,7 +1,6 @@
 #include "caps.hpp"
 
-#include "fmt.hpp"
-#include "result.hpp"
+#include "common.hpp"
 
 #include <memory>
 
