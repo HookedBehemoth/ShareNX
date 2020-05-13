@@ -57,7 +57,10 @@ namespace album {
         if (!brls::Application::init())
             return false;
 
-        found_language = false;// Translation::DetectSystemLanguage();
+        found_language = Translation::DetectSystemLanguage();
+        if (!found_language)
+            Translation::SetLanguage(Translation::Language::English_US);
+
         init_album_accessor = R_SUCCEEDED(capsaInitialize());
 
         return true;
@@ -68,33 +71,32 @@ namespace album {
         rootFrame->setTitle("ShareNX");
         rootFrame->setIcon(BOREALIS_ASSET("icon/logo.png"));
 
+        BuildGui();
+
         // Add the root view to the stack
         brls::Application::pushView(rootFrame);
 
         if (!found_language) {
-            brls::Dialog *dialog = new brls::Dialog("Failed to get system language!");
-            dialog->addButton("Default to en-US", [dialog](brls::View *view) {
-                found_language = Translation::SetLanguage(Translation::Language::English_US);
+            brls::Dialog *dialog = new brls::Dialog("Failed to get system language!\nDefaulted to en-US!");
+            dialog->addButton("Continue", [dialog](brls::View *view) {
                 dialog->close();
-                BuildGui();
             });
             dialog->addButton("Exit", [](brls::View *view) {
                 brls::Application::quit();
             });
             dialog->open();
-            return;
         }
+
         if (!init_album_accessor) {
-            brls::Application::pushView(new brls::Rectangle(nvgRGB(177, 0, 0)));
             brls::Dialog *dialog = new brls::Dialog(~ACCESSOR_INIT);
+            dialog->addButton("Continue", [dialog](brls::View *view) {
+                dialog->close();
+            });
             dialog->addButton(~EXIT, [](brls::View *view) {
                 brls::Application::quit();
             });
             dialog->open();
-            return;
         }
-
-        BuildGui();
     }
 
     void Start() {
@@ -104,8 +106,7 @@ namespace album {
     }
 
     void Cleanup() {
-        if (init_album_accessor)
-            capsaExit();
+        capsaExit();
     }
 
 }
