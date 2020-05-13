@@ -45,10 +45,6 @@ INCLUDES	:=	libs/libtesla/include libs/json common
 APP_TITLE	:=	ShareNX
 APP_AUTHOR	:=	Behemoth & Huntereb
 
-ifeq ($(RELEASE),)
-	APP_VERSION	:=	$(APP_VERSION)-$(shell git describe --dirty --always)
-endif
-
 NO_ICON		:=  1
 
 #---------------------------------------------------------------------------------
