@@ -37,9 +37,6 @@ Sidebar::Sidebar()
 
 View* Sidebar::getDefaultFocus()
 {
-    if (this->children.size() == 0)
-        return nullptr;
-
     // Sanity check
     if (this->lastFocus >= this->children.size())
         this->lastFocus = 0;

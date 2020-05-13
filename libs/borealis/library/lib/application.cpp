@@ -730,16 +730,6 @@ void Application::popView(ViewAnimation animation, std::function<void(void)> cb)
         toShow->show(cb, true, animation);
     }
 
-    if (Application::focusStack.size() == 0)
-    {
-        View* newFocus = Application::viewStack[Application::viewStack.size() - 1]->getDefaultFocus();
-        
-        if (newFocus)
-        {
-            Application::focusStack.push_back(newFocus);
-        }
-    }
-
     // Focus
     if (Application::focusStack.size() > 0)
     {
