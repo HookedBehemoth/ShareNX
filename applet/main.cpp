@@ -14,23 +14,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "album.hpp"
+#include "gui.hpp"
 
+#include <album.hpp>
 #include <cstdlib>
 
 int main(int argc, char *argv[]) {
     /* Initialize all album functionality */
-    if (!album::Initialize())
+    if (!gui::Initialize())
         return EXIT_FAILURE;
 
     /* Create GUI */
-    album::MakeGui();
+    gui::MakeGui();
 
     /* Start GUI */
-    album::Start();
+    gui::Start();
 
     /* Cleanup */
-    album::Cleanup();
+    gui::Cleanup();
 
     /* Exit */
     return EXIT_SUCCESS;

@@ -7,6 +7,13 @@
             return rc;       \
     })
 
+#define R_STR(cmd, message) \
+    ({                      \
+        auto rc = (cmd);    \
+        if (R_FAILED(rc))   \
+            return message; \
+    })
+
 #define R_THROW(rc_expr)     \
     ({                       \
         auto rc = (rc_expr); \

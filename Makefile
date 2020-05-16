@@ -11,3 +11,9 @@ ovl:
 
 nro:
 	$(MAKE) -f Makefile.applet
+
+clean:
+	$(MAKE) -f Makefile.overlay clean
+	$(MAKE) -f Makefile.applet clean
+
+.PHONY: all

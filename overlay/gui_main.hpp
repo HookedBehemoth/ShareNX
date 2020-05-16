@@ -16,21 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <tesla.hpp>
-
 #include "image_item.hpp"
 
-class MainGui : public tsl::Gui {
-  private:
-    ImageItem *img;
-    bool uploaded = false;
-    CapsAlbumFileId fileId;
+#include <tesla.hpp>
 
-  public:
-    MainGui(const CapsAlbumFileId &fileId, const u8 *rgba_buffer);
-    ~MainGui();
+namespace album {
 
-    virtual tsl::elm::Element *createUI() override;
+    class MainGui : public tsl::Gui {
+      private:
+        ImageItem *img;
+        bool uploaded = false;
+        CapsAlbumFileId fileId;
+        u32 length;
 
-    virtual void update() override {}
-};
+      public:
+        MainGui(const CapsAlbumFileId &fileId, const u8 *rgba_buffer, u32 video_length);
+        ~MainGui();
+
+        virtual tsl::elm::Element *createUI() override;
+    };
+
+}

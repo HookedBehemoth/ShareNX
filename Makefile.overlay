@@ -39,10 +39,10 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	ovlShareNX
 BUILD		:=	build.ovl
-SOURCES		:=	overlay common/translation common/util
+SOURCES		:=	overlay common common/util
 DATA		:=	data
 INCLUDES	:=	libs/libtesla/include libs/json common
-APP_TITLE	:=	ShareNX
+APP_TITLE	:=	ShareNX 
 APP_AUTHOR	:=	Behemoth & Huntereb
 
 NO_ICON		:=  1
@@ -53,7 +53,8 @@ NO_ICON		:=  1
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
 CFLAGS	:=	-g -Wall -O3 -ffunction-sections \
-			$(ARCH) $(DEFINES)
+			$(ARCH) $(DEFINES) `curl-config --cflags` \
+			-Wextra -Wuseless-cast
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DVERSION=\"v$(APP_VERSION)\"\
 			-DIMGUR_CLIENT_ID="\"$(SHARENX_IMGUR_CLIENT_ID)\""\
@@ -64,7 +65,7 @@ CXXFLAGS	:= $(CFLAGS) -std=c++2a
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:=	-lcurl -lmbedtls -lmbedx509 -lz -lmbedcrypto -lnx
+LIBS	:=	`curl-config --libs`
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

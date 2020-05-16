@@ -1,6 +1,6 @@
 #pragma once
 
-namespace album {
+namespace gui {
 
     bool Initialize();
 

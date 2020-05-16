@@ -1,12 +1,12 @@
 #include "caps.hpp"
 
-#include "common.hpp"
+#include <album.hpp>
 
 #include <memory>
 
-bool operator<(const CapsAlbumEntry &base_a, const CapsAlbumEntry &base_b) {
-    auto &a = base_a.file_id.datetime;
-    auto &b = base_b.file_id.datetime;
+bool operator>(const CapsAlbumFileId &base_a, const CapsAlbumFileId &base_b) {
+    auto &a = base_a.datetime;
+    auto &b = base_b.datetime;
     if (a.year != b.year) {
         return a.year > b.year;
     } else if (a.month != b.month) {
@@ -23,8 +23,16 @@ bool operator<(const CapsAlbumEntry &base_a, const CapsAlbumEntry &base_b) {
     return a.id > b.id;
 }
 
-bool operator>(const CapsAlbumEntry &a, const CapsAlbumEntry &b) {
-    return !operator<(a, b);
+inline bool operator<(const CapsAlbumFileId &a, const CapsAlbumFileId &b) {
+    return !operator>(a, b);
+}
+
+inline bool operator>(const CapsAlbumEntry &base_a, const CapsAlbumEntry &base_b) {
+    return operator>(base_a.file_id, base_b.file_id);
+}
+
+inline bool operator<(const CapsAlbumEntry &a, const CapsAlbumEntry &b) {
+    return !operator>(a, b);
 }
 
 namespace album {
@@ -33,9 +41,9 @@ namespace album {
         return fmt::MakeString("%04d.%02d.%02d %02d:%02d:%02d", date.year, date.month, date.day, date.hour, date.minute, date.second);
     }
 
-    std::string entryToFileName(const CapsAlbumEntry &entry) {
-        auto &date = entry.file_id.datetime;
-        return fmt::MakeString("%04d.%02d.%02d %02d:%02d:%02d.%s", date.year, date.month, date.day, date.hour, date.minute, date.second, entry.file_id.content == CapsAlbumFileContents_ScreenShot ? "jpg" : "mp4");
+    std::string MakeFileName(const CapsAlbumFileId &file_id) {
+        auto &date = file_id.datetime;
+        return fmt::MakeString("%04d.%02d.%02d %02d:%02d:%02d.%s", date.year, date.month, date.day, date.hour, date.minute, date.second, file_id.content == CapsAlbumFileContents_ScreenShot ? "jpg" : "mp4");
     }
 
     Result getThumbnail(u64 *width, u64 *height, const CapsAlbumEntry &entry, void *image, u64 image_size) {
@@ -88,24 +96,40 @@ namespace album {
         return combined;
     }
 
+    Result GetLatest(CapsAlbumFileId *out, void *img, size_t size) {
+        CapsAlbumFileId movie, screenshot;
+        R_TRY(capsaGetLastOverlayScreenShotThumbnail(&screenshot, nullptr, img, size));
+
+        if (hosversionBefore(4,0,0)) {
+            *out = screenshot;
+            return 0;
+        }
+
+        R_TRY(capsaGetLastOverlayMovieThumbnail(&movie, nullptr, img, size));
+
+        /* Return latest. */
+        *out = screenshot > movie ? screenshot : movie;
+
+        return 0;
+    }
+
     namespace MovieReader {
 
         namespace {
 
             constexpr const size_t AlbumMovieBufferSize = 0x40000;
-            alignas(0x1000) u8 buffer[0x40000];
+            alignas(0x1000) u8 buffer[AlbumMovieBufferSize];
 
-            u64 stream_id;
-            u64 stream_size;
-            u64 progress;
-            int last_buffer_index;
+            u64 stream_id = 0;
+            u64 stream_size = 0;
+            u64 progress = 0;
+            s64 last_buffer_index = -1;
 
         }
 
         Result Start(const CapsAlbumFileId &file_id) {
-            stream_id = 0;
             R_TRY(capsaOpenAlbumMovieStream(&stream_id, &file_id));
-            std::memset(buffer, 0, sizeof(buffer));
+            std::memset(buffer, 0, AlbumMovieBufferSize);
 
             progress = 0;
             last_buffer_index = -1;
@@ -125,16 +149,15 @@ namespace album {
             return stream_size;
         }
 
-        size_t Read(char *buffer, size_t size, size_t nitems, void *) {
+        size_t Read(char *out_buffer, size_t size, size_t nitems, void *) {
             size_t max = size * nitems;
 
             /* Should we still read? */
             u64 remaining = stream_size - progress;
-            if (remaining <= 0) {
+            if (remaining <= 0)
                 return 0;
-            }
 
-            int bufferIndex = progress / AlbumMovieBufferSize;
+            s64 bufferIndex = progress / AlbumMovieBufferSize;
             u64 curOffset = progress % AlbumMovieBufferSize;
             u64 readSize = std::min({max, AlbumMovieBufferSize - curOffset, remaining});
 
@@ -150,8 +173,8 @@ namespace album {
             }
 
             /* Copy movie data to output. */
-            char *startBuffer = buffer + curOffset;
-            std::memcpy(buffer, startBuffer, readSize);
+            const u8 *startBuffer = buffer + curOffset;
+            std::memcpy(out_buffer, startBuffer, readSize);
             progress += readSize;
             return readSize;
         }

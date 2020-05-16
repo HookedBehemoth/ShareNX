@@ -1,7 +1,8 @@
-#include "uploader.hpp"
+#include "imgur.hpp"
 
-#include "common.hpp"
+#include "translation/translation.hpp"
 
+#include <album.hpp>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -11,7 +12,7 @@
 
 using json = nlohmann::json;
 
-namespace upload {
+namespace imgur {
 
     namespace {
 
@@ -19,8 +20,6 @@ namespace upload {
         constexpr const char *ImgurAuthCallback = "http://localhost";
         constexpr const char *ImgurKeywords[3] = {"token_type=", "access_token=", "account_username="};
         constexpr size_t ImgurKeywordCount = sizeof(ImgurKeywords) / sizeof(const char *);
-
-        constexpr const char *HosterConfigPath = "sdmc:/config/ShareNX/";
 
         void GetToken(char *url, int count, const char *const *matches, const char **out) {
             int len[count];
@@ -46,15 +45,7 @@ namespace upload {
 
     }
 
-    std::vector<std::string> GetHosterNameList() {
-        std::vector<std::string> result;
-        for (auto &entry : std::filesystem::directory_iterator(HosterConfigPath)) {
-            result.push_back(entry.path().filename());
-        }
-        return result;
-    }
-
-    std::string GenerateImgurConfig() {
+    std::string GenerateConfig() {
         /* We can only use the web browser as an application. */
         THROW_UNLESS(appletGetAppletType() == AppletType_Application, WEB_APPLET_MODE);
 
@@ -95,7 +86,7 @@ namespace upload {
                 {"URL", "$json:data.link$"},
             });
 
-        std::ofstream ofs(fmt::MakeString("%simgur_%s.sxcu", HosterConfigPath, results[2]));
+        std::ofstream ofs(fmt::MakeString("%simgur_%s.sxcu", album::HosterConfigPath, results[2]));
         ofs << j.dump(1, '\t');
 
         return results[2];

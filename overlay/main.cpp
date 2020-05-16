@@ -20,7 +20,11 @@
 #include "gui_main.hpp"
 #include "image_item.hpp"
 
+#include <netinet/in.h>
+#include <unistd.h>
 #include <sys/select.h>
+#include <uploader.hpp>
+#include <util/caps.hpp>
 /* Curl header for global init on start. */
 #include <curl/curl.h>
 
@@ -39,8 +43,8 @@ constexpr const SocketInitConfig sockConf = {
     .tcp_tx_buf_max_size = 0x25000,
     .tcp_rx_buf_max_size = 0x25000,
 
-    .udp_tx_buf_size = 0,
-    .udp_rx_buf_size = 0,
+    .udp_tx_buf_size = 0x800,
+    .udp_rx_buf_size = 0x800,
 
     .sb_efficiency = 1,
 
@@ -48,71 +52,93 @@ constexpr const SocketInitConfig sockConf = {
     .bsd_service_type = BsdServiceType_Auto,
 };
 
-static u8 img[THUMB_SIZE];
+namespace album {
 
-class ShareOverlay : public tsl::Overlay {
-  private:
-    Result rc = 0;
-    CURLcode curl_res = CURLE_OK;
-    const char *msg = nullptr;
-    CapsAlbumFileId fileId;
+    namespace {
 
-  public:
-    virtual void initServices() override {
-        R_INIT(socketInitialize(&sockConf), "Failed to init socket!");
-        R_INIT(capsaInitialize(), "Failed to init capture service!");
-        R_INIT(fsInitialize(), "Failed to init fs!");
-        R_INIT(fsdevMountSdmc(), "Failed to mount sdmc!");
-        curl_res = curl_global_init(CURL_GLOBAL_DEFAULT);
-        if (curl_res != CURLE_OK) {
-            return;
-        }
+        static u8 img[ThumbnailBufferSize];
 
-        u64 size;
-        rc = capsaGetLastOverlayMovieThumbnail(&this->fileId, &size, img, THUMB_SIZE);
-        if (R_FAILED(rc) || size == 0 || this->fileId.application_id == 0) {
-            msg = "No screenshot taken!";
-            return;
-        }
-
-        u8 *work = new (std::nothrow) u8[WORK_SIZE];
-        if (work == nullptr) {
-            msg = "Out of memory!";
-            return;
-        }
-        tsl::hlp::ScopeGuard work_guard([work] { delete[] work; });
-
-        u64 w, h;
-        rc = capsaLoadAlbumScreenShotThumbnailImage(&w, &h, &this->fileId, img, THUMB_SIZE, work, WORK_SIZE);
-        if (R_FAILED(rc) || w != THUMB_WIDTH || h != THUMB_HEIGHT) {
-            msg = "CapSrv error!";
-            return;
-        }
-    }
-    virtual void exitServices() override {
-        curl_global_cleanup();
-        fsdevUnmountAll();
-        fsExit();
-        capsaExit();
-        socketExit();
     }
 
-    virtual void onShow() override {}
-    virtual void onHide() override {}
+    class ShareOverlay : public tsl::Overlay {
+      private:
+        Result rc = 0;
+        CURLcode curl_res = CURLE_OK;
+        const char *msg = nullptr;
+        u32 length;
+        CapsAlbumFileId fileId;
+        int nxlink;
 
-    virtual std::unique_ptr<tsl::Gui> loadInitialGui() override {
-        if (R_FAILED(rc)) {
-            return std::make_unique<ErrorGui>(rc);
-        } else if (curl_res != CURLE_OK) {
-            return std::make_unique<ErrorGui>("curl error");
-        } else if (msg != nullptr) {
-            return std::make_unique<ErrorGui>(msg);
-        } else {
-            return std::make_unique<MainGui>(this->fileId, img);
+      public:
+        virtual void initServices() override {
+            R_INIT(socketInitialize(&sockConf), "Failed to init socket!");
+            nxlink = nxlinkStdio();
+            R_INIT(capsaInitialize(), "Failed to init capture service!");
+            R_INIT(fsInitialize(), "Failed to init fs!");
+            album::Initialize();
+            curl_res = curl_global_init(CURL_GLOBAL_DEFAULT);
+            if (curl_res != CURLE_OK) {
+                return;
+            }
+
+            R_INIT(album::GetLatest(&this->fileId, img, ThumbnailBufferSize), "Failed to fetch remote.");
+
+            if (this->fileId.application_id == 0) {
+                msg = "No screenshot taken!";
+                return;
+            }
+
+            size_t work_size = 0x10000;
+            u8 *work = new (std::nothrow) u8[work_size];
+            if (work == nullptr) {
+                msg = "Out of memory!";
+                return;
+            }
+
+            u64 w, h;
+            if (hosversionBefore(4, 0, 0)) {
+                rc = capsaLoadAlbumScreenShotThumbnailImage(&w, &h, &this->fileId, img, ThumbnailBufferSize, work, work_size);
+                length = 0;
+            } else {
+                CapsScreenShotDecodeOption opts = {};
+                CapsScreenShotAttribute attrs = {};
+                rc = capsLoadAlbumScreenShotThumbnailImageEx0(&w, &h, &attrs, &this->fileId, &opts, img, ThumbnailBufferSize, work, work_size);
+                length = attrs.length_x10;
+            }
+
+            if (R_FAILED(rc) || w != ThumbnailWidth || h != ThumbnailHeight) {
+                msg = "CapSrv error!";
+            }
+
+            delete[] work;
         }
-    }
-};
+        virtual void exitServices() override {
+            curl_global_cleanup();
+            fsdevUnmountAll();
+            fsExit();
+            capsaExit();
+            ::close(nxlink);
+            socketExit();
+        }
+
+        virtual void onShow() override {}
+        virtual void onHide() override {}
+
+        virtual std::unique_ptr<tsl::Gui> loadInitialGui() override {
+            if (R_FAILED(rc)) {
+                return std::make_unique<ErrorGui>(rc);
+            } else if (curl_res != CURLE_OK) {
+                return std::make_unique<ErrorGui>(curl_easy_strerror(curl_res));
+            } else if (msg != nullptr) {
+                return std::make_unique<ErrorGui>(msg);
+            } else {
+                return std::make_unique<MainGui>(this->fileId, img, length);
+            }
+        }
+    };
+
+}
 
 int main(int argc, char **argv) {
-    return tsl::loop<ShareOverlay>(argc, argv);
+    return tsl::loop<album::ShareOverlay>(argc, argv);
 }

@@ -1,10 +1,12 @@
-#include "album.hpp"
+#include "gui.hpp"
 
-#include "common.hpp"
+#include "imgur.hpp"
+#include "translation/translation.hpp"
 
+#include <album.hpp>
 #include <borealis.hpp>
 
-namespace album {
+namespace gui {
 
     namespace {
 
@@ -24,11 +26,14 @@ namespace album {
             imgurCreation->getClickEvent()->subscribe([](brls::View *) {
                 std::string msg;
                 try {
-                    msg = fmt::MakeString(~CONFIG_SAVED_FMT, upload::GenerateImgurConfig().c_str());
+                    msg = fmt::MakeString(~CONFIG_SAVED_FMT, imgur::GenerateConfig().c_str());
                 } catch (Result rc) {
                     msg = fmt::MakeString("%s: 2%03d-%04d", ~ERROR, R_MODULE(rc), R_DESCRIPTION(rc));
                 } catch (String desc) {
                     msg = Translation::Translate(desc);
+                } catch (u8) {
+                    album::LoadDefault();
+                    album::Upload({});
                 }
                 brls::Dialog *dialog = new brls::Dialog(msg);
                 dialog->addButton(~BACK, [dialog](brls::View *) { dialog->close(); });
@@ -39,7 +44,7 @@ namespace album {
 
             hosterList->addView(imgurCreation);
 
-            for (std::string &hoster : upload::GetHosterNameList())
+            for (std::string &hoster : album::GetHosterNameList())
                 hosterList->addView(new brls::ListItem(hoster));
 
             rootFrame->addTab("Images", testList);
@@ -62,6 +67,8 @@ namespace album {
             Translation::SetLanguage(Translation::Language::English_US);
 
         init_album_accessor = R_SUCCEEDED(capsaInitialize());
+
+        album::Initialize();
 
         return true;
     }
@@ -89,9 +96,6 @@ namespace album {
 
         if (!init_album_accessor) {
             brls::Dialog *dialog = new brls::Dialog(~ACCESSOR_INIT);
-            dialog->addButton("Continue", [dialog](brls::View *view) {
-                dialog->close();
-            });
             dialog->addButton(~EXIT, [](brls::View *view) {
                 brls::Application::quit();
             });
@@ -106,6 +110,7 @@ namespace album {
     }
 
     void Cleanup() {
+        album::Exit();
         capsaExit();
     }
 

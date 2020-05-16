@@ -39,10 +39,10 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	ShareNX
 BUILD		:=	build.nx
-SOURCES		:=	applet common/translation common/util
+SOURCES		:=	applet applet/translation common common/util
 DATA		:=	data
 INCLUDES	:=	libs/json libs/borealis common
-APP_TITLE	:=	ShareNX
+APP_TITLE	:=	ShareNX 
 APP_AUTHOR	:=	Behemoth & Huntereb
 
 ROMFS				:=	libs/borealis/resources
@@ -55,7 +55,7 @@ BOREALIS_RESOURCES	:=	romfs:/
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
-			$(ARCH) $(DEFINES)
+			$(ARCH) $(DEFINES) `curl-config --cflags`
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ \
 			-DWINDOW_NAME="\"$(APP_TITLE)\"" \
@@ -68,7 +68,7 @@ CXXFLAGS	:= $(CFLAGS) -std=gnu++2a
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= 	-lnx -lm
+LIBS	:=	`curl-config --libs`
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

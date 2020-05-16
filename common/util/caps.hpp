@@ -1,21 +1,19 @@
 #pragma once
 
 #include <string>
+#include <switch.h>
 #include <vector>
-
-extern "C" {
-#include <switch/services/capsa.h>
-}
 
 namespace album {
 
     std::string dateToString(const CapsAlbumFileDateTime &date);
-    std::string entryToFileName(const CapsAlbumEntry &entry);
+    std::string MakeFileName(const CapsAlbumFileId &file_id);
     Result getThumbnail(u64 *width, u64 *height, const CapsAlbumEntry &entry, void *image, u64 image_size);
     Result getImage(u64 *width, u64 *height, const CapsAlbumEntry &entry, void *image, u64 image_size);
     Result getFile(const CapsAlbumEntry &entry, void *filebuf);
     std::vector<CapsAlbumEntry> getEntries(CapsAlbumStorage storage);
     std::vector<CapsAlbumEntry> getAllEntries();
+    Result GetLatest(CapsAlbumFileId *out, void *img, size_t size);
 
     namespace MovieReader {
 
