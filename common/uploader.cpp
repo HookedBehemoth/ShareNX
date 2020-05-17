@@ -143,7 +143,7 @@ namespace album {
         if (R_SUCCEEDED(fsFsOpenDirectory(&sdmc, entry.name, FsDirOpenMode_ReadFiles, &dir))) {
             s64 read_count;
             while (R_SUCCEEDED(fsDirRead(&dir, &read_count, 1, &entry)) && read_count > 0) {
-                result.push_back(entry.name);
+                result.emplace_back(entry.name);
             }
         }
         return result;
@@ -214,7 +214,7 @@ namespace album {
 
         /* Make custom http header. */
         for (auto &[k, v] : j["Headers"].items())
-            g_hoster.header.push_back(k + ": " + v.get<std::string>());
+            g_hoster.header.emplace_back(k).append(": ").append(v.get<std::string>());
 
         return true;
     }

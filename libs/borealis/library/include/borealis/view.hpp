@@ -191,6 +191,8 @@ class View
     unsigned getWidth();
     unsigned getHeight(bool includeCollapse = true);
 
+    bool intersects(View *other);
+
     void setForceTranslucent(bool translucent);
 
     void setParent(View* parent, void* parentUserdata = nullptr);

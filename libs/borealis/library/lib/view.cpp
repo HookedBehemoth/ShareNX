@@ -194,8 +194,8 @@ void View::drawHighlight(NVGcontext* vg, ThemeValues* theme, float alpha, Style*
 
     unsigned x      = this->x - insetLeft - style->Highlight.strokeWidth / 2;
     unsigned y      = this->y - insetTop - style->Highlight.strokeWidth / 2;
-    unsigned width  = this->width + insetLeft + insetRight + style->Highlight.strokeWidth;
-    unsigned height = this->height + insetTop + insetBottom + style->Highlight.strokeWidth;
+    unsigned width  = this->width + insetLeft + insetRight + style->Highlight.strokeWidth / 2;
+    unsigned height = this->height + insetTop + insetBottom + style->Highlight.strokeWidth / 2;
 
     // Shake animation
     if (this->highlightShaking)
@@ -428,6 +428,12 @@ int View::getX()
 int View::getY()
 {
     return this->y;
+}
+
+bool View::intersects(View *other)
+{
+    return ((this->x + (int)this->width) >= other->x) && ((other->x + (int)other->width) >= this->x) &&
+            ((this->y + (int)this->height) >= other->y) && ((other->y + (int)other->height) >= this->y);
 }
 
 unsigned View::getHeight(bool includeCollapse)

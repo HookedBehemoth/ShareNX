@@ -5,6 +5,7 @@
 
 #include <album.hpp>
 #include <borealis.hpp>
+#include "elements/elm_lazyimage.hpp"
 
 namespace gui {
 
@@ -12,45 +13,6 @@ namespace gui {
 
         bool found_language = false;
         bool init_album_accessor = false;
-
-        brls::TabFrame *rootFrame = nullptr;
-
-        void BuildGui() {
-            brls::List *testList = new brls::List();
-
-            testList->addView(new brls::ListItem("TODO: Images", "All images should appear here in a grid layout. Ideally we'd want a recycler view."));
-
-            brls::List *hosterList = new brls::List();
-
-            auto *imgurCreation = new brls::ListItem("Create imgur config", "Click to make...");
-            imgurCreation->getClickEvent()->subscribe([](brls::View *) {
-                std::string msg;
-                try {
-                    msg = fmt::MakeString(~CONFIG_SAVED_FMT, imgur::GenerateConfig().c_str());
-                } catch (Result rc) {
-                    msg = fmt::MakeString("%s: 2%03d-%04d", ~ERROR, R_MODULE(rc), R_DESCRIPTION(rc));
-                } catch (String desc) {
-                    msg = Translation::Translate(desc);
-                } catch (u8) {
-                    album::LoadDefault();
-                    album::Upload({});
-                }
-                brls::Dialog *dialog = new brls::Dialog(msg);
-                dialog->addButton(~BACK, [dialog](brls::View *) { dialog->close(); });
-                dialog->setCancelable(true);
-
-                dialog->open();
-            });
-
-            hosterList->addView(imgurCreation);
-
-            for (std::string &hoster : album::GetHosterNameList())
-                hosterList->addView(new brls::ListItem(hoster));
-
-            rootFrame->addTab("Images", testList);
-            rootFrame->addSeparator();
-            rootFrame->addTab("Imgur", hosterList);
-        }
 
     }
 
@@ -74,11 +36,17 @@ namespace gui {
     }
 
     void MakeGui() {
-        rootFrame = new brls::TabFrame();
+        brls::AppletFrame *rootFrame = new brls::AppletFrame(true, true);
         rootFrame->setTitle("ShareNX");
         rootFrame->setIcon(BOREALIS_ASSET("icon/logo.png"));
 
-        BuildGui();
+        auto *testList = new brls::BoxLayout(brls::BoxLayoutOrientation::VERTICAL);
+        testList->setSpacing(10);
+
+        for (auto &entry : album::getAllEntries())
+            testList->addView(new LazyImage(entry.file_id));
+
+        rootFrame->setContentView(testList);
 
         // Add the root view to the stack
         brls::Application::pushView(rootFrame);

@@ -24,23 +24,8 @@
 namespace brls
 {
 
-Image::Image(std::string imagePath)
-{
-    this->setImage(imagePath);
-    this->setOpacity(1.0F);
-}
-
-Image::Image(unsigned char* buffer, size_t bufferSize)
-{
-    this->setImage(buffer, bufferSize);
-    this->setOpacity(1.0F);
-}
-
 Image::~Image()
 {
-    if (this->imageBuffer != nullptr)
-        delete[] this->imageBuffer;
-
     if (this->texture != -1)
         nvgDeleteImage(Application::getNVGContext(), this->texture);
 }
@@ -58,19 +43,6 @@ void Image::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, 
     }
 
     nvgRestore(vg);
-}
-
-void Image::reloadTexture()
-{
-    NVGcontext* vg = Application::getNVGContext();
-
-    if (this->texture != -1)
-        nvgDeleteImage(vg, this->texture);
-
-    if (!this->imagePath.empty())
-        this->texture = nvgCreateImage(vg, this->imagePath.c_str(), 0);
-    else if (this->imageBuffer != nullptr)
-        this->texture = nvgCreateImageMem(vg, 0, this->imageBuffer, this->imageBufferSize);
 }
 
 void Image::layout(NVGcontext* vg, Style* style, FontStash* stash)
@@ -139,31 +111,39 @@ void Image::layout(NVGcontext* vg, Style* style, FontStash* stash)
     this->imgPaint = nvgImagePattern(vg, getX() + this->imageX, getY() + this->imageY, this->imageWidth, this->imageHeight, 0, this->texture, this->alpha);
 }
 
+void Image::setRGBAImage(unsigned width, unsigned height, unsigned char* buffer)
+{
+    NVGcontext* vg = Application::getNVGContext();
+
+    if (this->texture != -1)
+        nvgDeleteImage(vg, this->texture);
+
+    this->texture = nvgCreateImageRGBA(vg, width, height, 0, buffer);
+
+    this->invalidate();
+}
+
 void Image::setImage(unsigned char* buffer, size_t bufferSize)
 {
-    if (this->imageBuffer != nullptr)
-        delete[] this->imageBuffer;
+    NVGcontext* vg = Application::getNVGContext();
 
-    this->imagePath = "";
+    if (this->texture != -1)
+        nvgDeleteImage(vg, this->texture);
 
-    this->imageBuffer = new unsigned char[bufferSize];
-    std::memcpy(this->imageBuffer, buffer, bufferSize);
-    this->imageBufferSize = bufferSize;
+    this->texture = nvgCreateImageMem(vg, 0, buffer, bufferSize);
 
-    this->reloadTexture();
     this->invalidate();
 }
 
 void Image::setImage(std::string imagePath)
 {
-    this->imagePath = imagePath;
+    NVGcontext* vg = Application::getNVGContext();
 
-    if (this->imageBuffer != nullptr)
-        delete[] this->imageBuffer;
+    if (this->texture != -1)
+        nvgDeleteImage(vg, this->texture);
 
-    this->imageBuffer = nullptr;
-
-    this->reloadTexture();
+    if (!imagePath.empty())
+        this->texture = nvgCreateImage(vg, imagePath.c_str(), 0);
 
     this->invalidate();
 }
