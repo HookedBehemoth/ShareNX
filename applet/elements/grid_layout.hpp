@@ -55,8 +55,8 @@ class GridContentView : public brls::View
     brls::View* getDefaultFocus() override;
     void onChildFocusGained(brls::View* child) override;
     void onChildFocusLost(brls::View* child) override;
-    void willAppear() override;
-    void willDisappear() override;
+    void willAppear(bool resetState = false) override;
+    void willDisappear(bool resetState = false) override;
     void onWindowSizeChanged() override;
 
     /**

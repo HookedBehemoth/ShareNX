@@ -230,16 +230,16 @@ GridContentView::~GridContentView()
     this->children.clear();
 }
 
-void GridContentView::willAppear()
+void GridContentView::willAppear(bool resetState)
 {
     for (brls::View* child : this->children)
-        child->willAppear();
+        child->willAppear(resetState);
 }
 
-void GridContentView::willDisappear()
+void GridContentView::willDisappear(bool resetState)
 {
     for (brls::View* child : this->children)
-        child->willDisappear();
+        child->willDisappear(resetState);
 }
 
 void GridContentView::onWindowSizeChanged()
