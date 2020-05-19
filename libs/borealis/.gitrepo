@@ -5,8 +5,8 @@
 ;
 [subrepo]
 	remote = git@github.com:natinusala/borealis
-	branch = master
-	commit = 69f5f19182eddb372bfcb23c547585356d2d1d5a
+	branch = scrolling-refactor
+	commit = dd7c1a9e433ef29e149c4963264c5dcec9130a99
 	parent = b3c8bb913bf9cda5f49e034e0129213eabaf2832
 	method = merge
 	cmdver = 0.4.1

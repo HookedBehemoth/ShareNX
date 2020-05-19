@@ -32,6 +32,7 @@ namespace brls
 
 BoxLayout::BoxLayout(BoxLayoutOrientation orientation, size_t defaultFocus)
     : orientation(orientation)
+    , originalDefaultFocus(defaultFocus)
     , defaultFocusedIndex(defaultFocus)
 {
 }
@@ -135,7 +136,7 @@ View* BoxLayout::getNextFocus(FocusDirection direction, void* parentUserData)
 void BoxLayout::removeView(int index, bool free)
 {
     BoxLayoutChild* toRemove = this->children[index];
-    toRemove->view->willDisappear();
+    toRemove->view->willDisappear(true);
     if (free)
         delete toRemove->view;
     delete toRemove;
@@ -279,7 +280,7 @@ void BoxLayout::setResize(bool resize)
     this->invalidate();
 }
 
-void BoxLayout::addView(View* view, bool fill)
+void BoxLayout::addView(View* view, bool fill, bool resetState)
 {
     BoxLayoutChild* child = new BoxLayoutChild();
     child->view           = view;
@@ -294,7 +295,7 @@ void BoxLayout::addView(View* view, bool fill)
 
     view->setParent(this, userdata);
 
-    view->willAppear();
+    view->willAppear(resetState);
     this->invalidate();
 }
 
@@ -317,6 +318,13 @@ void BoxLayout::onChildFocusGained(View* child)
 {
     this->childFocused = true;
 
+    // Remember focus if needed
+    if (this->rememberFocus)
+    {
+        size_t index = *((size_t*) child->getParentUserData());
+        this->defaultFocusedIndex = index;
+    }
+
     View::onChildFocusGained(child);
 }
 
@@ -331,7 +339,7 @@ BoxLayout::~BoxLayout()
 {
     for (BoxLayoutChild* child : this->children)
     {
-        child->view->willDisappear();
+        child->view->willDisappear(true);
         delete child->view;
         delete child;
     }
@@ -339,22 +347,31 @@ BoxLayout::~BoxLayout()
     this->children.clear();
 }
 
-void BoxLayout::willAppear()
+void BoxLayout::willAppear(bool resetState)
 {
     for (BoxLayoutChild* child : this->children)
-        child->view->willAppear();
+        child->view->willAppear(resetState);
 }
 
-void BoxLayout::willDisappear()
+void BoxLayout::willDisappear(bool resetState)
 {
     for (BoxLayoutChild* child : this->children)
-        child->view->willDisappear();
+        child->view->willDisappear(resetState);
+
+    // Reset default focus to original one if needed
+    if (this->rememberFocus)
+        this->defaultFocusedIndex = this->originalDefaultFocus;
 }
 
 void BoxLayout::onWindowSizeChanged()
 {
     for (BoxLayoutChild* child : this->children)
         child->view->onWindowSizeChanged();
+}
+
+void BoxLayout::setRememberFocus(bool remember)
+{
+    this->rememberFocus = remember;
 }
 
 } // namespace brls

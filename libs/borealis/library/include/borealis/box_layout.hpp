@@ -69,8 +69,11 @@ class BoxLayout : public View
   protected:
     std::vector<BoxLayoutChild*> children;
 
-    size_t defaultFocusedIndex = 0;
-    bool childFocused          = false;
+    size_t originalDefaultFocus = 0;
+    size_t defaultFocusedIndex  = 0;
+    bool childFocused           = false;
+
+    bool rememberFocus = false;
 
     unsigned marginTop    = 0;
     unsigned marginRight  = 0;
@@ -93,8 +96,8 @@ class BoxLayout : public View
     View* getDefaultFocus() override;
     void onChildFocusGained(View* child) override;
     void onChildFocusLost(View* child) override;
-    void willAppear() override;
-    void willDisappear() override;
+    void willAppear(bool resetState = false) override;
+    void willDisappear(bool resetState = false) override;
     void onWindowSizeChanged() override;
 
     /**
@@ -121,7 +124,7 @@ class BoxLayout : public View
       * If fill is set to true, the child will
       * fill the remaining space
       */
-    void addView(View* view, bool fill = false);
+    void addView(View* view, bool fill = false, bool resetState = false);
 
     /**
       * Removes the view at specified
@@ -159,6 +162,12 @@ class BoxLayout : public View
      * Mandatory for using in a ScrollView
      */
     void setResize(bool resize);
+
+    /**
+     * Should the default focus be set to the originally focused
+     * view (until the layout disappears)?
+     */
+    void setRememberFocus(bool rememberFocus);
 };
 
 } // namespace brls
