@@ -33,7 +33,7 @@ namespace brls
 // TODO: Use a Label with integrated ticker
 class ListItem : public View
 {
-  private:
+  protected:
     std::string label;
     std::string subLabel;
     std::string value;

@@ -12,7 +12,7 @@ namespace album {
     Result getImage(u64 *width, u64 *height, const CapsAlbumEntry &entry, void *image, u64 image_size);
     Result getFile(const CapsAlbumEntry &entry, void *filebuf);
     std::vector<CapsAlbumEntry> getEntries(CapsAlbumStorage storage);
-    std::vector<CapsAlbumEntry> getAllEntries();
+    const std::vector<CapsAlbumEntry> &getAllEntries();
     Result GetLatest(CapsAlbumFileId *out, void *img, size_t size);
 
     namespace MovieReader {

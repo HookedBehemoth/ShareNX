@@ -80,19 +80,22 @@ namespace album {
         return {};
     }
 
-    std::vector<CapsAlbumEntry> getAllEntries() {
+    const std::vector<CapsAlbumEntry> &getAllEntries() {
+        static std::vector<CapsAlbumEntry> combined;
+        if (!combined.empty())
+            return combined;
+
         /* Get nand and sd entries. */
         auto nand_entries = getEntries(CapsAlbumStorage_Nand);
         auto sd_entries = getEntries(CapsAlbumStorage_Sd);
 
         /* Combine vector */
-        std::vector<CapsAlbumEntry> combined;
         combined.reserve(nand_entries.size() + sd_entries.size());
         combined.insert(combined.begin(), nand_entries.begin(), nand_entries.end());
         combined.insert(combined.end(), sd_entries.begin(), sd_entries.end());
 
         /* Sort entries. */
-        std::sort(combined.begin(), combined.end());
+        std::sort(combined.begin(), combined.end(), std::greater<>());
         return combined;
     }
 

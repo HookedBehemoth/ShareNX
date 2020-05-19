@@ -102,6 +102,22 @@ Style Style::horizon()
             .selectRadius = 15 }
     };
 
+    style.Grid = {
+        .marginLeftRight = 95,
+        .marginTop = 26,
+        .marginBottom = 23,
+        .spacing = 10,
+
+        .selectInset = 2,
+
+        .Item = {
+            .width  = 210,
+            .height = 120,
+
+            .selectRadius = 5,
+        }
+    };
+
     style.Label = {
         .regularFontSize      = 20,
         .mediumFontSize       = 18,

@@ -1,11 +1,13 @@
 #include "gui.hpp"
 
+#include "elements/elm_filteritem.hpp"
+#include "elements/elm_lazyimage.hpp"
+#include "elements/grid_layout.hpp"
 #include "imgur.hpp"
 #include "translation/translation.hpp"
 
 #include <album.hpp>
 #include <borealis.hpp>
-#include "elements/elm_lazyimage.hpp"
 
 namespace gui {
 
@@ -24,11 +26,13 @@ namespace gui {
         if (!brls::Application::init())
             return false;
 
+        setInitialize();
+        nsInitialize();
+        init_album_accessor = R_SUCCEEDED(capsaInitialize());
+
         found_language = Translation::DetectSystemLanguage();
         if (!found_language)
             Translation::SetLanguage(Translation::Language::English_US);
-
-        init_album_accessor = R_SUCCEEDED(capsaInitialize());
 
         album::Initialize();
 
@@ -36,20 +40,54 @@ namespace gui {
     }
 
     void MakeGui() {
-        brls::AppletFrame *rootFrame = new brls::AppletFrame(true, true);
-        rootFrame->setTitle("ShareNX");
-        rootFrame->setIcon(BOREALIS_ASSET("icon/logo.png"));
+        brls::AppletFrame *albumFrame = new brls::AppletFrame(true, true);
+        {
+            albumFrame->setTitle("ShareNX");
+            albumFrame->setIcon(BOREALIS_ASSET("icon/logo.png"));
 
-        auto *testList = new brls::BoxLayout(brls::BoxLayoutOrientation::VERTICAL);
-        testList->setSpacing(10);
+            auto *testList = new Grid();
+            testList->registerAction("Filter", brls::Key::Y, [] {
+                brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
+                filterFrame->setTitle("Filter");
 
-        for (auto &entry : album::getAllEntries())
-            testList->addView(new LazyImage(entry.file_id));
+                brls::List *filterList = new brls::List();
+                filterList->addView(new FilterListItem());
+                filterList->addView(new brls::ListItemGroupSpacing());
+                filterList->addView(new FilterListItem(CapsAlbumFileContents_ScreenShot));
+                filterList->addView(new FilterListItem(CapsAlbumFileContents_Movie));
+                filterList->addView(new FilterListItem(CapsAlbumStorage_Nand));
+                filterList->addView(new FilterListItem(CapsAlbumStorage_Sd));
+                filterList->addView(new brls::ListItemGroupSpacing());
 
-        rootFrame->setContentView(testList);
+                int appletCount = 0;
+                std::map<u64,int> applicationMap;
+                for (const auto &entry : album::getAllEntries()) {
+                    if (entry.file_id.application_id < 0x010000000000ffff) {
+                        appletCount++;
+                    } else {
+                        applicationMap[entry.file_id.application_id]++;
+                    }
+                }
+
+                for (auto [tid, count] : applicationMap)
+                    filterList->addView(new FilterListItem(tid, count));
+
+                filterList->addView(new FilterListItem(0, appletCount));
+
+                filterFrame->setContentView(filterList);
+                brls::Application::pushView(filterFrame);
+                return true;
+            });
+            testList->registerAction("Delete Items", brls::Key::X, [] { return true; });
+
+            for (const auto &entry : album::getAllEntries())
+                testList->addView(new LazyImage(entry.file_id));
+
+            albumFrame->setContentView(testList);
+        }
 
         // Add the root view to the stack
-        brls::Application::pushView(rootFrame);
+        brls::Application::pushView(albumFrame);
 
         if (!found_language) {
             brls::Dialog *dialog = new brls::Dialog("Failed to get system language!\nDefaulted to en-US!");
@@ -80,6 +118,8 @@ namespace gui {
     void Cleanup() {
         album::Exit();
         capsaExit();
+        nsExit();
+        setExit();
     }
 
 }

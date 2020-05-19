@@ -64,14 +64,11 @@ namespace Translation {
 
     bool DetectSystemLanguage() {
         bool set = false;
-        if (R_SUCCEEDED(setInitialize())) {
-            ::SetLanguage ourLang;
-            u64 language_code;
-            if (R_SUCCEEDED(setGetSystemLanguage(&language_code)))
-                if (R_SUCCEEDED(setMakeLanguage(language_code, &ourLang)))
-                    set = Translation::SetLanguage(Translation::Language(ourLang));
-            setExit();
-        }
+        ::SetLanguage ourLang;
+        u64 language_code;
+        if (R_SUCCEEDED(setGetSystemLanguage(&language_code)))
+            if (R_SUCCEEDED(setMakeLanguage(language_code, &ourLang)))
+                set = Translation::SetLanguage(Translation::Language(ourLang));
         return set;
     }
 
