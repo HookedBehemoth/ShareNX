@@ -123,6 +123,26 @@ void Image::setRGBAImage(unsigned width, unsigned height, unsigned char* buffer)
     this->invalidate();
 }
 
+void Image::updateRGBA(unsigned char* buffer)
+{
+    if (this->texture == -1)
+        return;
+
+    nvgUpdateImage(Application::getNVGContext(), this->texture, buffer);
+
+    this->invalidate();
+}
+
+void Image::updateYUV(unsigned char* data[3], int linesize[3], unsigned char* work)
+{
+    if (this->texture == -1)
+        return;
+
+    nvgUpdateImageYUV(Application::getNVGContext(), this->texture, data, linesize, work);
+
+    this->invalidate();
+}
+
 void Image::setImage(unsigned char* buffer, size_t bufferSize)
 {
     NVGcontext* vg = Application::getNVGContext();

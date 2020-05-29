@@ -25,6 +25,7 @@
 
 #include "sample_installer_page.hpp"
 #include "sample_loading_page.hpp"
+#include "video.hpp"
 
 std::vector<std::string> NOTIFICATIONS = {
     "You have cool hair",
@@ -54,6 +55,15 @@ int main(int argc, char* argv[])
     rootFrame->setIcon(BOREALIS_ASSET("icon/borealis.jpg"));
 
     brls::List* testList = new brls::List();
+
+    brls::ListItem* movItem = new brls::ListItem("Open example installer");
+    movItem->getClickEvent()->subscribe([](brls::View* view) {
+        auto* stagedFrame = new MovieView();
+
+        brls::Application::pushView(stagedFrame);
+    });
+
+    testList->addView(movItem);
 
     brls::ListItem* dialogItem = new brls::ListItem("Open a dialog");
     dialogItem->getClickEvent()->subscribe([](brls::View* view) {

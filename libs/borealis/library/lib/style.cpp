@@ -264,10 +264,10 @@ Style Style::horizon()
 
     style.Dialog = {
         .width  = 770,
-        .height = 280,
+        .height = 220,
 
-        .paddingTopBottom = 60,
-        .paddingLeftRight = 65,
+        .paddingTopBottom = 65,
+        .paddingLeftRight = 115,
 
         .cornerRadius = 5.0f,
 

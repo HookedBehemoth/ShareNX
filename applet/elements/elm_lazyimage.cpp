@@ -1,12 +1,16 @@
 #include "elm_lazyimage.hpp"
 
-#include "mediaview.hpp"
+#include "photoview.hpp"
+#include "videoview.hpp"
 
 #include <memory>
 
 LazyImage::LazyImage(const CapsAlbumFileId &id) : Image(), file_id(id) {
     this->registerAction("OK", brls::Key::A, [this] {
-        brls::Application::pushView(new AlbumView(this->file_id));
+        if (this->file_id.content == CapsAlbumFileContents_ScreenShot)
+            brls::Application::pushView(new PhotoView(this->file_id));
+        else
+            brls::Application::pushView(new MovieView(this->file_id));
         return true;
     });
     this->setScaleType(brls::ImageScaleType::SCALE);
@@ -15,6 +19,8 @@ LazyImage::LazyImage(const CapsAlbumFileId &id) : Image(), file_id(id) {
 LazyImage::~LazyImage() {
     if (this->videoLength)
         delete[] this->videoLength;
+    if (tmpBuffer)
+        delete[] tmpBuffer;
 }
 
 void LazyImage::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
@@ -23,6 +29,7 @@ void LazyImage::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned heig
     } else if (loading && ready) {
         this->setRGBAImage(320, 180, tmpBuffer);
         delete[] tmpBuffer;
+        tmpBuffer = nullptr;
         this->layout(brls::Application::getNVGContext(), style, ctx->fontStash);
         this->invalidate();
         ready = false;
@@ -53,12 +60,12 @@ void LazyImage::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned heig
 
     // Video length. 54x18
     if (this->videoLength) {
-        nvgFillColor(vg, nvgRGBA(0, 0, 0, 0.5 * 0xff));
+        nvgFillColor(vg, a(nvgRGBAf(0, 0, 0, 0.5f)));
         nvgBeginPath(vg);
         nvgRect(vg, x + width - 54, y + height - 18, 54, 18);
         nvgFill(vg);
 
-        nvgFillColor(vg, nvgRGBA(0xff, 0xff, 0xff, 0xff));
+        nvgFillColor(vg, a(nvgRGB(0xff, 0xff, 0xff)));
         nvgFontSize(vg, 14);
         nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
         nvgBeginPath(vg);
@@ -104,7 +111,7 @@ namespace {
                 rc = capsLoadAlbumScreenShotThumbnailImageEx0(&w, &h, &attrs, &this->fileId, &opts, img, imgSize, work.get(), workSize);
 
                 /* Round video length to nearest full number. */
-                u8 length = (attrs.length_x10 + 499) / 1000;
+                u8 length = std::round(static_cast<float>(attrs.length_x10) / 1000);
                 if (length) {
                     videoLength = new char[8];
                     std::sprintf(videoLength, "%dsec", length);
@@ -126,7 +133,7 @@ namespace {
 
         static void WorkThreadFunc(void *user) {
             ImageLoader *ptr = static_cast<ImageLoader *>(user);
-            while (appletMainLoop()) {
+            while (true) {
                 if (ptr->Loop())
                     continue;
 
@@ -138,6 +145,7 @@ namespace {
 
                 svcSleepThread(1'000'000);
             }
+            ptr->exitflag = true;
         }
 
         bool Loop() {
@@ -166,9 +174,11 @@ namespace {
         }
 
         ~ImageLoader() {
-            exitflag = true;
-            threadWaitForExit(&thread);
-            threadClose(&thread);
+            if (!exitflag) {
+                exitflag = true;
+                threadWaitForExit(&thread);
+                threadClose(&thread);
+            }
         }
 
         void Enqueue(const CapsAlbumFileId &fileId, LazyImage *image) {

@@ -22,6 +22,7 @@
 #include <borealis/box_layout.hpp>
 #include <borealis/label.hpp>
 #include <borealis/view.hpp>
+#include <borealis/application.hpp>
 
 namespace brls
 {
@@ -32,6 +33,8 @@ namespace brls
 class Hint : public BoxLayout
 {
   private:
+    NVGcolor textColor;
+
     bool animate;
 
     GenericEvent::Subscription globalFocusEventSubscriptor;
@@ -48,7 +51,7 @@ class Hint : public BoxLayout
     void rebuildHints();
 
   public:
-    Hint(bool animate = true);
+    Hint(NVGcolor textColor, bool animate = true);
     ~Hint();
 
     void willAppear(bool resetState = false) override;

@@ -33,7 +33,7 @@ AppletFrame::AppletFrame(bool padLeft, bool padRight)
     if (padRight)
         this->rightPadding = style->AppletFrame.separatorSpacing;
 
-    this->hint = new Hint();
+    this->hint = new Hint(Application::getThemeValues()->textColor);
     this->hint->setParent(this);
 
     this->registerAction("Back", Key::B, [this] { return this->onCancel(); });

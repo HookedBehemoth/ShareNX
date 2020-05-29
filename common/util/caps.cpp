@@ -1,7 +1,7 @@
 #include "caps.hpp"
 
 #include <album.hpp>
-
+#include <cstdio>
 #include <memory>
 
 bool operator>(const CapsAlbumFileId &base_a, const CapsAlbumFileId &base_b) {
@@ -103,7 +103,7 @@ namespace album {
         CapsAlbumFileId movie, screenshot;
         R_TRY(capsaGetLastOverlayScreenShotThumbnail(&screenshot, nullptr, img, size));
 
-        if (hosversionBefore(4,0,0)) {
+        if (hosversionBefore(4, 0, 0)) {
             *out = screenshot;
             return 0;
         }
@@ -131,6 +131,9 @@ namespace album {
         }
 
         Result Start(const CapsAlbumFileId &file_id) {
+            if (stream_id != 0)
+                R_TRY(Close());
+
             R_TRY(capsaOpenAlbumMovieStream(&stream_id, &file_id));
             std::memset(buffer, 0, AlbumMovieBufferSize);
 
@@ -169,7 +172,9 @@ namespace album {
                 u64 actualSize = 0;
 
                 /* Read movie data to temporary buffer. */
-                if (R_FAILED(capsaReadMovieDataFromAlbumMovieReadStream(stream_id, bufferIndex * AlbumMovieBufferSize, buffer, AlbumMovieBufferSize, &actualSize))) {
+                Result rc=0;
+                if (R_FAILED(rc = capsaReadMovieDataFromAlbumMovieReadStream(stream_id, bufferIndex * AlbumMovieBufferSize, buffer, AlbumMovieBufferSize, &actualSize))) {
+                    printf("read failed: 0x%x\n", rc);
                     return 0;
                 }
                 last_buffer_index = bufferIndex;
@@ -180,6 +185,22 @@ namespace album {
             std::memcpy(out_buffer, startBuffer, readSize);
             progress += readSize;
             return readSize;
+        }
+
+        int read_packet(void *, uint8_t *buf, int buf_size) {
+            size_t size = Read((char *)buf, 1, buf_size, nullptr);
+            return size == 0 ? -420 : size;
+        }
+
+        int64_t seek(void *, int64_t offset, int whence) {
+            if (whence == 0x10000)
+                return stream_size;
+
+            if (static_cast<int64_t>(stream_size) < offset)
+                return -420;
+
+            last_buffer_index = -1;
+            return progress = offset;
         }
 
     }

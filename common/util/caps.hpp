@@ -22,6 +22,9 @@ namespace album {
         u64 GetStreamSize();
         size_t Read(char *buffer, size_t size, size_t nitems, void *);
 
+        int read_packet(void *, uint8_t *buf, int buf_size);
+        int64_t seek(void *, int64_t offset, int whence);
+
     };
 
 }

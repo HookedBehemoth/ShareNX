@@ -47,6 +47,8 @@ class Image : public View
     void setImage(std::string imagePath);
     void setImage(unsigned char* buffer, size_t bufferSize);
     void setRGBAImage(unsigned width, unsigned height, unsigned char* buffer);
+    void updateRGBA(unsigned char* buffer);
+    void updateYUV(unsigned char* data[3], int linesize[3], unsigned char* work);
 
     void setScaleType(ImageScaleType imageScaleType);
     void setOpacity(float opacity);

@@ -26,8 +26,9 @@
 namespace brls
 {
 
-Hint::Hint(bool animate)
+Hint::Hint(NVGcolor textColor, bool animate)
     : BoxLayout(BoxLayoutOrientation::HORIZONTAL)
+    , textColor(textColor)
     , animate(animate)
 {
     Style* style = Application::getStyle();
@@ -129,6 +130,7 @@ void Hint::rebuildHints()
         std::string hintText = Hint::getKeyIcon(action.key) + "  " + action.hintText;
 
         Label* label = new Label(LabelStyle::HINT, hintText);
+        label->setColor(this->textColor);
         this->addView(label);
     }
 }

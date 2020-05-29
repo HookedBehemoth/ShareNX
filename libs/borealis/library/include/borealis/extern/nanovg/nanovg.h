@@ -382,6 +382,8 @@ int nvgCreateImageRGBA(NVGcontext* ctx, int w, int h, int imageFlags, const unsi
 // Updates image data specified by image handle.
 void nvgUpdateImage(NVGcontext* ctx, int image, const unsigned char* data);
 
+void nvgUpdateImageYUV(NVGcontext* ctx, int image, unsigned char* data[3], int linesize[3], unsigned char* work);
+
 // Returns the dimensions of a created image.
 void nvgImageSize(NVGcontext* ctx, int image, int* w, int* h);
 
