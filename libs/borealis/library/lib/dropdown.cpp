@@ -66,7 +66,7 @@ Dropdown::Dropdown(std::string title, std::vector<std::string> values, ValueSele
         this->list->addView(item);
     }
 
-    this->hint = new Hint(Application::getThemeValues()->textColor);
+    this->hint = new Hint();
     this->hint->setParent(this);
 
     this->registerAction("Back", Key::B, [this] { return this->onCancel(); });

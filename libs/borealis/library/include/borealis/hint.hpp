@@ -33,8 +33,6 @@ namespace brls
 class Hint : public BoxLayout
 {
   private:
-    NVGcolor textColor;
-
     bool animate;
 
     GenericEvent::Subscription globalFocusEventSubscriptor;
@@ -46,12 +44,14 @@ class Hint : public BoxLayout
     static void popHint(Hint* hint);
     static void animateHints();
 
+  protected:
     static std::string getKeyIcon(Key key);
+    static bool actionsSortFunc(Action a, Action b);
 
-    void rebuildHints();
+    virtual void rebuildHints();
 
   public:
-    Hint(NVGcolor textColor, bool animate = true);
+    Hint(bool animate = true);
     ~Hint();
 
     void willAppear(bool resetState = false) override;

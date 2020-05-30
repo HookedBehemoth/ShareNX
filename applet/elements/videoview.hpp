@@ -24,10 +24,11 @@ class MovieView : public AlbumView {
 
     u8 *decodeWorkBuffer = nullptr;
 
+    int frameCount;
     bool running = false;
 
   public:
-    MovieView(const CapsAlbumFileId &fileId);
+    MovieView(const CapsAlbumFileId &fileId, int frameCount);
 
     ~MovieView();
 

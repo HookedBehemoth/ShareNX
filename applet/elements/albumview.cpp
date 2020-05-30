@@ -22,7 +22,7 @@ namespace {
 
 }
 
-AlbumView::AlbumView(const CapsAlbumFileId &fileId) : View(), hint(nvgRGBf(1.f, 1.f, 1.f)) {
+AlbumView::AlbumView(const CapsAlbumFileId &fileId) : View() {
     this->registerAction("Hide", brls::Key::PLUS, [this] {this->hideBar = !this->hideBar; return true; });
     this->registerAction("Back", brls::Key::B, [] {brls::Application::popView(); return true; });
     this->registerAction("OK", brls::Key::A, [fileId] {
@@ -34,7 +34,7 @@ AlbumView::AlbumView(const CapsAlbumFileId &fileId) : View(), hint(nvgRGBf(1.f, 
 
         dialog->addButton("Cancel", [dialog](brls::View *view) { dialog->close(); });
         dialog->addButton("Delete", [this, dialog, fileId](brls::View *view) {
-            dialog->close();
+            dialog->close([] { brls::Application::popView(); });
             capsaDeleteAlbumFile(&fileId);
         });
 

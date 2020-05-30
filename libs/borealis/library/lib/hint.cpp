@@ -26,9 +26,8 @@
 namespace brls
 {
 
-Hint::Hint(NVGcolor textColor, bool animate)
+Hint::Hint(bool animate)
     : BoxLayout(BoxLayoutOrientation::HORIZONTAL)
-    , textColor(textColor)
     , animate(animate)
 {
     Style* style = Application::getStyle();
@@ -47,7 +46,7 @@ Hint::Hint(NVGcolor textColor, bool animate)
     });
 }
 
-bool actionsSortFunc(Action a, Action b)
+bool Hint::actionsSortFunc(Action a, Action b)
 {
     // From left to right:
     //  - first +
@@ -130,7 +129,6 @@ void Hint::rebuildHints()
         std::string hintText = Hint::getKeyIcon(action.key) + "  " + action.hintText;
 
         Label* label = new Label(LabelStyle::HINT, hintText);
-        label->setColor(this->textColor);
         this->addView(label);
     }
 }

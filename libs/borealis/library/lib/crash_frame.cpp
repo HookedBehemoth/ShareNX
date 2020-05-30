@@ -41,7 +41,7 @@ CrashFrame::CrashFrame(std::string text)
     this->button->overrideThemeVariant(Application::getThemeValuesForVariant(ThemeVariant_DARK));
 
     // Hint
-    this->hint = new Hint(Application::getThemeValues()->textColor);
+    this->hint = new Hint();
     this->hint->setParent(this);
 }
 

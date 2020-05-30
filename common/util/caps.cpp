@@ -203,6 +203,10 @@ namespace album {
             return progress = offset;
         }
 
+        float Progress() {
+            return (float)progress / (float)stream_size;
+        }
+
     }
 
 }

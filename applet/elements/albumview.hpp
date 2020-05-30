@@ -2,13 +2,14 @@
 
 #include <borealis.hpp>
 #include <switch.h>
+#include "popuphint.hpp"
 
 class AlbumView : public brls::View {
   private:
-    bool hideBar = false;
-    brls::Hint hint;
+    PopupHint hint;
 
   protected:
+    bool hideBar = false;
     brls::Image image;
     bool shouldClose;
 

@@ -67,7 +67,7 @@ namespace {
 
 }
 
-MovieView::MovieView(const CapsAlbumFileId &fileId) : AlbumView(fileId) {
+MovieView::MovieView(const CapsAlbumFileId &fileId, int frameCount) : AlbumView(fileId), frameCount(frameCount) {
     this->registerAction("Pause", brls::Key::Y, [this] {
         this->running = !this->running;
         this->updateActionHint(brls::Key::Y, this->running ? "Pause" : "Play");
@@ -170,10 +170,36 @@ void MovieView::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned heig
         } else {
             brls::Logger::info("reached end");
             av_seek_frame(fmt_ctx, video_stream_idx, 0, AVSEEK_FLAG_ANY);
+            this->video_dec_ctx->frame_number = 0;
         }
     }
 
     AlbumView::draw(vg, x, y, width, height, style, ctx);
+
+    if (!this->hideBar) {
+        /* Extra background */
+        nvgFillColor(vg, a(nvgRGBAf(0, 0, 0, 0.83f)));
+        nvgBeginPath(vg);
+        nvgRect(vg, x, y + height - 72 - 14, width, 14);
+        nvgFill(vg);
+
+        const unsigned barLength = width - 30;
+
+        /* Progress bar background */
+        /* In official software this is more trasparent instead of brighter. */
+        nvgFillColor(vg, a(nvgRGBAf(1.f, 1.f, 1.f, 0.5f)));
+        nvgBeginPath(vg);
+        nvgRoundedRect(vg, x + 15, y + height - 72 - 6, barLength, 6, 4);
+        nvgFill(vg);
+
+        float progress = (float)(this->video_dec_ctx->frame_number % this->frameCount) / (float)this->frameCount;
+
+        /* Progress bar */
+        nvgFillColor(vg, a(nvgRGB(0x00, 0xff, 0xc8)));
+        nvgBeginPath(vg);
+        nvgRoundedRect(vg, x + 15, y + height - 72 - 6, barLength * progress, 6, 4);
+        nvgFill(vg);
+    }
 }
 
 bool MovieView::tryReceive(AVCodecContext *dec) {

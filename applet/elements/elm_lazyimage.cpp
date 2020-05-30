@@ -10,7 +10,7 @@ LazyImage::LazyImage(const CapsAlbumFileId &id) : Image(), file_id(id) {
         if (this->file_id.content == CapsAlbumFileContents_ScreenShot)
             brls::Application::pushView(new PhotoView(this->file_id));
         else
-            brls::Application::pushView(new MovieView(this->file_id));
+            brls::Application::pushView(new MovieView(this->file_id, this->frameCount));
         return true;
     });
     this->setScaleType(brls::ImageScaleType::SCALE);
@@ -37,10 +37,10 @@ void LazyImage::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned heig
 
     float cornerRadius = (float)style->Button.cornerRadius;
 
-    float shadowWidth = 2.0f;
+    float shadowWidth   = 2.0f;
     float shadowFeather = 10.0f;
     float shadowOpacity = 63.75f;
-    float shadowOffset = 10.0f;
+    float shadowOffset  = 10.0f;
 
     NVGpaint shadowPaint = nvgBoxGradient(vg,
                                           x, y + shadowWidth,
@@ -78,10 +78,11 @@ brls::View *LazyImage::getDefaultFocus() {
     return this;
 }
 
-void LazyImage::SetAlbumThumbnailImage(unsigned char *buffer, char *length) {
-    this->tmpBuffer = buffer;
+void LazyImage::SetAlbumThumbnailImage(unsigned char *buffer, char *length, int count) {
+    this->tmpBuffer   = buffer;
     this->videoLength = length;
-    this->ready = true;
+    this->frameCount  = count;
+    this->ready       = true;
 }
 
 #include <memory>
@@ -96,18 +97,20 @@ namespace {
 
         void make() const {
             size_t workSize = 0x10000;
-            auto work = std::make_unique<u8[]>(workSize);
-            size_t imgSize = 320 * 180 * 4;
-            auto img = new u8[imgSize];
+            auto work       = std::make_unique<u8[]>(workSize);
+            size_t imgSize  = 320 * 180 * 4;
+            auto img        = new u8[imgSize];
 
             Result rc = 0;
             u64 w, h;
             char *videoLength = nullptr;
+            int frameCount = 0;
             if (hosversionBefore(4, 0, 0)) {
                 rc = capsaLoadAlbumScreenShotThumbnailImage(&w, &h, &this->fileId, img, imgSize, work.get(), workSize);
             } else {
                 CapsScreenShotDecodeOption opts = {};
-                CapsScreenShotAttribute attrs = {};
+                CapsScreenShotAttribute attrs   = {};
+
                 rc = capsLoadAlbumScreenShotThumbnailImageEx0(&w, &h, &attrs, &this->fileId, &opts, img, imgSize, work.get(), workSize);
 
                 /* Round video length to nearest full number. */
@@ -115,10 +118,11 @@ namespace {
                 if (length) {
                     videoLength = new char[8];
                     std::sprintf(videoLength, "%dsec", length);
+                    frameCount = attrs.frame_count / 1000;
                 }
             }
             if (R_SUCCEEDED(rc)) {
-                image->SetAlbumThumbnailImage(img, videoLength);
+                image->SetAlbumThumbnailImage(img, videoLength, frameCount);
             } else
                 brls::Logger::error("Failed to load image with: 0x%x", rc);
         }
