@@ -4,9 +4,9 @@
 ; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
 ;
 [subrepo]
-	remote = git@github.com:natinusala/borealis
-	branch = scrolling-refactor
-	commit = dd7c1a9e433ef29e149c4963264c5dcec9130a99
-	parent = b3c8bb913bf9cda5f49e034e0129213eabaf2832
+	remote = git@github.com:HookedBehemoth/borealis.git
+	branch = QoL
+	commit = ae09010de630d09a05d6991c61c90f5f6d2e8be5
+	parent = 1fefa331f6ec8094d5f75b52913df841714e0afa
 	method = merge
 	cmdver = 0.4.1
