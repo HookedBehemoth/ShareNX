@@ -16,24 +16,24 @@
 namespace Translation {
 
     constexpr static const char *const *translations[Total_Languages] = {
-        [Japanese] = japanese,
-        [English_US] = english,
-        [French] = french,
-        [German] = german,
-        [Italian] = italian,
-        [Spanish] = spanish,
-        [Chinese_CN] = chinese,
-        [Korean] = korean,
-        [Dutch] = dutch,
-        [Polish] = polish,
-        [Russian] = russian,
-        [Chinese_TW] = chinese,
-        [English_GB] = english,
-        [French_CA] = french,
+        [Japanese]      = japanese,
+        [English_US]    = english,
+        [French]        = french,
+        [German]        = german,
+        [Italian]       = italian,
+        [Spanish]       = spanish,
+        [Chinese_CN]    = chinese,
+        [Korean]        = korean,
+        [Dutch]         = dutch,
+        [Polish]        = polish,
+        [Russian]       = russian,
+        [Chinese_TW]    = chinese,
+        [English_GB]    = english,
+        [French_CA]     = french,
         [Spanish_Latin] = spanish,
-        [Chinese_HANS] = chinese,
-        [Chinese_HANT] = chinese,
-        [Vong] = vong,
+        [Chinese_HANS]  = chinese,
+        [Chinese_HANT]  = chinese,
+        [Vong]          = vong,
     };
 
     static const char *const *current = translations[English_US];
@@ -41,12 +41,16 @@ namespace Translation {
     const char *Translate(String key) {
         /* Return a snowflake if the key is out of range. */
         if (key >= String::Total_Strings)
-            return "\u2744";
+            return "\ue152";
 
         /* Return a snowman if the string isn't defined. */
         const char *temp = current[key];
         if (!temp)
+#ifdef __DEBUG__
             return "\u2603";
+#else
+            return english[key];
+#endif
 
         /* Return translated string. */
         return temp;

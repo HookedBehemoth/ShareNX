@@ -1,12 +1,13 @@
 #include "elm_lazyimage.hpp"
 
+#include "../translation/translation.hpp"
 #include "photoview.hpp"
 #include "videoview.hpp"
 
 #include <memory>
 
 LazyImage::LazyImage(const CapsAlbumFileId &id) : Image(), file_id(id) {
-    this->registerAction("OK", brls::Key::A, [this] {
+    this->registerAction(~OK, brls::Key::A, [this] {
         if (this->file_id.content == CapsAlbumFileContents_ScreenShot)
             brls::Application::pushView(new PhotoView(this->file_id));
         else
@@ -104,7 +105,7 @@ namespace {
             Result rc = 0;
             u64 w, h;
             char *videoLength = nullptr;
-            int frameCount = 0;
+            int frameCount    = 0;
             if (hosversionBefore(4, 0, 0)) {
                 rc = capsaLoadAlbumScreenShotThumbnailImage(&w, &h, &this->fileId, img, imgSize, work.get(), workSize);
             } else {
@@ -117,7 +118,7 @@ namespace {
                 u8 length = std::round(static_cast<float>(attrs.length_x10) / 1000);
                 if (length) {
                     videoLength = new char[8];
-                    std::sprintf(videoLength, "%dsec", length);
+                    std::sprintf(videoLength, "%d%s", length, ~SECONDS_SHORT);
                     frameCount = attrs.frame_count / 1000;
                 }
             }

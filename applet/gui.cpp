@@ -13,7 +13,7 @@ namespace gui {
 
     namespace {
 
-        bool found_language = false;
+        bool found_language      = false;
         bool init_album_accessor = false;
 
     }
@@ -26,6 +26,10 @@ namespace gui {
         if (!brls::Application::init())
             return false;
 
+        /* Official software actually sets a function pointer that's called in nn::applet::StartLibraryApplet instead of setting the jump flag */
+        libappletSetJumpFlag(appletGetAppletType() == AppletType_LibraryApplet);
+
+        socketInitializeDefault();
         setInitialize();
         nsInitialize();
         init_album_accessor = R_SUCCEEDED(capsaInitialize());
@@ -46,9 +50,9 @@ namespace gui {
             albumFrame->setIcon(BOREALIS_ASSET("icon/logo.png"));
 
             auto *testList = new Grid();
-            testList->registerAction("Filter", brls::Key::Y, [] {
+            testList->registerAction(~FILTER, brls::Key::Y, [] {
                 brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
-                filterFrame->setTitle("Filter");
+                filterFrame->setTitle(~FILTER);
 
                 brls::List *filterList = new brls::List();
                 filterList->addView(new FilterListItem());
@@ -60,7 +64,7 @@ namespace gui {
                 filterList->addView(new brls::ListItemGroupSpacing());
 
                 int appletCount = 0;
-                std::map<u64,int> applicationMap;
+                std::map<u64, int> applicationMap;
                 for (const auto &entry : album::getAllEntries()) {
                     if (entry.file_id.application_id < 0x010000000000ffff) {
                         appletCount++;
@@ -78,7 +82,7 @@ namespace gui {
                 brls::Application::pushView(filterFrame);
                 return true;
             });
-            testList->registerAction("Delete Items", brls::Key::X, [] { return true; });
+            testList->registerAction(~DELETE_ITEMS, brls::Key::X, [] { return true; });
 
             for (const auto &entry : album::getAllEntries())
                 testList->addView(new LazyImage(entry.file_id));
@@ -89,22 +93,20 @@ namespace gui {
         // Add the root view to the stack
         brls::Application::pushView(albumFrame);
 
+        auto QuitAction = [](brls::View *) { brls::Application::quit(); };
+
         if (!found_language) {
             brls::Dialog *dialog = new brls::Dialog("Failed to get system language!\nDefaulted to en-US!");
-            dialog->addButton("Continue", [dialog](brls::View *view) {
+            dialog->addButton(~CONTINUE, [dialog](brls::View *view) {
                 dialog->close();
             });
-            dialog->addButton("Exit", [](brls::View *view) {
-                brls::Application::quit();
-            });
+            dialog->addButton(~EXIT, QuitAction);
             dialog->open();
         }
 
         if (!init_album_accessor) {
             brls::Dialog *dialog = new brls::Dialog(~ACCESSOR_INIT);
-            dialog->addButton(~EXIT, [](brls::View *view) {
-                brls::Application::quit();
-            });
+            dialog->addButton(~EXIT, QuitAction);
             dialog->open();
         }
     }
@@ -120,6 +122,7 @@ namespace gui {
         capsaExit();
         nsExit();
         setExit();
+        socketExit();
     }
 
 }

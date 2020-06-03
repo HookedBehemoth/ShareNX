@@ -3,10 +3,13 @@
 #include <borealis.hpp>
 #include <switch.h>
 #include "popuphint.hpp"
+#include "popupview.hpp"
 
 class AlbumView : public brls::View {
   private:
     PopupHint hint;
+    PopupView popupView;
+    std::string dateString;
 
   protected:
     bool hideBar = false;
@@ -21,4 +24,6 @@ class AlbumView : public brls::View {
     void willAppear(bool resetState = false) override;
     void willDisappear(bool resetState = false) override;
     brls::View *getDefaultFocus() final;
+    
+    CapsAlbumFileId fileId;
 };

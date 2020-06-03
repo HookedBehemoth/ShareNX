@@ -1,5 +1,7 @@
 #include "videoview.hpp"
 
+#include "../translation/translation.hpp"
+
 #include <util/caps.hpp>
 
 namespace {
@@ -68,12 +70,6 @@ namespace {
 }
 
 MovieView::MovieView(const CapsAlbumFileId &fileId, int frameCount) : AlbumView(fileId), frameCount(frameCount) {
-    this->registerAction("Pause", brls::Key::Y, [this] {
-        this->running = !this->running;
-        this->updateActionHint(brls::Key::Y, this->running ? "Pause" : "Play");
-        return true;
-    });
-
     if (R_FAILED(album::MovieReader::Start(fileId))) {
         brls::Logger::error("Failed to start read");
         return;
@@ -85,8 +81,10 @@ MovieView::MovieView(const CapsAlbumFileId &fileId, int frameCount) : AlbumView(
     fmt_ctx->pb = avio_alloc_context(buffer, 0x2000, 0, nullptr, &album::MovieReader::read_packet, nullptr, &album::MovieReader::seek);
 
     /* open input file, and allocate format context */
-    if (avformat_open_input(&fmt_ctx, "dummyFilename", nullptr, nullptr) < 0) {
+    int res = avformat_open_input(&fmt_ctx, "dummyFilename", nullptr, nullptr);
+    if (res < 0) {
         brls::Logger::error("Could not open remote file");
+        brls_av_error("avformat_open_input", res);
         return;
     }
 
@@ -134,6 +132,12 @@ MovieView::MovieView(const CapsAlbumFileId &fileId, int frameCount) : AlbumView(
 
     this->image.setRGBAImage(width, height, decodeWorkBuffer);
 
+    this->registerAction(~PAUSE, brls::Key::Y, [this] {
+        this->running = !this->running;
+        this->updateActionHint(brls::Key::Y, this->running ? ~PAUSE : ~PLAY);
+        return true;
+    });
+
     running = true;
 }
 
@@ -141,10 +145,16 @@ MovieView::~MovieView() {
     running = false;
     if (decodeWorkBuffer)
         delete[] decodeWorkBuffer;
-    av_frame_free(&frame);
-    avcodec_free_context(&video_dec_ctx);
-    av_free(fmt_ctx->pb->buffer);
-    avformat_close_input(&fmt_ctx);
+    if (frame)
+        av_frame_free(&frame);
+    if (video_dec_ctx)
+        avcodec_free_context(&video_dec_ctx);
+    if (fmt_ctx) {
+        if (fmt_ctx->pb && fmt_ctx->pb->buffer) {
+            av_free(fmt_ctx->pb->buffer);
+            avformat_close_input(&fmt_ctx);
+        }
+    }
     album::MovieReader::Close();
     brls::Application::setMaximumFPS(60);
 }
@@ -176,7 +186,7 @@ void MovieView::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned heig
 
     AlbumView::draw(vg, x, y, width, height, style, ctx);
 
-    if (!this->hideBar) {
+    if (!this->hideBar && this->video_dec_ctx) {
         /* Extra background */
         nvgFillColor(vg, a(nvgRGBAf(0, 0, 0, 0.83f)));
         nvgBeginPath(vg);
@@ -207,9 +217,9 @@ bool MovieView::tryReceive(AVCodecContext *dec) {
     if (ret == 0) {
         /* Output */
         if (frame->width != width || frame->height != height || frame->format != pix_fmt) {
-            brls::Logger::error("format changed: [w: %d, h: %d, f: %s] -> [w: %d, h: %d, f: %s]",
-                                width, height, av_get_pix_fmt_name(pix_fmt),
-                                frame->width, frame->height, av_get_pix_fmt_name((AVPixelFormat)frame->format));
+            brls::Logger::error("format changed: [w: %d, h: %d, f: %d] -> [w: %d, h: %d, f: %d]",
+                                width, height, pix_fmt,
+                                frame->width, frame->height, frame->format);
         } else {
             /* update image */
             this->image.updateYUV((unsigned char **)frame->data, frame->linesize, decodeWorkBuffer);
