@@ -13,14 +13,10 @@ example_files = files(
     'example/sample_loading_page.cpp'
 )
 
-libavcodec  = dependency('libavcodec',  version : '>=58.54.100')
-libavformat = dependency('libavformat', version : '>=58.29.100')
-libavutil   = dependency('libavutil',   version : '>=56.31.100')
-
 borealis_example = executable(
     'borealis_example',
     [ example_files, borealis_files ],
-    dependencies : [ borealis_dependencies, libavcodec, libavformat, libavutil ],
+    dependencies : borealis_dependencies,
     install: true,
     include_directories: [ borealis_include, include_directories('example')],
     cpp_args: [ '-g', '-O2', '-DBOREALIS_RESOURCES="./resources/"' ]

@@ -100,23 +100,15 @@ Button* Button::setLabel(std::string label)
 
 Button* Button::setImage(std::string path)
 {
-    if (this->image == nullptr) {
-        this->image = new Image();
-        this->image->setParent(this);
-    }
-
-    this->image->setImage(path);
+    this->image = new Image(path);
+    this->image->setParent(this);
     return this;
 }
 
 Button* Button::setImage(unsigned char* buffer, size_t bufferSize)
 {
-    if (this->image == nullptr) {
-        this->image = new Image();
-        this->image->setParent(this);
-    }
-
-    this->image->setImage(buffer, bufferSize);
+    this->image = new Image(buffer, bufferSize);
+    this->image->setParent(this);
     return this;
 }
 

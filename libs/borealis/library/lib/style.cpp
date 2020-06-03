@@ -102,22 +102,6 @@ Style Style::horizon()
             .selectRadius = 15 }
     };
 
-    style.Grid = {
-        .marginLeftRight = 95,
-        .marginTop = 26,
-        .marginBottom = 23,
-        .spacing = 10,
-
-        .selectInset = 2,
-
-        .Item = {
-            .width  = 210,
-            .height = 120,
-
-            .selectRadius = 5,
-        }
-    };
-
     style.Label = {
         .regularFontSize      = 20,
         .mediumFontSize       = 18,
@@ -130,7 +114,7 @@ Style Style::horizon()
         .dialogFontSize       = 24,
         .hintFontSize         = 22,
 
-        .lineHeight             = 1.5f,
+        .lineHeight             = 1.65f,
         .notificationLineHeight = 1.35f
     };
 

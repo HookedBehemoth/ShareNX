@@ -25,7 +25,6 @@
 
 #include "sample_installer_page.hpp"
 #include "sample_loading_page.hpp"
-#include "video.hpp"
 
 std::vector<std::string> NOTIFICATIONS = {
     "You have cool hair",
@@ -56,15 +55,6 @@ int main(int argc, char* argv[])
 
     brls::List* testList = new brls::List();
 
-    brls::ListItem* movItem = new brls::ListItem("Open example installer");
-    movItem->getClickEvent()->subscribe([](brls::View* view) {
-        auto* stagedFrame = new MovieView();
-
-        brls::Application::pushView(stagedFrame);
-    });
-
-    testList->addView(movItem);
-
     brls::ListItem* dialogItem = new brls::ListItem("Open a dialog");
     dialogItem->getClickEvent()->subscribe([](brls::View* view) {
         brls::Dialog* dialog = new brls::Dialog("Warning: PozzNX will wipe all data on your Switch and render it inoperable, do you want to proceed?");
@@ -92,8 +82,9 @@ int main(int argc, char* argv[])
     brls::ListItem* themeItem = new brls::ListItem("TV Resolution");
     themeItem->setValue("Automatic");
 
-    brls::ListItem* jankItem = new brls::ListItem("User Interface Jank", "Some people believe homebrews to have a jank user interface. Set to Minimal to have a native look and feel, set to Maximal to have a SX OS look and feel.");
-    jankItem->setValue("Minimal");
+    brls::SelectListItem* jankItem = new brls::SelectListItem(
+        "User Interface Jank",
+        { "Native", "Minimal", "Regular", "Maximum", "SX OS", "Windows Vista", "iOS 14" });
 
     brls::ListItem* crashItem = new brls::ListItem("Divide by 0", "Can the Switch do it?");
     crashItem->getClickEvent()->subscribe([](brls::View* view) { brls::Application::crash("The software was closed because an error occured:\nSIGABRT (signal 6)"); });

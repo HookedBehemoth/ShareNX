@@ -22,7 +22,6 @@
 #include <borealis/box_layout.hpp>
 #include <borealis/label.hpp>
 #include <borealis/view.hpp>
-#include <borealis/application.hpp>
 
 namespace brls
 {
@@ -44,11 +43,9 @@ class Hint : public BoxLayout
     static void popHint(Hint* hint);
     static void animateHints();
 
-  protected:
     static std::string getKeyIcon(Key key);
-    static bool actionsSortFunc(Action a, Action b);
 
-    virtual void rebuildHints();
+    void rebuildHints();
 
   public:
     Hint(bool animate = true);

@@ -682,10 +682,8 @@ void Application::giveFocus(View* view)
 
 void Application::popView(ViewAnimation animation, std::function<void(void)> cb)
 {
-    if (Application::viewStack.size() <= 1) {// never pop the root view
-        Application::quit();
+    if (Application::viewStack.size() <= 1) // never pop the root view
         return;
-    }
 
     Application::blockInputs();
 
@@ -702,7 +700,7 @@ void Application::popView(ViewAnimation animation, std::function<void(void)> cb)
         Application::viewStack.pop_back();
         delete last;
 
-        // Animate the old view once the old one
+        // Animate the old view once the new one
         // has ended its animation
         if (Application::viewStack.size() > 0 && wait)
         {
@@ -710,7 +708,7 @@ void Application::popView(ViewAnimation animation, std::function<void(void)> cb)
 
             if (newLast->isHidden())
             {
-                newLast->willAppear();
+                newLast->willAppear(false);
                 newLast->show(cb, true, animation);
             }
             else
@@ -727,7 +725,7 @@ void Application::popView(ViewAnimation animation, std::function<void(void)> cb)
     if (!wait && Application::viewStack.size() > 1)
     {
         View* toShow = Application::viewStack[Application::viewStack.size() - 2];
-        toShow->willAppear();
+        toShow->willAppear(false);
         toShow->show(cb, true, animation);
     }
 
@@ -756,7 +754,7 @@ void Application::pushView(View* view, ViewAnimation animation)
     bool fadeOut = last && !last->isTranslucent() && !view->isTranslucent(); // play the fade out animation?
     bool wait    = animation == ViewAnimation::FADE; // wait for the old view animation to be done before showing the new one?
 
-    //view->registerAction("Exit", Key::PLUS, [] { Application::quit(); return true; });
+    view->registerAction("Exit", Key::PLUS, [] { Application::quit(); return true; });
     view->registerAction(
         "FPS", Key::MINUS, [] { Application::toggleFramerateDisplay(); return true; }, true);
 

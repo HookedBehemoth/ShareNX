@@ -122,26 +122,6 @@ class Style
         } Item;
     } List;
 
-    // Grid
-    struct
-    {
-        unsigned marginLeftRight;
-        unsigned marginTop;
-        unsigned marginBottom;
-        unsigned spacing;
-
-        unsigned selectInset;
-
-        // Item
-        struct
-        {
-            unsigned width;
-            unsigned height;
-
-            unsigned selectRadius;
-        } Item;
-    } Grid;
-
     // Label
     struct
     {

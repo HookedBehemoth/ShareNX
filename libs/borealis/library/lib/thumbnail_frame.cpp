@@ -172,22 +172,30 @@ View* ThumbnailSidebar::getDefaultFocus()
 
 void ThumbnailSidebar::setThumbnail(std::string imagePath)
 {
-    if (this->image == nullptr) {
-        this->image = new Image();
-        this->image->setParent(this);
+    if (this->image)
+    {
+        this->image->setImage(imagePath);
     }
-
-    this->image->setImage(imagePath);
+    else
+    {
+        this->image = new Image(imagePath);
+        this->image->setParent(this);
+        this->invalidate();
+    }
 }
 
 void ThumbnailSidebar::setThumbnail(unsigned char* buffer, size_t bufferSize)
 {
-    if (this->image == nullptr) {
-        this->image = new Image();
-        this->image->setParent(this);
+    if (this->image)
+    {
+        this->image->setImage(buffer, bufferSize);
     }
-
-    this->image->setImage(buffer, bufferSize);
+    else
+    {
+        this->image = new Image(buffer, bufferSize);
+        this->image->setParent(this);
+        this->invalidate();
+    }
 }
 
 void ThumbnailSidebar::setSubtitle(std::string subTitle)
