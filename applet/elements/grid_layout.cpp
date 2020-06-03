@@ -28,13 +28,24 @@
 #include <borealis/logger.hpp>
 #include <iterator>
 
+namespace {
+
+    constexpr int GridMarginLeftRight = 95;
+    constexpr int GridMarginTop = 26;
+    constexpr int GridMarginBottom = 23;
+    constexpr int GridSpacing = 10;
+    constexpr int GridSelectInset = 2;
+    constexpr int GridItemWidth  = 210;
+    constexpr int GridItemHeight = 120;
+    constexpr int GridItemSelectRadius = 5;
+
+}
+
 GridContentView::GridContentView() {
-    brls::Style *style = brls::Application::getStyle();
+    this->setMargins(GridMarginTop, GridMarginLeftRight, GridMarginBottom, GridMarginLeftRight);
+    this->setChildSize(GridItemWidth, GridItemHeight);
 
-    this->setMargins(style->Grid.marginTop, style->Grid.marginLeftRight, style->Grid.marginBottom, style->Grid.marginLeftRight);
-    this->setChildSize(style->Grid.Item.width, style->Grid.Item.height);
-
-    this->spacing = style->Grid.spacing;
+    this->spacing = GridSpacing;
 }
 
 void GridContentView::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)

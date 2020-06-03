@@ -23,22 +23,21 @@
 #include <borealis/scroll_view.hpp>
 #include <vector>
 
-class GridContentView : public brls::View
-{
+class GridContentView : public brls::View {
   private:
-    unsigned spacing = 0;
-    unsigned index = 0;
+    unsigned spacing   = 0;
+    unsigned index     = 0;
     unsigned gridWidth = 1;
-    
+
     unsigned childWidth;
     unsigned childHeight;
 
     bool resize = false; // should the view be resized according to children size after a layout?
 
   protected:
-    std::vector<brls::View*> children;
+    std::vector<brls::View *> children;
 
-    bool childFocused          = false;
+    bool childFocused = false;
 
     unsigned marginTop    = 0;
     unsigned marginRight  = 0;
@@ -49,12 +48,12 @@ class GridContentView : public brls::View
     GridContentView();
     ~GridContentView();
 
-    void layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) override;
-    void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
-    brls::View* getNextFocus(brls::FocusDirection direction, void* parentUserdata) override;
-    brls::View* getDefaultFocus() override;
-    void onChildFocusGained(brls::View* child) override;
-    void onChildFocusLost(brls::View* child) override;
+    void layout(NVGcontext *vg, brls::Style *style, brls::FontStash *stash) override;
+    void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
+    brls::View *getNextFocus(brls::FocusDirection direction, void *parentUserdata) override;
+    brls::View *getDefaultFocus() override;
+    void onChildFocusGained(brls::View *child) override;
+    void onChildFocusLost(brls::View *child) override;
     void willAppear(bool resetState = false) override;
     void willDisappear(bool resetState = false) override;
     void onWindowSizeChanged() override;
@@ -80,7 +79,7 @@ class GridContentView : public brls::View
       * If fill is set to true, the child will
       * fill the remaining space
       */
-    void addView(brls::View* view);
+    void addView(brls::View *view);
 
     /**
       * Removes the view at specified
@@ -110,19 +109,18 @@ class GridContentView : public brls::View
     void setFocusedIndex(unsigned index);
     size_t getViewsCount();
 
-    brls::View* getChild(size_t i);
+    brls::View *getChild(size_t i);
 };
 
-class Grid : public brls::ScrollView
-{
+class Grid : public brls::ScrollView {
   private:
-    GridContentView* layout;
+    GridContentView *layout;
 
   public:
     Grid();
     ~Grid();
 
     // Wrapped GridContentView methods
-    void addView(brls::View* view);
+    void addView(brls::View *view);
     void setMargins(unsigned top, unsigned right, unsigned bottom, unsigned left);
 };

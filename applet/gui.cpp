@@ -9,6 +9,8 @@
 #include <album.hpp>
 #include <borealis.hpp>
 
+#include "logo_bin.h"
+
 namespace gui {
 
     namespace {
@@ -21,7 +23,6 @@ namespace gui {
     bool Initialize() {
         /* Set log level */
         brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
-        brls::Application::setDisplayFramerate(true);
 
         if (!brls::Application::init())
             return false;
@@ -47,7 +48,8 @@ namespace gui {
         brls::AppletFrame *albumFrame = new brls::AppletFrame(true, true);
         {
             albumFrame->setTitle("ShareNX");
-            albumFrame->setIcon(BOREALIS_ASSET("icon/logo.png"));
+
+            albumFrame->setIcon(logo_bin, logo_bin_size);
 
             auto *testList = new Grid();
             testList->registerAction(~FILTER, brls::Key::Y, [] {
