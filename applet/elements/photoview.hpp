@@ -4,7 +4,11 @@
 
 #include <memory>
 
-class PhotoView : public AlbumView {
-  public:
-    PhotoView(const CapsAlbumFileId &fileId);
-};
+namespace album {
+
+    class PhotoView : public AlbumView {
+      public:
+        PhotoView(const CapsAlbumFileId &fileId);
+    };
+
+}

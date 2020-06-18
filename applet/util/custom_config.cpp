@@ -12,7 +12,7 @@
 
 using json = nlohmann::json;
 
-namespace imgur {
+namespace album {
 
     namespace {
 
@@ -45,7 +45,7 @@ namespace imgur {
 
     }
 
-    std::string GenerateConfig() {
+    std::string GenerateImgurConfig() {
         /* We can only use the web browser as an application. */
         THROW_UNLESS(appletGetAppletType() == AppletType_Application, WEB_APPLET_MODE);
 

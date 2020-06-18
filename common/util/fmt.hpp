@@ -6,6 +6,7 @@
 namespace fmt {
 
     /* This will have to do till P0645 comes to be. */
+    /* Seems like we'll have fmtlib in borealis. */
     template <typename... Args>
     std::string MakeString(const char *fmt, Args &&... args) {
         size_t size = std::snprintf(nullptr, 0, fmt, args...);

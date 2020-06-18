@@ -7,29 +7,33 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
-class MovieView : public AlbumView {
-  private:
-    AVFormatContext *fmt_ctx      = NULL;
-    AVCodecContext *video_dec_ctx = NULL;
-    int width, height;
-    enum AVPixelFormat pix_fmt;
-    AVStream *video_stream = NULL;
+namespace album {
 
-    int video_stream_idx = -1;
-    AVFrame *frame       = NULL;
-    AVPacket pkt;
+    class MovieView : public AlbumView {
+      private:
+        AVFormatContext *fmt_ctx      = NULL;
+        AVCodecContext *video_dec_ctx = NULL;
+        int width, height;
+        enum AVPixelFormat pix_fmt;
+        AVStream *video_stream = NULL;
 
-    u8 *decodeWorkBuffer = nullptr;
+        int video_stream_idx = -1;
+        AVFrame *frame       = NULL;
+        AVPacket pkt;
 
-    int frameCount;
-    bool running = false;
+        u8 *decodeWorkBuffer = nullptr;
 
-  public:
-    MovieView(const CapsAlbumFileId &fileId, int frameCount);
+        int frameCount;
+        bool running = false;
 
-    ~MovieView();
+      public:
+        MovieView(const CapsAlbumFileId &fileId, int frameCount);
 
-    void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx);
+        ~MovieView();
 
-    bool tryReceive(AVCodecContext *dec);
-};
+        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx);
+
+        bool tryReceive(AVCodecContext *dec);
+    };
+
+}

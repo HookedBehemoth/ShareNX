@@ -2,78 +2,83 @@
 
 #include "../translation/translation.hpp"
 
-PopupSeparator::PopupSeparator() {
-    auto *style = brls::Application::getStyle();
-    this->setHeight(style->Sidebar.Separator.height);
-}
+namespace album {
 
-void PopupSeparator::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
-    nvgFillColor(vg, a(ctx->theme->sidebarSeparatorColor));
-    nvgBeginPath(vg);
-    nvgRect(vg, x, y + height / 2, width, 1);
-    nvgFill(vg);
-}
+    PopupSeparator::PopupSeparator() {
+        auto *style = brls::Application::getStyle();
+        this->setHeight(style->Sidebar.Separator.height);
+    }
 
-PopupItem::PopupItem(const std::string &label, PopupView *popupView, std::function<bool()> onClick)
-    : label(label), popupView(popupView) {
-    auto *style = brls::Application::getStyle();
-    this->setHeight(style->Sidebar.Item.height);
+    void PopupSeparator::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
+        nvgFillColor(vg, a(ctx->theme->sidebarSeparatorColor));
+        nvgBeginPath(vg);
+        nvgRect(vg, x, y + height / 2, width, 1);
+        nvgFill(vg);
+    }
 
-    this->registerAction(~OK, brls::Key::A, onClick);
-}
+    PopupItem::PopupItem(const std::string &label, PopupView *popupView, std::function<bool()> onClick)
+        : label(label), popupView(popupView) {
+        auto *style = brls::Application::getStyle();
+        this->setHeight(style->Sidebar.Item.height);
 
-void PopupItem::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
-    nvgFillColor(vg, a(ctx->theme->textColor));
-    nvgFontSize(vg, 25);
-    nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
-    nvgFontFaceId(vg, ctx->fontStash->regular);
-    nvgBeginPath(vg);
-    nvgText(vg, x + style->Sidebar.Item.textOffsetX + style->Sidebar.Item.padding, y + height / 2, this->label.c_str(), nullptr);
-}
+        this->registerAction(~OK, brls::Key::A, onClick);
+    }
 
-brls::View *PopupItem::getDefaultFocus() {
-    return this;
-}
+    void PopupItem::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
+        nvgFillColor(vg, a(ctx->theme->textColor));
+        nvgFontSize(vg, 25);
+        nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+        nvgFontFaceId(vg, ctx->fontStash->regular);
+        nvgBeginPath(vg);
+        nvgText(vg, x + style->Sidebar.Item.textOffsetX + style->Sidebar.Item.padding, y + height / 2, this->label.c_str(), nullptr);
+    }
 
-void PopupItem::onFocusGained() {
-    View::onFocusGained();
-}
+    brls::View *PopupItem::getDefaultFocus() {
+        return this;
+    }
 
-PopupView::PopupView(brls::View *parent)
-    : BoxLayout(brls::BoxLayoutOrientation::VERTICAL) {
-    this->registerAction(~BACK, brls::Key::B, [this, parent] {
-        this->hide([] {}, true, brls::ViewAnimation::SLIDE_RIGHT);
-        brls::Application::giveFocus(parent);
-        return true;
-    });
-    auto *style = brls::Application::getStyle();
+    void PopupItem::onFocusGained() {
+        View::onFocusGained();
+    }
 
-    this->setWidth(460);
-    this->setSpacing(style->Sidebar.spacing);
-    this->setMargins(155, 40, 155, 40);
-    this->setBackground(brls::Background::NONE);
+    PopupView::PopupView(brls::View *parent)
+        : BoxLayout(brls::BoxLayoutOrientation::VERTICAL) {
+        this->registerAction(~BACK, brls::Key::B, [this, parent] {
+            this->hide([] {}, true, brls::ViewAnimation::SLIDE_RIGHT);
+            brls::Application::giveFocus(parent);
+            return true;
+        });
+        auto *style = brls::Application::getStyle();
 
-    this->hide([] {}, false);
-}
+        this->setWidth(460);
+        this->setSpacing(style->Sidebar.spacing);
+        this->setMargins(155, 40, 155, 40);
+        this->setBackground(brls::Background::NONE);
 
-PopupItem *PopupView::addItem(const std::string &label, std::function<bool()> onClick) {
-    auto *item = new PopupItem(label, this, onClick);
+        this->hide([] {}, false);
+    }
 
-    this->addView(item);
+    PopupItem *PopupView::addItem(const std::string &label, std::function<bool()> onClick) {
+        auto *item = new PopupItem(label, this, onClick);
 
-    return item;
-}
+        item->overrideThemeVariant(brls::Application::getThemeValuesForVariant(brls::ThemeVariant_DARK));
+        this->addView(item);
 
-void PopupView::addSeparator() {
-    auto *separator = new PopupSeparator();
-    this->addView(separator);
-}
+        return item;
+    }
 
-void PopupView::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
-    nvgFillColor(vg, a(nvgRGBAf(0, 0, 0, 0.83f)));
-    nvgBeginPath(vg);
-    nvgRect(vg, x, y, width, height);
-    nvgFill(vg);
+    void PopupView::addSeparator() {
+        auto *separator = new PopupSeparator();
+        this->addView(separator);
+    }
 
-    BoxLayout::draw(vg, x, y, width, height, style, ctx);
+    void PopupView::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
+        nvgFillColor(vg, a(nvgRGBAf(0, 0, 0, 0.83f)));
+        nvgBeginPath(vg);
+        nvgRect(vg, x, y, width, height);
+        nvgFill(vg);
+
+        BoxLayout::draw(vg, x, y, width, height, style, ctx);
+    }
+
 }

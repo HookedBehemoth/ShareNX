@@ -1,6 +1,7 @@
 #include "caps.hpp"
 
 #include <album.hpp>
+#include <atomic>
 #include <cstdio>
 #include <memory>
 
@@ -80,19 +81,22 @@ namespace album {
         return {};
     }
 
-    const std::vector<CapsAlbumEntry> &getAllEntries() {
+    const std::vector<CapsAlbumEntry> &getAllEntries(bool invalidate) {
         static std::vector<CapsAlbumEntry> combined;
-        if (!combined.empty())
+        if (!invalidate && !combined.empty())
             return combined;
 
-        /* Get nand and sd entries. */
-        auto nand_entries = getEntries(CapsAlbumStorage_Nand);
-        auto sd_entries = getEntries(CapsAlbumStorage_Sd);
+        combined.resize(12100);
+        u64 nand_count = 0;
+        u64 sd_count   = 0;
 
-        /* Combine vector */
-        combined.reserve(nand_entries.size() + sd_entries.size());
-        combined.insert(combined.begin(), nand_entries.begin(), nand_entries.end());
-        combined.insert(combined.end(), sd_entries.begin(), sd_entries.end());
+        auto *data = combined.data();
+        capsaGetAlbumFileList(CapsAlbumStorage_Nand, &nand_count, data, 1100);
+
+        data += nand_count;
+        capsaGetAlbumFileList(CapsAlbumStorage_Sd, &sd_count, data, 11000);
+
+        combined.resize(nand_count + sd_count);
 
         /* Sort entries. */
         std::sort(combined.begin(), combined.end(), std::greater<>());
@@ -123,36 +127,54 @@ namespace album {
             constexpr const size_t AlbumMovieBufferSize = 0x40000;
             alignas(0x1000) u8 buffer[AlbumMovieBufferSize];
 
-            u64 stream_id = 0;
-            u64 stream_size = 0;
-            u64 progress = 0;
-            s64 last_buffer_index = -1;
+            CapsAlbumFileId file_id;
+            std::atomic<int> ref_count = 0;
+            u64 stream_id              = 0;
+            size_t stream_size         = 0;
+            size_t progress            = 0;
+            s64 last_buffer_index      = -1;
 
         }
 
-        Result Start(const CapsAlbumFileId &file_id) {
+        Result Start(const CapsAlbumFileId &_file_id) {
+            if (ref_count++) {
+                if (std::memcmp(&file_id, &_file_id, sizeof(file_id)) == 0)
+                    return 0;
+                return MAKERESULT(211, 13);
+            }
+
             if (stream_id != 0)
-                R_TRY(Close());
+                return MAKERESULT(211, 14);
+
+            file_id = _file_id;
 
             R_TRY(capsaOpenAlbumMovieStream(&stream_id, &file_id));
             std::memset(buffer, 0, AlbumMovieBufferSize);
 
-            progress = 0;
+            progress          = 0;
             last_buffer_index = -1;
             return capsaGetAlbumMovieStreamSize(stream_id, &stream_size);
         }
 
         Result Close() {
-            Result rc = capsaCloseAlbumMovieStream(stream_id);
-            stream_id = 0;
-            stream_size = 0;
-            progress = 0;
-            last_buffer_index = -1;
+            Result rc = 0;
+            if (--ref_count == 0) {
+                puts("closing album read stream");
+                rc                = capsaCloseAlbumMovieStream(stream_id);
+                stream_id         = 0;
+                stream_size       = 0;
+                progress          = 0;
+                last_buffer_index = -1;
+            }
             return rc;
         }
 
-        u64 GetStreamSize() {
+        size_t GetStreamSize() {
             return stream_size;
+        }
+
+        size_t GetProgress() {
+            return progress;
         }
 
         size_t Read(char *out_buffer, size_t size, size_t nitems, void *) {
@@ -164,15 +186,15 @@ namespace album {
                 return 0;
 
             s64 bufferIndex = progress / AlbumMovieBufferSize;
-            u64 curOffset = progress % AlbumMovieBufferSize;
-            u64 readSize = std::min({max, AlbumMovieBufferSize - curOffset, remaining});
+            u64 curOffset   = progress % AlbumMovieBufferSize;
+            u64 readSize    = std::min({max, AlbumMovieBufferSize - curOffset, remaining});
 
             /* Do we need to fetch? */
             if (bufferIndex != last_buffer_index) {
                 u64 actualSize = 0;
 
                 /* Read movie data to temporary buffer. */
-                Result rc=0;
+                Result rc = 0;
                 if (R_FAILED(rc = capsaReadMovieDataFromAlbumMovieReadStream(stream_id, bufferIndex * AlbumMovieBufferSize, buffer, AlbumMovieBufferSize, &actualSize))) {
                     printf("read failed: 0x%x\n", rc);
                     return 0;
@@ -193,18 +215,29 @@ namespace album {
         }
 
         int64_t seek(void *, int64_t offset, int whence) {
-            if (whence == 0x10000)
-                return stream_size;
+            int64_t newOffset = 0;
 
-            if (static_cast<int64_t>(stream_size) < offset)
+            switch (whence) {
+                case SEEK_SET:
+                    newOffset = offset;
+                    break;
+                case SEEK_CUR:
+                    newOffset = progress + offset;
+                    break;
+                case SEEK_END:
+                    newOffset = stream_size - 1 - offset;
+                    break;
+                case 0x10000:
+                    return stream_size;
+                default:
+                    return -419;
+            }
+
+            if (newOffset < 0 || static_cast<int64_t>(stream_size) < offset)
                 return -420;
 
             last_buffer_index = -1;
-            return progress = offset;
-        }
-
-        float Progress() {
-            return (float)progress / (float)stream_size;
+            return progress   = newOffset;
         }
 
     }

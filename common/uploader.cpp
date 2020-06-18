@@ -24,9 +24,8 @@ namespace album {
             return size * nmemb;
         }
 
-        int XferCallback(std::function<void(size_t, size_t)> *userp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
-            (*userp)(dltotal, dlnow);
-            return 1;
+        int XferCallback(std::function<bool(size_t, size_t)> *userp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
+            return (*userp)(ultotal, ulnow);
         }
 
         const Hoster lewd_pics = {
@@ -42,17 +41,17 @@ namespace album {
 
     }
 
-    void Initialize() {
+    void InitializeHoster() {
         std::error_code err;
         std::filesystem::create_directory(HosterConfigPath, err);
 
-        Update();
+        UpdateHoster();
     }
 
-    void Exit() {
+    void ExitHoster() {
     }
 
-    void Update() {
+    void UpdateHoster() {
         s_HosterList.clear();
 
         std::error_code err;
@@ -68,8 +67,10 @@ namespace album {
         return s_HosterList;
     }
 
-    std::string Hoster::Upload(const CapsAlbumFileId &file_id, std::function<void(double, double)> cb) {
+    std::string Hoster::Upload(const CapsAlbumFileId &file_id, std::function<bool(size_t, size_t)> cb) {
         std::unique_ptr<char[]> imgBuffer;
+
+        size_t progress = 0;
 
         /* Init curl. */
         CURL *curl = curl_easy_init();
@@ -106,6 +107,8 @@ namespace album {
         } else if (file_id.content == CapsAlbumFileContents_Movie) {
             /* Start read. */
             R_STR(album::MovieReader::Start(file_id), "Failed to open movie stream");
+            progress = album::MovieReader::GetProgress();
+            album::MovieReader::seek(nullptr, 0, SEEK_SET);
 
             /* Associate callback. */
             curl_mime_type(file_part, "video/mp4");
@@ -139,6 +142,7 @@ namespace album {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
         curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
         curl_easy_setopt(curl, CURLOPT_URL, this->url.c_str());
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cb);
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, XferCallback);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
@@ -155,7 +159,11 @@ namespace album {
         curl_mime_free(mime);
         curl_easy_cleanup(curl);
 
-        album::MovieReader::Close();
+        if (file_id.content == CapsAlbumFileContents_Movie) {
+            /* Set read progess back. */
+            album::MovieReader::seek(nullptr, progress, SEEK_SET);
+            album::MovieReader::Close();
+        }
 
         if (res == CURLE_OK) {
             if (http_code == 200) {

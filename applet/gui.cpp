@@ -3,19 +3,17 @@
 #include "elements/elm_filteritem.hpp"
 #include "elements/elm_lazyimage.hpp"
 #include "elements/grid_layout.hpp"
-#include "imgur.hpp"
+#include "exceptions.hpp"
+#include "logo_bin.h"
 #include "translation/translation.hpp"
 
 #include <album.hpp>
 #include <borealis.hpp>
 
-#include "logo_bin.h"
-
-namespace gui {
+namespace album {
 
     namespace {
 
-        bool found_language      = false;
         bool init_album_accessor = false;
 
     }
@@ -24,10 +22,14 @@ namespace gui {
         /* Set log level */
         brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
+        brls::Application::setQuitOnPopRoot(true);
+        brls::Application::setGlobalQuit(false);
+
         if (!brls::Application::init())
             return false;
 
         /* Official software actually sets a function pointer that's called in nn::applet::StartLibraryApplet instead of setting the jump flag */
+        /* Libnx doesn't check on that flag. Modified locally. */
         libappletSetJumpFlag(appletGetAppletType() == AppletType_LibraryApplet);
 
         socketInitializeDefault();
@@ -35,11 +37,9 @@ namespace gui {
         nsInitialize();
         init_album_accessor = R_SUCCEEDED(capsaInitialize());
 
-        found_language = Translation::DetectSystemLanguage();
-        if (!found_language)
-            Translation::SetLanguage(Translation::Language::English_US);
+        lang::DetectSystemLanguage();
 
-        album::Initialize();
+        InitializeHoster();
 
         return true;
     }
@@ -95,32 +95,24 @@ namespace gui {
         // Add the root view to the stack
         brls::Application::pushView(albumFrame);
 
-        auto QuitAction = [](brls::View *) { brls::Application::quit(); };
-
-        if (!found_language) {
-            brls::Dialog *dialog = new brls::Dialog("Failed to get system language!\nDefaulted to en-US!");
-            dialog->addButton(~CONTINUE, [dialog](brls::View *view) {
-                dialog->close();
-            });
-            dialog->addButton(~EXIT, QuitAction);
-            dialog->open();
-        }
-
         if (!init_album_accessor) {
             brls::Dialog *dialog = new brls::Dialog(~ACCESSOR_INIT);
-            dialog->addButton(~EXIT, QuitAction);
+            dialog->addButton(~EXIT, [](brls::View *) { brls::Application::quit(); });
             dialog->open();
         }
     }
 
     void Start() {
         // Run the app
-        while (brls::Application::mainLoop())
-            ;
+        while (brls::Application::mainLoop()) {
+            auto *crashFrame = getCrashFrame();
+            if (crashFrame != nullptr)
+                brls::Application::pushView(crashFrame);
+        }
     }
 
     void Cleanup() {
-        album::Exit();
+        ExitHoster();
         capsaExit();
         nsExit();
         setExit();

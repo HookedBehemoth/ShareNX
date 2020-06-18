@@ -3,24 +3,28 @@
 #include <borealis.hpp>
 #include <switch.h>
 
-class LazyImage : public brls::Image {
-  private:
-    CapsAlbumFileId file_id;
-    bool ready               = false;
-    bool loading             = false;
-    char *videoLength        = nullptr;
-    int frameCount           = 0;
-    unsigned char *tmpBuffer = nullptr;
+namespace album {
 
-  public:
-    LazyImage(const CapsAlbumFileId &id);
-    ~LazyImage();
+    class LazyImage : public brls::Image {
+      private:
+        CapsAlbumFileId file_id;
+        bool ready               = false;
+        bool loading             = false;
+        char *videoLength        = nullptr;
+        int frameCount           = 0;
+        unsigned char *tmpBuffer = nullptr;
 
-    void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) final;
-    View *getDefaultFocus() final;
+      public:
+        LazyImage(const CapsAlbumFileId &id);
+        ~LazyImage();
 
-    void SetAlbumThumbnailImage(unsigned char *buffer, char *length, int count);
+        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) final;
+        View *getDefaultFocus() final;
 
-  private:
-    void LoadImage();
-};
+        void SetAlbumThumbnailImage(unsigned char *buffer, char *length, int count);
+
+      private:
+        void LoadImage();
+    };
+
+}

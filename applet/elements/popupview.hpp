@@ -2,38 +2,42 @@
 
 #include <borealis.hpp>
 
-// A sidebar with multiple tabs
-class PopupSeparator : public brls::View {
-  public:
-    PopupSeparator();
+namespace album {
 
-    void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
-};
+    // A sidebar with multiple tabs
+    class PopupSeparator : public brls::View {
+      public:
+        PopupSeparator();
 
-class PopupView;
+        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
+    };
 
-class PopupItem : public brls::View {
-  private:
-    std::string label;
+    class PopupView;
 
-    PopupView *popupView = nullptr;
+    class PopupItem : public brls::View {
+      private:
+        std::string label;
 
-  public:
-    PopupItem(const std::string &label, PopupView *popupView, std::function<bool()> onClick);
+        PopupView *popupView = nullptr;
 
-    void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
+      public:
+        PopupItem(const std::string &label, PopupView *popupView, std::function<bool()> onClick);
 
-    brls::View *getDefaultFocus() override;
+        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
 
-    void onFocusGained() override;
-};
+        brls::View *getDefaultFocus() override;
 
-class PopupView : public brls::BoxLayout {
-  public:
-    PopupView(brls::View *parent);
+        void onFocusGained() override;
+    };
 
-    PopupItem *addItem(const std::string &label, std::function<bool()> onClick);
-    void addSeparator();
+    class PopupView : public brls::BoxLayout {
+      public:
+        PopupView(brls::View *parent);
 
-    void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
-};
+        PopupItem *addItem(const std::string &label, std::function<bool()> onClick);
+        void addSeparator();
+
+        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
+    };
+
+}

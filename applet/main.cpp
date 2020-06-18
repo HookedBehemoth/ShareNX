@@ -21,17 +21,17 @@
 
 int main(int argc, char *argv[]) {
     /* Initialize all album functionality */
-    if (!gui::Initialize())
+    if (!album::Initialize())
         return EXIT_FAILURE;
 
     /* Create GUI */
-    gui::MakeGui();
+    album::MakeGui();
 
     /* Start GUI */
-    gui::Start();
+    album::Start();
 
     /* Cleanup */
-    gui::Cleanup();
+    album::Cleanup();
 
     /* Exit */
     return EXIT_SUCCESS;

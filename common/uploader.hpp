@@ -16,15 +16,15 @@ namespace album {
         std::map<std::string, std::string> body;
         std::vector<std::string> header;
 
-        std::string Upload(const CapsAlbumFileId &file_id, std::function<void(double, double)> cb = [](double, double) {});
+        std::string Upload(const CapsAlbumFileId &file_id, std::function<bool(size_t, size_t)> cb = [](size_t, size_t) { return true; });
         std::string ParseResponse(const std::string &response);
         void ParseFile(const std::string &path);
     };
 
-    void Initialize();
-    void Exit();
+    void InitializeHoster();
+    void ExitHoster();
 
-    void Update();
+    void UpdateHoster();
     std::vector<Hoster> &GetHosterList();
 
 }

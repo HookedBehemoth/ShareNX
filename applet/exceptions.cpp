@@ -1,6 +1,7 @@
 #include "translation/translation.hpp"
 
 #include <borealis.hpp>
+#include <borealis/crash_frame.hpp>
 #include <cstring>
 #include <string>
 #include <switch.h>
@@ -8,12 +9,14 @@
 
 extern "C" {
 
-alignas(16) u8 __nx_exception_stack[0x8000];
-u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
-void __libnx_exception_handler(ThreadExceptionDump *ctx);
-u32 __nx_applet_exit_mode;
+    alignas(16) u8 __nx_exception_stack[0x8000];
+    u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
+    void __libnx_exception_handler(ThreadExceptionDump *ctx);
+    u32 __nx_applet_exit_mode;
 
 }
+
+brls::CrashFrame *g_crashFrame = nullptr;
 
 static void unwindStack(u64 *outStackTrace, s32 *outStackTraceSize, size_t maxStackTraceSize, u64 currFp) {
     struct StackFrame {
@@ -47,7 +50,6 @@ static void printDebugInfo(ThreadExceptionDump *ctx, uintptr_t base_address) {
 }
 
 void __libnx_exception_handler(ThreadExceptionDump *ctx) {
-    static bool alreadyCrashed = false;
     static ThreadExceptionDump ctxBackup;
 
     u32 p;
@@ -55,9 +57,7 @@ void __libnx_exception_handler(ThreadExceptionDump *ctx) {
     svcQueryMemory(&info, &p, (u64)&__libnx_exception_handler);
     u64 base_address = info.addr;
 
-    printDebugInfo(ctx, base_address);
-
-    if (alreadyCrashed) {
+    if (g_crashFrame != nullptr) {
         brls::Logger::error("Fatal exception thrown during exception handling. Closing immediately.");
 
         // Setup FatalCpuContext to pass on crash information to fatal
@@ -84,7 +84,8 @@ void __libnx_exception_handler(ThreadExceptionDump *ctx) {
             svcSleepThread(UINT64_MAX);
     }
 
-    alreadyCrashed = true;
+    printDebugInfo(ctx, base_address);
+
     std::memcpy(&ctxBackup, ctx, sizeof(ThreadExceptionDump));
 
     const char *errorDesc = nullptr;
@@ -116,14 +117,28 @@ void __libnx_exception_handler(ThreadExceptionDump *ctx) {
             break;
     }
 
-    brls::Application::crash(fmt::MakeString("%s\n\n%s: %s\nPC: BASE + 0x%016lx",
-                                             ~FATAL_EXCEPTION,
-                                             ~REASON,
-                                             errorDesc,
-                                             ctx->pc.x - base_address));
-    while (brls::Application::mainLoop())
-        ;
+    g_crashFrame = new brls::CrashFrame(fmt::MakeString("%s\n\n%s: %s\nPC: BASE + 0x%016lx",
+                                                        ~album::FATAL_EXCEPTION,
+                                                        ~album::REASON,
+                                                        errorDesc,
+                                                        ctx->pc.x - base_address));
 
-    __nx_applet_exit_mode = 1;
-    exit(1);
+    if (threadGetSelf()->stack_mem == nullptr) {
+        /* Is UI thread */
+        brls::Application::pushView(g_crashFrame);
+        g_crashFrame = nullptr;
+        while (brls::Application::mainLoop())
+            ;
+
+        __nx_applet_exit_mode = 1;
+        exit(1);
+    } else {
+        threadExit();
+    }
+}
+
+brls::CrashFrame *getCrashFrame() {
+    auto *frame = g_crashFrame;
+    g_crashFrame = nullptr;
+    return frame;
 }
