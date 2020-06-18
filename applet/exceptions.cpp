@@ -13,6 +13,7 @@ extern "C" {
     u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
     void __libnx_exception_handler(ThreadExceptionDump *ctx);
     u32 __nx_applet_exit_mode;
+    u32 __nx_applet_type = AppletType_LibraryApplet;
 
 }
 

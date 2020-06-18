@@ -44,8 +44,9 @@ DATA		:=	data
 INCLUDES	:=	libs/json libs/borealis common
 APP_TITLE	:=	ShareNX 
 APP_AUTHOR	:=	Behemoth & Huntereb
+CONFIG_JSON	:=	album.json
 
-ROMFS				:=	libs/borealis/resources
+#ROMFS				:=	libs/borealis/resources
 BOREALIS_PATH		:=	libs/borealis
 BOREALIS_RESOURCES	:=	romfs:/
 
