@@ -5,5 +5,6 @@
 namespace album {
 
     std::string GenerateImgurConfig();
+    std::string GenerateElixireConfig();
 
 }

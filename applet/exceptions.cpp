@@ -50,6 +50,7 @@ static void printDebugInfo(ThreadExceptionDump *ctx, uintptr_t base_address) {
 }
 
 void __libnx_exception_handler(ThreadExceptionDump *ctx) {
+    thread_local static bool alreadyCrashed = false;
     static ThreadExceptionDump ctxBackup;
 
     u32 p;
@@ -57,7 +58,7 @@ void __libnx_exception_handler(ThreadExceptionDump *ctx) {
     svcQueryMemory(&info, &p, (u64)&__libnx_exception_handler);
     u64 base_address = info.addr;
 
-    if (g_crashFrame != nullptr) {
+    if (alreadyCrashed) {
         brls::Logger::error("Fatal exception thrown during exception handling. Closing immediately.");
 
         // Setup FatalCpuContext to pass on crash information to fatal
@@ -83,6 +84,8 @@ void __libnx_exception_handler(ThreadExceptionDump *ctx) {
         while (true)
             svcSleepThread(UINT64_MAX);
     }
+
+    alreadyCrashed = true;
 
     printDebugInfo(ctx, base_address);
 

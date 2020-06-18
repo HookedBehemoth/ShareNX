@@ -24,7 +24,7 @@ namespace album {
         ACCESSOR_INIT,
         TOKEN_MISSING,
         WEB_APPLET_MODE,
-        WEB_EXIT_REASON,
+        CANCELLED,
         CONFIG_SAVED_FMT,
         /* */
         DELETE_INFO,

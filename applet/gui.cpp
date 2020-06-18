@@ -17,6 +17,28 @@ namespace album {
 
         bool init_album_accessor = false;
 
+        typedef std::string (*cfg_callback)();
+
+        bool MakeConfig(cfg_callback cb) {
+            std::string msg;
+            try {
+                msg = fmt::MakeString(~CONFIG_SAVED_FMT, cb().c_str());
+                UpdateHoster();
+            } catch (Result rc) {
+                msg = fmt::MakeString("%s: 2%03d-%04d", ~ERROR, R_MODULE(rc), R_DESCRIPTION(rc));
+            } catch (String desc) {
+                msg = lang::Translate(desc);
+            } catch (std::exception &e) {
+                msg = e.what();
+            }
+            brls::Dialog *dialog = new brls::Dialog(msg);
+            dialog->addButton(~BACK, [dialog](brls::View *) { dialog->close(); });
+            dialog->setCancelable(true);
+
+            dialog->open();
+            return true;
+        }
+
         bool OpenHosterGui() {
             brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
             filterFrame->setTitle("ShareNX \uE134");
@@ -24,25 +46,17 @@ namespace album {
 
             brls::List *filterList = new brls::List();
 
-            auto imgurButton = new brls::ListItem("Imgur", "Log into your Imgur Account to create a custom upload config.");
+            auto imgurButton = new brls::ListItem("Imgur", "Log into an Imgur Account or create a new one.\nRequires Application override.");
             imgurButton->registerAction(~OK, brls::Key::A, [] {
-                std::string msg;
-                try {
-                    msg = fmt::MakeString(~CONFIG_SAVED_FMT, GenerateImgurConfig().c_str());
-                    UpdateHoster();
-                } catch (Result rc) {
-                    msg = fmt::MakeString("%s: 2%03d-%04d", ~ERROR, R_MODULE(rc), R_DESCRIPTION(rc));
-                } catch (String desc) {
-                    msg = lang::Translate(desc);
-                }
-                brls::Dialog *dialog = new brls::Dialog(msg);
-                dialog->addButton(~BACK, [dialog](brls::View *) { dialog->close(); });
-                dialog->setCancelable(true);
-
-                dialog->open();
-                return true;
+                return MakeConfig(&GenerateImgurConfig);
             });
             filterList->addView(imgurButton);
+
+            auto elixireButton = new brls::ListItem("Elixi.re", "Log into your Elixi.re account.");
+            elixireButton->registerAction(~OK, brls::Key::A, [] {
+                return MakeConfig(&GenerateElixireConfig);
+            });
+            filterList->addView(elixireButton);
 
             filterFrame->setContentView(filterList);
             brls::Application::pushView(filterFrame);
@@ -122,6 +136,7 @@ namespace album {
         /* Libnx doesn't check on that flag. Modified locally. */
         libappletSetJumpFlag(appletGetAppletType() == AppletType_LibraryApplet);
 
+        accountInitialize(AccountServiceType_Application);
         socketInitializeDefault();
         setInitialize();
         nsInitialize();
@@ -159,6 +174,7 @@ namespace album {
         nsExit();
         setExit();
         socketExit();
+        accountExit();
     }
 
 }

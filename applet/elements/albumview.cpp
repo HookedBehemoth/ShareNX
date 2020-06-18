@@ -38,7 +38,6 @@ namespace album {
             dialog->addButton(~DELETE, [this, dialog](brls::View *view) {
                 dialog->close([fileId = this->fileId] {
                     brls::Application::popView(brls::ViewAnimation::FADE, [fileId] {
-                        brls::Logger::info("Deleting file");
                         Result rc = capsaDeleteAlbumFile(&fileId);
                         if (R_FAILED(rc)) {
                             brls::Logger::error("Failed to delete file");
@@ -58,7 +57,6 @@ namespace album {
             dialog->addButton(~COPY, [this, dialog](brls::View *view) {
                 Result rc          = capsaStorageCopyAlbumFile(&this->fileId, this->fileId.storage == CapsAlbumStorage_Nand ? CapsAlbumStorage_Sd : CapsAlbumStorage_Nand);
                 std::string result = R_SUCCEEDED(rc) ? "Successfully copied!" : fmt::MakeString("Copy failed: 0x%x", rc);
-                brls::Logger::info("rc: 0x%x", rc);
                 dialog->close([result] {
                     auto *dialog = new brls::Dialog(result);
                     dialog->addButton(~OK, [dialog](brls::View *) { dialog->close(); });

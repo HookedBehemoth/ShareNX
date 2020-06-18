@@ -174,7 +174,7 @@ namespace album {
                     return "Invalid response";
                 }
             } else {
-                return fmt::MakeString("Http Code: %d", http_code);
+                return fmt::MakeString("Http Code: %ld", http_code);
             }
         } else {
             return curl_easy_strerror(res);
