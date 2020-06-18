@@ -1,6 +1,6 @@
-#include "imgur.hpp"
+#include "custom_config.hpp"
 
-#include "translation/translation.hpp"
+#include "../translation/translation.hpp"
 
 #include <album.hpp>
 #include <cstring>
@@ -16,10 +16,10 @@ namespace album {
 
     namespace {
 
-        constexpr const char *ImgurAuthUrl = "https://api.imgur.com/oauth2/authorize?client_id=" IMGUR_CLIENT_ID "&response_type=token&state=auth";
+        constexpr const char *ImgurAuthUrl      = "https://api.imgur.com/oauth2/authorize?client_id=" IMGUR_CLIENT_ID "&response_type=token&state=auth";
         constexpr const char *ImgurAuthCallback = "http://localhost";
-        constexpr const char *ImgurKeywords[3] = {"token_type=", "access_token=", "account_username="};
-        constexpr size_t ImgurKeywordCount = sizeof(ImgurKeywords) / sizeof(const char *);
+        constexpr const char *ImgurKeywords[3]  = {"token_type=", "access_token=", "account_username="};
+        constexpr size_t ImgurKeywordCount      = sizeof(ImgurKeywords) / sizeof(const char *);
 
         void GetToken(char *url, int count, const char *const *matches, const char **out) {
             int len[count];

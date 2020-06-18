@@ -6,6 +6,7 @@
 #include "exceptions.hpp"
 #include "logo_bin.h"
 #include "translation/translation.hpp"
+#include "util/custom_config.hpp"
 
 #include <album.hpp>
 #include <borealis.hpp>
@@ -15,6 +16,95 @@ namespace album {
     namespace {
 
         bool init_album_accessor = false;
+
+        bool OpenHosterGui() {
+            brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
+            filterFrame->setTitle("ShareNX \uE134");
+            filterFrame->setIcon(logo_bin, logo_bin_size);
+
+            brls::List *filterList = new brls::List();
+
+            auto imgurButton = new brls::ListItem("Imgur", "Log into your Imgur Account to create a custom upload config.");
+            imgurButton->registerAction(~OK, brls::Key::A, [] {
+                std::string msg;
+                try {
+                    msg = fmt::MakeString(~CONFIG_SAVED_FMT, GenerateImgurConfig().c_str());
+                    UpdateHoster();
+                } catch (Result rc) {
+                    msg = fmt::MakeString("%s: 2%03d-%04d", ~ERROR, R_MODULE(rc), R_DESCRIPTION(rc));
+                } catch (String desc) {
+                    msg = lang::Translate(desc);
+                }
+                brls::Dialog *dialog = new brls::Dialog(msg);
+                dialog->addButton(~BACK, [dialog](brls::View *) { dialog->close(); });
+                dialog->setCancelable(true);
+
+                dialog->open();
+                return true;
+            });
+            filterList->addView(imgurButton);
+
+            filterFrame->setContentView(filterList);
+            brls::Application::pushView(filterFrame);
+
+            return true;
+        }
+
+        bool OpenFilterGui() {
+            brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
+            filterFrame->setTitle(~FILTER);
+
+            brls::List *filterList = new brls::List();
+            filterList->addView(new FilterListItem());
+            filterList->addView(new brls::ListItemGroupSpacing());
+            filterList->addView(new FilterListItem(CapsAlbumFileContents_ScreenShot));
+            filterList->addView(new FilterListItem(CapsAlbumFileContents_Movie));
+            filterList->addView(new FilterListItem(CapsAlbumStorage_Nand));
+            filterList->addView(new FilterListItem(CapsAlbumStorage_Sd));
+            filterList->addView(new brls::ListItemGroupSpacing());
+
+            /* Count entries by application ID */
+            int appletCount = 0;
+            std::map<u64, int> applicationMap;
+            for (const auto &entry : album::getAllEntries()) {
+                if (entry.file_id.application_id < 0x010000000000ffff) {
+                    appletCount++;
+                } else {
+                    applicationMap[entry.file_id.application_id]++;
+                }
+            }
+
+            for (auto [tid, count] : applicationMap)
+                filterList->addView(new FilterListItem(tid, count));
+
+            filterList->addView(new FilterListItem(0, appletCount));
+
+            filterFrame->setContentView(filterList);
+            brls::Application::pushView(filterFrame);
+
+            return true;
+        }
+
+        void OpenMainGui() {
+            brls::AppletFrame *albumFrame = new brls::AppletFrame(true, true);
+            {
+                albumFrame->setTitle("ShareNX \uE134");
+                albumFrame->setIcon(logo_bin, logo_bin_size);
+
+                /* TODO: Recycler view */
+                auto *testList = new Grid();
+                testList->registerAction(~FILTER, brls::Key::Y, &OpenFilterGui);
+                testList->registerAction("Custom Config", brls::Key::MINUS, &OpenHosterGui);
+
+                for (const auto &entry : album::getAllEntries())
+                    testList->addView(new LazyImage(entry.file_id));
+
+                albumFrame->setContentView(testList);
+            }
+
+            // Add the root view to the stack
+            brls::Application::pushView(albumFrame);
+        };
 
     }
 
@@ -45,55 +135,7 @@ namespace album {
     }
 
     void MakeGui() {
-        brls::AppletFrame *albumFrame = new brls::AppletFrame(true, true);
-        {
-            albumFrame->setTitle("ShareNX");
-
-            albumFrame->setIcon(logo_bin, logo_bin_size);
-
-            auto *testList = new Grid();
-            testList->registerAction(~FILTER, brls::Key::Y, [] {
-                brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
-                filterFrame->setTitle(~FILTER);
-
-                brls::List *filterList = new brls::List();
-                filterList->addView(new FilterListItem());
-                filterList->addView(new brls::ListItemGroupSpacing());
-                filterList->addView(new FilterListItem(CapsAlbumFileContents_ScreenShot));
-                filterList->addView(new FilterListItem(CapsAlbumFileContents_Movie));
-                filterList->addView(new FilterListItem(CapsAlbumStorage_Nand));
-                filterList->addView(new FilterListItem(CapsAlbumStorage_Sd));
-                filterList->addView(new brls::ListItemGroupSpacing());
-
-                int appletCount = 0;
-                std::map<u64, int> applicationMap;
-                for (const auto &entry : album::getAllEntries()) {
-                    if (entry.file_id.application_id < 0x010000000000ffff) {
-                        appletCount++;
-                    } else {
-                        applicationMap[entry.file_id.application_id]++;
-                    }
-                }
-
-                for (auto [tid, count] : applicationMap)
-                    filterList->addView(new FilterListItem(tid, count));
-
-                filterList->addView(new FilterListItem(0, appletCount));
-
-                filterFrame->setContentView(filterList);
-                brls::Application::pushView(filterFrame);
-                return true;
-            });
-            testList->registerAction(~DELETE_ITEMS, brls::Key::X, [] { return true; });
-
-            for (const auto &entry : album::getAllEntries())
-                testList->addView(new LazyImage(entry.file_id));
-
-            albumFrame->setContentView(testList);
-        }
-
-        // Add the root view to the stack
-        brls::Application::pushView(albumFrame);
+        OpenMainGui();
 
         if (!init_album_accessor) {
             brls::Dialog *dialog = new brls::Dialog(~ACCESSOR_INIT);
