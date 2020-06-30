@@ -37,8 +37,8 @@ namespace album {
 
         DropdownCallback cb;
 
-        brls::List *list;
-        brls::Hint *hint;
+        brls::List list;
+        brls::Hint hint;
 
         float topOffset; // for slide in animation
 
@@ -46,7 +46,7 @@ namespace album {
         unsigned getShowAnimationDuration(brls::ViewAnimation animation) override;
 
       public:
-        SaneDropdown(std::string title, std::vector<std::string> values);
+        SaneDropdown(const std::string &title, const std::vector<std::string> &values);
         ~SaneDropdown();
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;

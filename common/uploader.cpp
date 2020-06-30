@@ -4,6 +4,7 @@
 
 #include <cstring>
 #include <filesystem>
+#include <fmt/core.h>
 #include <fstream>
 #include <json.hpp>
 #include <memory>
@@ -142,7 +143,7 @@ namespace album {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
         curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
         curl_easy_setopt(curl, CURLOPT_URL, this->url.c_str());
-		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &cb);
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, XferCallback);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
@@ -170,11 +171,11 @@ namespace album {
                 try {
                     return this->ParseResponse(urlresponse);
                 } catch (std::exception &e) {
-                    printf("failed to parse response: %s\n", e.what());
+                    fmt::print("failed to parse response: {}\n", e.what());
                     return "Invalid response";
                 }
             } else {
-                return fmt::MakeString("Http Code: %ld", http_code);
+                return fmt::format("Http Code: %ld", http_code);
             }
         } else {
             return curl_easy_strerror(res);
@@ -292,14 +293,15 @@ namespace album {
 
             /* Append body arguments. */
             for (auto &[k, v] : j["Arguments"].items())
-                this->body.emplace(k, v);
+                this->body.push_back({k, v.get<std::string>()});
 
             /* Make custom http header. */
             for (auto &[k, v] : j["Headers"].items())
-                this->header.emplace_back(k).append(": ").append(v.get<std::string>());
+                this->header.push_back(fmt::format("{}: {}", k, v));
+
         } catch (std::exception &e) {
             printf("sth went wrong owo: %s\n", e.what());
-            this->name = path + " (failed to parse)";
+            this->name    = path + " (failed to parse)";
             this->can_img = false;
             this->can_mov = false;
         }

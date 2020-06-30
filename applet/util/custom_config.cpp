@@ -5,6 +5,7 @@
 #include <album.hpp>
 #include <cstring>
 #include <filesystem>
+#include <fmt/core.h>
 #include <fstream>
 #include <json.hpp>
 #include <memory>
@@ -108,18 +109,18 @@ namespace album {
 
         json j = json::object(
             {
-                {"Name", fmt::MakeString("imgur %s", results[2])},
+                {"Name", fmt::format("imgur {}", results[2])},
                 {"Version", "12.4.1"},
                 {"DestinationType", "ImageUploader"},
                 {"RequestMethod", "POST"},
                 {"RequestURL", "https://api.imgur.com/3/upload"},
                 {"Body", "MultipartFormData"},
                 {"FileFormName", "image"},
-                {"Headers", {{"Authorization", fmt::MakeString("Bearer %s", results[1])}}},
+                {"Headers", {{"Authorization", fmt::format("Bearer {}", results[1])}}},
                 {"URL", "$json:data.link$"},
             });
 
-        std::ofstream ofs(fmt::MakeString("%simgur_%s.sxcu", album::HosterConfigPath, results[2]));
+        std::ofstream ofs(fmt::format("{}imgur_{}.sxcu", album::HosterConfigPath, results[2]));
         ofs << j.dump(1, '\t');
 
         return results[2];
@@ -196,7 +197,7 @@ namespace album {
 
         json j = json::object(
             {
-                {"Name", fmt::MakeString("elixi.re %s", username)},
+                {"Name", fmt::format("elixi.re {}", username)},
                 {"Version", "12.4.1"},
                 {"DestinationType", "ImageUploader"},
                 {"DestinationType", "VideoUploader"},
@@ -208,7 +209,7 @@ namespace album {
                 {"URL", "$json:url$"},
             });
 
-        std::ofstream ofs(fmt::MakeString("%selixi.re_%s.sxcu", album::HosterConfigPath, username));
+        std::ofstream ofs(fmt::format("{}elixi.re_{}.sxcu", album::HosterConfigPath, username));
         ofs << j.dump(1, '\t');
 
         return username;

@@ -3,6 +3,8 @@
 #include <album.hpp>
 #include <atomic>
 #include <cstdio>
+#include <cstring>
+#include <fmt/core.h>
 #include <memory>
 
 bool operator>(const CapsAlbumFileId &base_a, const CapsAlbumFileId &base_b) {
@@ -36,31 +38,41 @@ inline bool operator<(const CapsAlbumEntry &a, const CapsAlbumEntry &b) {
     return !operator>(a, b);
 }
 
+template <>
+struct fmt::formatter<CapsAlbumFileDateTime> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const CapsAlbumFileDateTime &date, FormatContext &ctx) {
+        return format_to(ctx.out(), "{:2}.{:02}.{:04} {:02}:{:02}:{:02}",
+                         date.day, date.month, date.year,
+                         date.hour, date.minute, date.second);
+    }
+};
+
+template <>
+struct fmt::formatter<CapsAlbumFileId> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const CapsAlbumFileId &fileId, FormatContext &ctx) {
+        return format_to(ctx.out(), "[{:016X}, {}, {}@{}]",
+                         fileId.application_id,
+                         fileId.datetime,
+                         fileId.content % 2 ? "Movie" : "Screenshot",
+                         fileId.storage == CapsAlbumStorage_Nand ? "NAND" : "SdCard");
+    }
+};
+
 namespace album {
 
     std::string dateToString(const CapsAlbumFileDateTime &date) {
-        return fmt::MakeString("%04d.%02d.%02d %02d:%02d:%02d", date.year, date.month, date.day, date.hour, date.minute, date.second);
+        return fmt::format("{}", date);
     }
 
     std::string MakeFileName(const CapsAlbumFileId &file_id) {
         auto &date = file_id.datetime;
-        return fmt::MakeString("%04d.%02d.%02d %02d:%02d:%02d.%s", date.year, date.month, date.day, date.hour, date.minute, date.second, file_id.content == CapsAlbumFileContents_ScreenShot ? "jpg" : "mp4");
-    }
-
-    Result getThumbnail(u64 *width, u64 *height, const CapsAlbumEntry &entry, void *image, u64 image_size) {
-        auto work = std::make_unique<u8[]>(entry.size);
-        return capsaLoadAlbumScreenShotThumbnailImage(width, height, &entry.file_id, image, image_size, work.get(), entry.size);
-    }
-
-    Result getImage(u64 *width, u64 *height, const CapsAlbumEntry &entry, void *image, u64 image_size) {
-        auto work = std::make_unique<u8[]>(entry.size);
-        return capsaLoadAlbumScreenShotImage(width, height, &entry.file_id, image, image_size, work.get(), entry.size);
-    }
-
-    Result getFile(const CapsAlbumEntry &entry, void *filebuf) {
-        u64 tmp;
-        std::memset(filebuf, 0, entry.size);
-        return capsaLoadAlbumFile(&entry.file_id, &tmp, filebuf, entry.size);
+        return fmt::format("{}.{}", date, file_id.content % 2 ? "mp4" : "jpg");
     }
 
     std::vector<CapsAlbumEntry> getEntries(CapsAlbumStorage storage) {

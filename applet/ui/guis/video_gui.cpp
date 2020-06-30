@@ -1,6 +1,6 @@
-#include "videoview.hpp"
+#include "video_gui.hpp"
 
-#include "../translation/translation.hpp"
+#include "../../translation/translation.hpp"
 
 #include <util/caps.hpp>
 
@@ -133,7 +133,7 @@ namespace album {
             return;
         }
 
-        this->image.setRGBAImage(width, height, decodeWorkBuffer);
+        nvgCreateImageRGBA(brls::Application::getNVGContext(), width, height, 0, decodeWorkBuffer);
 
         this->registerAction(~PAUSE, brls::Key::Y, [this] {
             this->running = !this->running;
@@ -227,7 +227,7 @@ namespace album {
                                     frame->width, frame->height, frame->format);
             } else {
                 /* update image */
-                this->image.updateYUV((unsigned char **)frame->data, frame->linesize, decodeWorkBuffer);
+                nvgUpdateImageYUV(brls::Application::getNVGContext(), this->image, (unsigned char **)frame->data, frame->linesize, decodeWorkBuffer);
             }
 
             /* free frame */

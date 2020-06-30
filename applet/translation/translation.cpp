@@ -5,18 +5,17 @@
 
 namespace album {
 
-    #include "languages/chinese.hpp"
-    #include "languages/dutch.hpp"
-    #include "languages/english.hpp"
-    #include "languages/french.hpp"
-    #include "languages/german.hpp"
-    #include "languages/italian.hpp"
-    #include "languages/japanese.hpp"
-    #include "languages/korean.hpp"
-    #include "languages/polish.hpp"
-    #include "languages/russian.hpp"
-    #include "languages/spanish.hpp"
-    #include "languages/vong.hpp"
+    #include "languages/chinese.inc"
+    #include "languages/dutch.inc"
+    #include "languages/english.inc"
+    #include "languages/french.inc"
+    #include "languages/german.inc"
+    #include "languages/italian.inc"
+    #include "languages/japanese.inc"
+    #include "languages/korean.inc"
+    #include "languages/polish.inc"
+    #include "languages/russian.inc"
+    #include "languages/spanish.inc"
 
     namespace lang {
 
@@ -38,7 +37,6 @@ namespace album {
             [Spanish_Latin] = spanish,
             [Chinese_HANS]  = chinese,
             [Chinese_HANT]  = chinese,
-            [Vong]          = vong,
         };
 
         static const char *const *current = translations[English_US];

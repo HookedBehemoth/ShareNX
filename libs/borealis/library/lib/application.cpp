@@ -318,30 +318,13 @@ bool Application::mainLoop()
         frameStart = cpu_features_get_time_usec();
 
     // glfw events
-    bool is_active;
-    do
-    {
-        is_active = !glfwGetWindowAttrib(Application::window, GLFW_ICONIFIED);
-        if (is_active)
-            glfwPollEvents();
-        else
-            glfwWaitEvents();
+    glfwWaitEvents();
 
-        if (glfwWindowShouldClose(Application::window))
-        {
-            Application::exit();
-            return false;
-        }
-    } while (!is_active);
-
-    // libnx applet main loop
-#ifdef __SWITCH__
-    if (!appletMainLoop())
+    if (glfwWindowShouldClose(Application::window))
     {
         Application::exit();
         return false;
     }
-#endif
 
     // Gamepad
     if (!glfwGetGamepadState(GLFW_JOYSTICK_1, &Application::gamepad))

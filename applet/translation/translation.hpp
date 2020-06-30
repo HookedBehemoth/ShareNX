@@ -39,7 +39,7 @@ namespace album {
         FILTER_NAND,
         FILTER_SD,
         FILTER_OTHER,
-        SECONDS_SHORT,
+        LENGTH_FMT,
         UPLOADER,
         /* String count. */
         Total_Strings,
@@ -66,8 +66,6 @@ namespace album {
             Spanish_Latin,
             Chinese_HANS,
             Chinese_HANT,
-            /* Additional languages not officially supported by N. */
-            Vong,
             /* Total languages. */
             Total_Languages,
         };

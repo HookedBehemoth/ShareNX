@@ -19,7 +19,7 @@ constexpr static const char *const german[Total_Strings] = {
     [TOKEN_MISSING]      = "Fehlendes Symbol in Rückgabe!",
     [WEB_APPLET_MODE]    = "Web browser kann nicht im Applet Modus genutzt werden!",
     [CANCELLED]          = "Abgebrochen!",
-    [CONFIG_SAVED_FMT]   = "Configuration für %s wurde gespeichert.",
+    [CONFIG_SAVED_FMT]   = "Configuration für {} wurde gespeichert.",
     [DELETE_INFO]        = "Die Datei wird gelöscht.",
     [NAND]               = "Systemspeicher",
     [SD]                 = "microSD Card",
@@ -32,6 +32,6 @@ constexpr static const char *const german[Total_Strings] = {
     [FILTER_NAND]        = "Systemspeicher",
     [FILTER_SD]          = "microSD Card",
     [FILTER_OTHER]       = "Andere",
-    [SECONDS_SHORT]      = " Sek.",
+    [LENGTH_FMT]         = "{} Sek.",
     [UPLOADER]           = "Hochlader",
 };

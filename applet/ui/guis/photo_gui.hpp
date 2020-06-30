@@ -1,8 +1,6 @@
 #pragma once
 
-#include "albumview.hpp"
-
-#include <memory>
+#include "album_gui.hpp"
 
 namespace album {
 

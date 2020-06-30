@@ -1,6 +1,6 @@
 #include "upload_process.hpp"
 
-#include <util/fmt.hpp>
+#include <fmt/core.h>
 
 using namespace std::chrono_literals;
 
@@ -11,15 +11,17 @@ namespace album {
             this->progress = static_cast<float>(current) / static_cast<float>(total);
             return this->cancel;
         });
-        
-        this->text = fmt::MakeString("Uploading to %s", hoster->name.c_str());
+
+        this->text = fmt::format("Uploading to {}", hoster->name);
     }
 
+    UploadProcess::~UploadProcess() { this->cancel = true; }
+
     void UploadProcess::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
-        if (!this->has_data && this->response.wait_for(10us) == std::future_status::ready) {
-            this->has_data = true;
-            this->data = this->response.get();
-            brls::Logger::info("Upload finished: %s", this->data.c_str());
+        if (!this->done && this->response.wait_for(10us) == std::future_status::ready) {
+            this->done = true;
+            this->text = this->response.get();
+            brls::Logger::info("Upload finished: %s", this->text.c_str());
         }
 
         // Draw text
@@ -30,14 +32,11 @@ namespace album {
         nvgTextLineHeight(vg, 1.0f);
         nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
         nvgBeginPath(vg);
+        nvgText(vg, x + width / 2, y + height / 2, this->text.c_str(), nullptr);
 
-        if (this->has_data) {
-            nvgText(vg, x + width / 2, y + height / 2, this->data.c_str(), nullptr);
-        } else {
-            nvgText(vg, x + width / 2, y + height / 2, this->text.c_str(), nullptr);
-
+        if (this->done) {
             const unsigned barLength = width - 30;
-            unsigned progress_y = y + 0.8f * height;
+            unsigned progress_y      = y + 0.8f * height;
 
             /* Progress bar background */
             /* In official software this is more trasparent instead of brighter. */

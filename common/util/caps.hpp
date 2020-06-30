@@ -6,11 +6,10 @@
 
 namespace album {
 
+    /* TODO: remove */
     std::string dateToString(const CapsAlbumFileDateTime &date);
     std::string MakeFileName(const CapsAlbumFileId &file_id);
-    Result getThumbnail(u64 *width, u64 *height, const CapsAlbumEntry &entry, void *image, u64 image_size);
-    Result getImage(u64 *width, u64 *height, const CapsAlbumEntry &entry, void *image, u64 image_size);
-    Result getFile(const CapsAlbumEntry &entry, void *filebuf);
+
     const std::vector<CapsAlbumEntry> &getAllEntries(bool invalidate = false);
     Result GetLatest(CapsAlbumFileId *out, void *img, size_t size);
 

@@ -1,10 +1,11 @@
-#include "albumview.hpp"
+#include "album_gui.hpp"
 
-#include "../translation/translation.hpp"
-#include "sane_dropdown.hpp"
-#include "upload_process.hpp"
+#include "../../translation/translation.hpp"
+#include "../brls_ext/sane_dropdown.hpp"
+#include "../upload_process.hpp"
 
 #include <album.hpp>
+#include <fmt/core.h>
 
 namespace album {
 
@@ -112,18 +113,21 @@ namespace album {
 
         this->popupView.setParent(this);
         this->hint.setParent(this);
-        this->image.setParent(this);
 
         auto &datetime = fileId.datetime;
-        dateString     = fmt::MakeString("%s  %2d/%02d/%04d %02d:%02d",
-                                     fileId.storage == CapsAlbumStorage_Nand ? ~NAND : ~SD,
-                                     datetime.day, datetime.month, datetime.year,
-                                     datetime.hour, datetime.minute);
+        dateString     = fmt::format("{}  {:2}/{:02}/{:04} {:02}:{:02}",
+                                 fileId.storage == CapsAlbumStorage_Nand ? ~NAND : ~SD,
+                                 datetime.day, datetime.month, datetime.year,
+                                 datetime.hour, datetime.minute);
+    }
+
+    AlbumView::~AlbumView() {
+        if (this->image != -1)
+            nvgDeleteImage(brls::Application::getNVGContext(), this->image);
     }
 
     void AlbumView::layout(NVGcontext *vg, brls::Style *style, brls::FontStash *stash) {
-        this->image.setBoundaries(0, 0, 1280, 720);
-        this->image.layout(vg, style, stash);
+        this->imgPaint = nvgImagePattern(vg, 0, 0, 1280, 720, 0, this->image, this->alpha);
 
         unsigned hintWidth = this->width - style->AppletFrame.separatorSpacing * 2 - style->AppletFrame.footerTextSpacing * 2;
 
@@ -139,7 +143,10 @@ namespace album {
     }
 
     void AlbumView::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
-        this->image.draw(vg, 0, 0, 1280, 720, style, ctx);
+        nvgBeginPath(vg);
+        nvgRoundedRect(vg, 0, 0, 1280, 720, 0);
+        nvgFillPaint(vg, a(this->imgPaint));
+        nvgFill(vg);
 
         if (!this->hideBar) {
             nvgFillColor(vg, a(nvgRGBAf(0, 0, 0, 0.83f)));
@@ -163,12 +170,10 @@ namespace album {
     }
 
     void AlbumView::willAppear(bool resetState) {
-        this->image.willAppear(resetState);
         this->hint.willAppear(resetState);
     }
 
     void AlbumView::willDisappear(bool resetState) {
-        this->image.willDisappear(resetState);
         this->hint.willDisappear(resetState);
     }
 

@@ -14,17 +14,15 @@ namespace album {
         const CapsAlbumFileId fileId;
         std::string text;
         std::future<std::string> response;
-        bool has_data = false;
-        std::string data;
+        bool done      = false;
         float progress = 0.0f;
-        bool cancel = false;
+        bool cancel    = false;
 
       public:
         UploadProcess(Hoster &_hoster, const CapsAlbumFileId &_fileId);
-        ~UploadProcess() { this->cancel = true; }
+        ~UploadProcess();
 
-        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override;
-        //void layout(NVGcontext *vg, brls::Style *style, brls::FontStash *stash) override;
+        void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override final;
     };
 
 }

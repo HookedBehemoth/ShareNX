@@ -1,7 +1,7 @@
 #pragma once
 
-#include "popuphint.hpp"
-#include "popupview.hpp"
+#include "../brls_ext/popup_hint.hpp"
+#include "../popup_view.hpp"
 
 #include <borealis.hpp>
 #include <switch.h>
@@ -10,15 +10,17 @@ namespace album {
 
     class AlbumView : public brls::View {
       private:
-        PopupHint hint;
+        brls::PopupHint hint;
         PopupView popupView;
         std::string dateString;
 
       protected:
         bool hideBar = false;
-        brls::Image image;
+        int image = -1;
+        NVGpaint imgPaint;
 
         AlbumView(const CapsAlbumFileId &fileId);
+        ~AlbumView();
 
       public:
         void layout(NVGcontext *vg, brls::Style *style, brls::FontStash *stash);

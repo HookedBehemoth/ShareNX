@@ -13,7 +13,7 @@ namespace album {
         bool can_img, can_mov;
         std::string url, file_form;
         std::string scheme;
-        std::map<std::string, std::string> body;
+        std::vector<std::pair<std::string, std::string>> body;
         std::vector<std::string> header;
 
         std::string Upload(const CapsAlbumFileId &file_id, std::function<bool(size_t, size_t)> cb = [](size_t, size_t) { return true; });

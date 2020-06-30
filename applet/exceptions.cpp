@@ -3,9 +3,9 @@
 #include <borealis.hpp>
 #include <borealis/crash_frame.hpp>
 #include <cstring>
+#include <fmt/core.h>
 #include <string>
 #include <switch.h>
-#include <util/fmt.hpp>
 
 extern "C" {
 
@@ -121,7 +121,7 @@ void __libnx_exception_handler(ThreadExceptionDump *ctx) {
             break;
     }
 
-    g_crashFrame = new brls::CrashFrame(fmt::MakeString("%s\n\n%s: %s\nPC: BASE + 0x%016lx",
+    g_crashFrame = new brls::CrashFrame(fmt::format("{}\n\n{}: {}\nPC: BASE + 0x{:016X}",
                                                         ~album::FATAL_EXCEPTION,
                                                         ~album::REASON,
                                                         errorDesc,

@@ -1,4 +1,4 @@
-#include "photoview.hpp"
+#include "photo_gui.hpp"
 
 namespace album {
 
@@ -10,7 +10,7 @@ namespace album {
 
         u64 w, h;
         capsaLoadAlbumScreenShotImage(&w, &h, &fileId, img.get(), imgSize, work.get(), workSize);
-        this->image.setRGBAImage(w, h, img.get());
+        nvgCreateImageRGBA(brls::Application::getNVGContext(), w, h, 0, img.get());
     }
 
 }

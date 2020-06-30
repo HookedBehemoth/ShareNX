@@ -19,7 +19,7 @@ constexpr static const char *const english[Total_Strings] = {
     [TOKEN_MISSING]      = "Authentication token missing from callback URL!",
     [WEB_APPLET_MODE]    = "Can't use web browser in applet mode!",
     [CANCELLED]          = "Canceled!",
-    [CONFIG_SAVED_FMT]   = "Configuration was saved for %s.",
+    [CONFIG_SAVED_FMT]   = "Configuration for {} was saved.",
     [DELETE_INFO]        = "The file will be deleted.",
     [NAND]               = "System memory",
     [SD]                 = "microSD card",
@@ -32,6 +32,6 @@ constexpr static const char *const english[Total_Strings] = {
     [FILTER_NAND]        = "System Memory",
     [FILTER_SD]          = "microSD Card",
     [FILTER_OTHER]       = "Other",
-    [SECONDS_SHORT]      = "sec",
+    [LENGTH_FMT]         = "{}sec",
     [UPLOADER]           = "Uploader",
 };

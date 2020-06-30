@@ -1,6 +1,6 @@
 #pragma once
 
-#include "albumview.hpp"
+#include "album_gui.hpp"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -9,6 +9,7 @@ extern "C" {
 
 namespace album {
 
+    /* TODO: Split of decoder. */
     class MovieView : public AlbumView {
       private:
         AVFormatContext *fmt_ctx      = NULL;

@@ -1,15 +1,18 @@
 #include "gui.hpp"
 
-#include "elements/elm_filteritem.hpp"
-#include "elements/elm_lazyimage.hpp"
-#include "elements/grid_layout.hpp"
 #include "exceptions.hpp"
-#include "logo_bin.h"
 #include "translation/translation.hpp"
+#include "ui/album_adapter.hpp"
+#include "ui/brls_ext/recycler_view.hpp"
+#include "ui/filter_item.hpp"
 #include "util/custom_config.hpp"
 
 #include <album.hpp>
 #include <borealis.hpp>
+#include <fmt/core.h>
+
+/* Momiji */
+#include "logo_bin.h"
 
 namespace album {
 
@@ -22,10 +25,10 @@ namespace album {
         bool MakeConfig(cfg_callback cb) {
             std::string msg;
             try {
-                msg = fmt::MakeString(~CONFIG_SAVED_FMT, cb().c_str());
+                msg = fmt::format(~CONFIG_SAVED_FMT, cb());
                 UpdateHoster();
             } catch (Result rc) {
-                msg = fmt::MakeString("%s: 2%03d-%04d", ~ERROR, R_MODULE(rc), R_DESCRIPTION(rc));
+                msg = fmt::format("{}: 2{:03}-{:04}", ~ERROR, R_MODULE(rc), R_DESCRIPTION(rc));
             } catch (String desc) {
                 msg = lang::Translate(desc);
             } catch (std::exception &e) {
@@ -47,15 +50,11 @@ namespace album {
             brls::List *filterList = new brls::List();
 
             auto imgurButton = new brls::ListItem("Imgur", "Log into an Imgur Account or create a new one.\nRequires Application override.");
-            imgurButton->registerAction(~OK, brls::Key::A, [] {
-                return MakeConfig(&GenerateImgurConfig);
-            });
+            imgurButton->registerAction(~OK, brls::Key::A, [] { return MakeConfig(&GenerateImgurConfig); });
             filterList->addView(imgurButton);
 
             auto elixireButton = new brls::ListItem("Elixi.re", "Log into your Elixi.re account.");
-            elixireButton->registerAction(~OK, brls::Key::A, [] {
-                return MakeConfig(&GenerateElixireConfig);
-            });
+            elixireButton->registerAction(~OK, brls::Key::A, [] { return MakeConfig(&GenerateElixireConfig); });
             filterList->addView(elixireButton);
 
             filterFrame->setContentView(filterList);
@@ -105,15 +104,17 @@ namespace album {
                 albumFrame->setTitle("ShareNX \uE134");
                 albumFrame->setIcon(logo_bin, logo_bin_size);
 
-                /* TODO: Recycler view */
-                auto *testList = new Grid();
-                testList->registerAction(~FILTER, brls::Key::Y, &OpenFilterGui);
-                testList->registerAction("Custom Config", brls::Key::MINUS, &OpenHosterGui);
+                auto recyclerView     = new brls::RecyclerView();
+                auto thumbnailAdapter = new ThumbnailAdapter();
+                auto view             = recyclerView->get();
 
-                for (const auto &entry : album::getAllEntries())
-                    testList->addView(new LazyImage(entry.file_id));
+                view.setAdapter(thumbnailAdapter);
+                FilterListItem::setAdapter(thumbnailAdapter);
 
-                albumFrame->setContentView(testList);
+                view.registerAction(~FILTER, brls::Key::Y, &OpenFilterGui);
+                view.registerAction("Custom Config", brls::Key::MINUS, &OpenHosterGui);
+
+                albumFrame->setContentView(recyclerView);
             }
 
             // Add the root view to the stack

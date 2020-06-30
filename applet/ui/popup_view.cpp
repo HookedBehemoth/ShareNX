@@ -1,11 +1,11 @@
-#include "popupview.hpp"
+#include "popup_view.hpp"
 
 #include "../translation/translation.hpp"
 
 namespace album {
 
     PopupSeparator::PopupSeparator() {
-        auto *style = brls::Application::getStyle();
+        auto style = brls::Application::getStyle();
         this->setHeight(style->Sidebar.Separator.height);
     }
 
@@ -16,9 +16,9 @@ namespace album {
         nvgFill(vg);
     }
 
-    PopupItem::PopupItem(const std::string &label, PopupView *popupView, std::function<bool()> onClick)
-        : label(label), popupView(popupView) {
-        auto *style = brls::Application::getStyle();
+    PopupItem::PopupItem(const std::string &label, std::function<bool()> onClick)
+        : label(label) {
+        auto style = brls::Application::getStyle();
         this->setHeight(style->Sidebar.Item.height);
 
         this->registerAction(~OK, brls::Key::A, onClick);
@@ -37,10 +37,6 @@ namespace album {
         return this;
     }
 
-    void PopupItem::onFocusGained() {
-        View::onFocusGained();
-    }
-
     PopupView::PopupView(brls::View *parent)
         : BoxLayout(brls::BoxLayoutOrientation::VERTICAL) {
         this->registerAction(~BACK, brls::Key::B, [this, parent] {
@@ -48,7 +44,7 @@ namespace album {
             brls::Application::giveFocus(parent);
             return true;
         });
-        auto *style = brls::Application::getStyle();
+        auto style = brls::Application::getStyle();
 
         this->setWidth(460);
         this->setSpacing(style->Sidebar.spacing);
@@ -59,7 +55,7 @@ namespace album {
     }
 
     PopupItem *PopupView::addItem(const std::string &label, std::function<bool()> onClick) {
-        auto *item = new PopupItem(label, this, onClick);
+        auto item = new PopupItem(label, onClick);
 
         item->overrideThemeVariant(brls::Application::getThemeValuesForVariant(brls::ThemeVariant_DARK));
         this->addView(item);
@@ -68,7 +64,7 @@ namespace album {
     }
 
     void PopupView::addSeparator() {
-        auto *separator = new PopupSeparator();
+        auto separator = new PopupSeparator();
         this->addView(separator);
     }
 

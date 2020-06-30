@@ -19,7 +19,7 @@
 
 #include "sane_dropdown.hpp"
 
-#include "../translation/translation.hpp"
+#include "../../translation/translation.hpp"
 
 #include <borealis/animations.hpp>
 #include <borealis/application.hpp>
@@ -29,17 +29,17 @@ namespace album {
 
 #define SELECT_VIEW_MAX_ITEMS 6 // for max height
 
-    SaneDropdown::SaneDropdown(std::string title, std::vector<std::string> values)
+    SaneDropdown::SaneDropdown(const std::string &title, const std::vector<std::string> &values)
         : title(title) {
-        brls::Style *style = brls::Application::getStyle();
+        auto style = brls::Application::getStyle();
 
         this->topOffset = (float)style->Dropdown.listPadding / 8.0f;
 
         this->valuesCount = values.size();
 
-        this->list = new brls::List(0);
-        this->list->setParent(this);
-        this->list->setMargins(1, 0, 1, 0);
+        this->hint.setParent(this);
+        this->list.setParent(this);
+        this->list.setMargins(1, 0, 1, 0);
 
         for (size_t i = 0; i < values.size(); i++) {
             std::string value = values[i];
@@ -55,17 +55,16 @@ namespace album {
                 });
             });
 
-            this->list->addView(item);
+            this->list.addView(item);
         }
-
-        this->hint = new brls::Hint();
-        this->hint->setParent(this);
 
         this->registerAction(~BACK, brls::Key::B, [] {
             brls::Application::popView();
             return false;
         });
     }
+
+    SaneDropdown::~SaneDropdown() = default;
 
     void SaneDropdown::show(std::function<void(void)> cb, bool animate, brls::ViewAnimation animation) {
         brls::View::show(cb);
@@ -84,7 +83,7 @@ namespace album {
     }
 
     void SaneDropdown::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
-        unsigned top = this->list->getY() - style->Dropdown.headerHeight - style->Dropdown.listPadding;
+        unsigned top = this->list.getY() - style->Dropdown.headerHeight - style->Dropdown.listPadding;
 
         // Backdrop
         nvgFillColor(vg, a(ctx->theme->dropdownBackgroundColor));
@@ -101,10 +100,10 @@ namespace album {
         nvgFill(vg);
 
         // List
-        this->list->frame(ctx);
+        this->list.frame(ctx);
 
         // Footer
-        this->hint->frame(ctx);
+        this->hint.frame(ctx);
 
         nvgFillColor(vg, ctx->theme->separatorColor); // we purposely don't apply opacity
 
@@ -141,48 +140,37 @@ namespace album {
         unsigned listHeight = std::min(SELECT_VIEW_MAX_ITEMS, this->valuesCount) * style->Dropdown.listItemHeight - (unsigned)this->topOffset;
         unsigned listWidth  = style->Dropdown.listWidth + style->List.marginLeftRight * 2;
 
-        this->list->setBoundaries(
+        this->list.setBoundaries(
             this->width / 2 - listWidth / 2,
             this->height - style->AppletFrame.footerHeight - listHeight - style->Dropdown.listPadding + (unsigned)this->topOffset,
             listWidth,
             listHeight);
-        this->list->invalidate();
+        this->list.invalidate();
 
         // Hint
         // TODO: convert the bottom-left footer into a Label to get its width and avoid clipping with the hint
         unsigned hintWidth = this->width - style->AppletFrame.separatorSpacing * 2 - style->AppletFrame.footerTextSpacing * 2;
 
-        this->hint->setBoundaries(
+        this->hint.setBoundaries(
             this->x + this->width - hintWidth - style->AppletFrame.separatorSpacing - style->AppletFrame.footerTextSpacing,
             this->y + this->height - style->AppletFrame.footerHeight,
             hintWidth,
             style->AppletFrame.footerHeight);
-        this->hint->invalidate();
+        this->hint.invalidate();
     }
 
     brls::View *SaneDropdown::getDefaultFocus() {
-        return this->list->getDefaultFocus();
+        return this->list.getDefaultFocus();
     }
 
     void SaneDropdown::willAppear(bool resetState) {
-        if (this->list)
-            this->list->willAppear(resetState);
-
-        if (this->hint)
-            this->hint->willAppear(resetState);
+        this->list.willAppear(resetState);
+        this->hint.willAppear(resetState);
     }
 
     void SaneDropdown::willDisappear(bool resetState) {
-        if (this->list)
-            this->list->willDisappear(resetState);
-
-        if (this->hint)
-            this->hint->willDisappear(resetState);
-    }
-
-    SaneDropdown::~SaneDropdown() {
-        delete this->list;
-        delete this->hint;
+        this->list.willDisappear(resetState);
+        this->hint.willDisappear(resetState);
     }
 
 }
