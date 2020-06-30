@@ -34,10 +34,10 @@ TabFrame::TabFrame()
     this->sidebar = new Sidebar();
 
     // Setup content view
-    this->layout = new BoxLayout(BoxLayoutOrientation::HORIZONTAL);
-    layout->addView(sidebar);
+    this->boxLayout = new BoxLayout(BoxLayoutOrientation::HORIZONTAL);
+    boxLayout->addView(sidebar);
 
-    this->setContentView(layout);
+    this->setContentView(boxLayout);
 }
 
 bool TabFrame::onCancel()
@@ -57,16 +57,16 @@ void TabFrame::switchToView(View* view)
     if (this->rightPane == view)
         return;
 
-    if (this->layout->getViewsCount() > 1)
+    if (this->boxLayout->getViewsCount() > 1)
     {
         if (this->rightPane)
             this->rightPane->willDisappear(true);
-        this->layout->removeView(1, false);
+        this->boxLayout->removeView(1, false);
     }
 
     this->rightPane = view;
     if (this->rightPane != nullptr)
-        this->layout->addView(this->rightPane, true, true); // addView() calls willAppear()
+        this->boxLayout->addView(this->rightPane, true, true); // addView() calls willAppear()
 }
 
 void TabFrame::addTab(std::string label, View* view)
@@ -90,10 +90,21 @@ void TabFrame::addSeparator()
     this->sidebar->addSeparator();
 }
 
+void TabFrame::layout(NVGcontext* vg, Style* style, FontStash* stash)
+{
+    AppletFrame::layout(vg, style, stash);
+
+    if (this->boxLayout)
+        this->boxLayout->layout(vg, style, stash);
+
+    if (this->rightPane)
+        this->rightPane->layout(vg, style, stash);
+}
+
 View* TabFrame::getDefaultFocus()
 {
     // Try to focus the right pane
-    if (this->layout->getViewsCount() > 1)
+    if (this->boxLayout->getViewsCount() > 1)
     {
         View* newFocus = this->rightPane->getDefaultFocus();
 

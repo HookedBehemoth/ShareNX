@@ -48,9 +48,12 @@ class TabFrame : public AppletFrame
 
     ~TabFrame();
 
+  protected:
+    void layout(NVGcontext* vg, Style* style, FontStash* stash) override;
+
   private:
     Sidebar* sidebar;
-    BoxLayout* layout;
+    BoxLayout* boxLayout;
     View* rightPane = nullptr;
 
     void switchToView(View* view);

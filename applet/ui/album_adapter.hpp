@@ -14,7 +14,7 @@ namespace album {
         friend class album::Thumbnail;
 
       private:
-        std::vector<std::reference_wrapper<CapsAlbumFileId>> albumFilterList;
+        std::vector<std::reference_wrapper<const CapsAlbumFileId>> albumFilterList;
 
       public:
         ThumbnailAdapter();

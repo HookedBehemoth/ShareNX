@@ -69,7 +69,7 @@ void ScrollView::layout(NVGcontext* vg, Style* style, FontStash* stash)
             this->getY() - roundf(this->scrollY * (float)contentHeight),
             this->getWidth(),
             contentHeight);
-        this->contentView->invalidate();
+        this->contentView->invalidate(true);
     }
 
     this->ready = true;

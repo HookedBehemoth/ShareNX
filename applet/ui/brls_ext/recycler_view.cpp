@@ -108,6 +108,8 @@ namespace brls {
     }
 
     View *RecyclerContentView::getDefaultFocus() {
+        this->updateAll();
+
         // Find the first focusable view in or after last index
         for (size_t i = index; i < itemCount; i++) {
             View *newFocus = this->children[i % std::size(this->children)]->getDefaultFocus();
@@ -194,8 +196,13 @@ namespace brls {
     }
 
     void RecyclerContentView::updateAll() {
-        this->showHeight = this->parent->getHeight();
+        /* TODO: scroll view needs my default focus to layout correctly so this is wrong the first time */
+        this->showHeight = this->parent->getHeight() - 100;
         this->itemCount  = adapter->getItemCount();
+
+        brls::Logger::debug("x: %d, y: %d, w: %d, h: %d", x, y, width, height);
+
+        brls::Logger::debug("showHeight: %d, itemCount: %ld", showHeight, itemCount);
 
         this->gridWidth  = this->width / (this->childWidth + this->spacing);
         this->gridHeight = showHeight / (this->childHeight + this->spacing) + 3;
@@ -206,6 +213,8 @@ namespace brls {
 
         auto childCount = std::min({this->itemCount, this->gridHeight * this->gridWidth});
         auto viewCount  = std::size(this->children);
+
+        brls::Logger::debug("gridWidth: %d, gridHeight: %d", gridWidth, gridHeight);
 
         if (childCount < viewCount) {
             children.resize(childCount);
@@ -220,6 +229,8 @@ namespace brls {
             for (size_t i = 0; i < childCount; i++)
                 this->updateChild(i, true);
         }
+
+        brls::Logger::debug("updateAll: count: %d", childCount);
     }
 
     void RecyclerContentView::updateChild(size_t itemIndex, bool fetch) {
@@ -245,12 +256,11 @@ namespace brls {
     /* Getting this part to work took as long as getting all the above to work. */
 
     RecyclerView::RecyclerView() {
-        this->layout.setParent(this);
-
-        this->setContentView(&this->layout);
+        this->layout = new RecyclerContentView();
+        this->setContentView(this->layout);
     }
 
-    RecyclerContentView &RecyclerView::get() {
+    RecyclerContentView *RecyclerView::get() {
         return this->layout;
     }
 

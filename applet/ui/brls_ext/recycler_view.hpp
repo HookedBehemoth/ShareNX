@@ -31,10 +31,10 @@ namespace brls {
         size_t gridHeight = 1;
         size_t gridWidth  = 1;
         unsigned index    = 0;
-        int spacing       = 0;
+        int spacing       = 10;
 
-        unsigned childWidth  = 0;
-        unsigned childHeight = 0;
+        unsigned childWidth  = 320;
+        unsigned childHeight = 180;
 
         RecyclerAdapter *adapter = nullptr;
 
@@ -54,13 +54,8 @@ namespace brls {
         int marginLeft   = 0;
 
       public:
-        RecyclerContentView()
-            : childWidth(320), childHeight(180) {
-            setSpacing(10);
-            setMargins(0, 0, 0, 0);
-        }
+        RecyclerContentView() = default;
         ~RecyclerContentView();
-        ;
 
         void layout(NVGcontext *vg, Style *style, FontStash *stash) override;
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, Style *style, FrameContext *ctx) override;
@@ -84,12 +79,12 @@ namespace brls {
 
     class RecyclerView : public ScrollView {
       private:
-        RecyclerContentView layout;
+        RecyclerContentView *layout;
 
       public:
         RecyclerView();
 
-        RecyclerContentView &get();
+        RecyclerContentView *get();
     };
 
 }

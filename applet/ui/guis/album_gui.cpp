@@ -32,6 +32,8 @@ namespace album {
     }
 
     AlbumView::AlbumView(const CapsAlbumFileId &_fileId) : popupView(this), fileId(_fileId) {
+        fmt::print("opening album view for: {}\n", fileId);
+
         auto OpenDeleteDialog = [this] {
             brls::Dialog *dialog = new brls::Dialog(~DELETE_INFO);
 
@@ -57,7 +59,7 @@ namespace album {
             dialog->addButton(~CANCEL, [dialog](brls::View *view) { dialog->close(); });
             dialog->addButton(~COPY, [this, dialog](brls::View *view) {
                 Result rc          = capsaStorageCopyAlbumFile(&this->fileId, this->fileId.storage == CapsAlbumStorage_Nand ? CapsAlbumStorage_Sd : CapsAlbumStorage_Nand);
-                std::string result = R_SUCCEEDED(rc) ? "Successfully copied!" : fmt::MakeString("Copy failed: 0x%x", rc);
+                std::string result = R_SUCCEEDED(rc) ? "Successfully copied!" : fmt::format("Copy failed: 0x{:X}", rc);
                 dialog->close([result] {
                     auto *dialog = new brls::Dialog(result);
                     dialog->addButton(~OK, [dialog](brls::View *) { dialog->close(); });
@@ -127,7 +129,7 @@ namespace album {
     }
 
     void AlbumView::layout(NVGcontext *vg, brls::Style *style, brls::FontStash *stash) {
-        this->imgPaint = nvgImagePattern(vg, 0, 0, 1280, 720, 0, this->image, this->alpha);
+        this->imgPaint = nvgImagePattern(vg, 0, 0, 1280, 720, 0, this->image, 1.f);
 
         unsigned hintWidth = this->width - style->AppletFrame.separatorSpacing * 2 - style->AppletFrame.footerTextSpacing * 2;
 

@@ -133,7 +133,7 @@ namespace album {
             return;
         }
 
-        nvgCreateImageRGBA(brls::Application::getNVGContext(), width, height, 0, decodeWorkBuffer);
+        this->image = nvgCreateImageRGBA(brls::Application::getNVGContext(), width, height, 0, decodeWorkBuffer);
 
         this->registerAction(~PAUSE, brls::Key::Y, [this] {
             this->running = !this->running;

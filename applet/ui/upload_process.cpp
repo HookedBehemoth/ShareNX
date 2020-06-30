@@ -34,7 +34,7 @@ namespace album {
         nvgBeginPath(vg);
         nvgText(vg, x + width / 2, y + height / 2, this->text.c_str(), nullptr);
 
-        if (this->done) {
+        if (!this->done) {
             const unsigned barLength = width - 30;
             unsigned progress_y      = y + 0.8f * height;
 

@@ -6,12 +6,12 @@
 
 namespace album {
 
-    Thumbnail::Thumbnail(const CapsAlbumFileId &id) : SaneImage(), file_id(id) {
+    Thumbnail::Thumbnail() : SaneImage() {
         this->registerAction(~OK, brls::Key::A, [this] {
-            if (this->file_id.content == CapsAlbumFileContents_ScreenShot)
-                brls::Application::pushView(new PhotoView(this->file_id));
+            if (this->file_id && this->file_id->content == CapsAlbumFileContents_ScreenShot)
+                brls::Application::pushView(new PhotoView(*this->file_id));
             else
-                brls::Application::pushView(new MovieView(this->file_id, this->frameCount));
+                brls::Application::pushView(new MovieView(*this->file_id, this->frameCount));
             return true;
         });
     }

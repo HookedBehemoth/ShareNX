@@ -3,6 +3,33 @@
 #include <string>
 #include <switch.h>
 #include <vector>
+#include <fmt/core.h>
+
+template <>
+struct fmt::formatter<CapsAlbumFileDateTime> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const CapsAlbumFileDateTime &date, FormatContext &ctx) {
+        return format_to(ctx.out(), "{:2}.{:02}.{:04} {:02}:{:02}:{:02}",
+                         date.day, date.month, date.year,
+                         date.hour, date.minute, date.second);
+    }
+};
+
+template <>
+struct fmt::formatter<CapsAlbumFileId> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    auto format(const CapsAlbumFileId &fileId, FormatContext &ctx) {
+        return format_to(ctx.out(), "[{:016X}, {}, {}@{}]",
+                         fileId.application_id,
+                         fileId.datetime,
+                         fileId.content % 2 ? "Movie" : "Screenshot",
+                         fileId.storage == CapsAlbumStorage_Nand ? "NAND" : "SdCard");
+    }
+};
 
 namespace album {
 

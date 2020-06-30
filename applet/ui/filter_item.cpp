@@ -7,12 +7,12 @@
 
 namespace album {
 
-    FilterListItem::FilterListItem() : ListItem("") {
+    FilterListItem::FilterListItem() {
         size_t count = album::getAllEntries().size();
         this->updateLabel(~FILTER_ALL, count);
     }
 
-    FilterListItem::FilterListItem(CapsAlbumFileContents type) : ListItem("") {
+    FilterListItem::FilterListItem(CapsAlbumFileContents type) {
         this->filter = [type](const CapsAlbumEntry &entry) -> bool {
             return entry.file_id.content == type;
         };
@@ -25,7 +25,7 @@ namespace album {
         this->updateLabel(title, count);
     }
 
-    FilterListItem::FilterListItem(CapsAlbumStorage storage) : ListItem("") {
+    FilterListItem::FilterListItem(CapsAlbumStorage storage) {
         this->filter = [storage](const CapsAlbumEntry &entry) -> bool {
             return entry.file_id.storage == storage;
         };
@@ -38,7 +38,7 @@ namespace album {
         this->updateLabel(title, count);
     }
 
-    FilterListItem::FilterListItem(u64 titleId, int count) : ListItem("") {
+    FilterListItem::FilterListItem(u64 titleId, int count) {
         this->filter = [titleId](const CapsAlbumEntry &entry) -> bool {
             return entry.file_id.application_id == titleId;
         };
@@ -61,6 +61,29 @@ namespace album {
         brls::Logger::info("tid: %016lX: %s (%d)", titleId, title, count);
 
         this->updateLabel(title, count);
+    }
+
+    void FilterListItem::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
+        unsigned leftPadding = style->List.Item.padding;
+
+        // Label
+        nvgFillColor(vg, a(ctx->theme->textColor));
+        nvgFontSize(vg, style->Label.listItemFontSize);
+        nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+        nvgFontFaceId(vg, ctx->fontStash->regular);
+        nvgBeginPath(vg);
+        nvgText(vg, x + leftPadding, y + this->height / 2, this->label.c_str(), nullptr);
+
+        // Separators
+        // Offset by one to be hidden by highlight
+        nvgFillColor(vg, a(ctx->theme->listItemSeparatorColor));
+        nvgBeginPath(vg);
+        nvgRect(vg, x, y + 1 + this->height, width, 1);
+        nvgFill(vg);
+    }
+
+    brls::View *FilterListItem::getDefaultFocus() {
+        return this;
     }
 
     void FilterListItem::setAdapter(ThumbnailAdapter *adapter) {

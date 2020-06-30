@@ -104,17 +104,20 @@ namespace album {
                 albumFrame->setTitle("ShareNX \uE134");
                 albumFrame->setIcon(logo_bin, logo_bin_size);
 
-                auto recyclerView     = new brls::RecyclerView();
-                auto thumbnailAdapter = new ThumbnailAdapter();
-                auto view             = recyclerView->get();
+                auto adapter  = new ThumbnailAdapter();
+                auto recycler = new brls::RecyclerView();
 
-                view.setAdapter(thumbnailAdapter);
-                FilterListItem::setAdapter(thumbnailAdapter);
+                FilterListItem::setAdapter(adapter);
 
-                view.registerAction(~FILTER, brls::Key::Y, &OpenFilterGui);
-                view.registerAction("Custom Config", brls::Key::MINUS, &OpenHosterGui);
+                auto view = recycler->get();
+                view->setAdapter(adapter);
+                view->setChildSize(210, 120);
+                view->setMargins(26, 65, 23, 65);
 
-                albumFrame->setContentView(recyclerView);
+                view->registerAction(~FILTER, brls::Key::Y, &OpenFilterGui);
+                view->registerAction("Custom Config", brls::Key::MINUS, &OpenHosterGui);
+
+                albumFrame->setContentView(recycler);
             }
 
             // Add the root view to the stack

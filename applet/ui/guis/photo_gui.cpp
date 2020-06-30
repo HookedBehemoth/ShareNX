@@ -10,7 +10,9 @@ namespace album {
 
         u64 w, h;
         capsaLoadAlbumScreenShotImage(&w, &h, &fileId, img.get(), imgSize, work.get(), workSize);
-        nvgCreateImageRGBA(brls::Application::getNVGContext(), w, h, 0, img.get());
+        this->image = nvgCreateImageRGBA(brls::Application::getNVGContext(), w, h, 0, img.get());
+
+        brls::Logger::debug("image: %d", this->image);
     }
 
 }

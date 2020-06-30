@@ -70,7 +70,7 @@ namespace brls {
         }
 
         // Sort the actions
-        std::stable_sort(actions.begin(), actions.end(),  );
+        std::stable_sort(actions.begin(), actions.end(), actionsSortFunc);
 
         // Populate the layout with labels
         for (const brls::Action &action : actions) {

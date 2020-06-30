@@ -28,24 +28,24 @@ namespace album {
     }
 
     brls::View *ThumbnailAdapter::createView() {
-        return new Thumbnail(albumFilterList[0]);
+        return new Thumbnail();
     }
 
     void ThumbnailAdapter::bindView(brls::View *view, int index) {
         auto imageHolder = static_cast<album::Thumbnail *>(view);
 
-        auto &fileId = albumFilterList[index];
+        imageHolder->file_id = &albumFilterList[index].get();
 
         u64 w, h;
         CapsScreenShotDecodeOption opts;
         CapsScreenShotAttribute attrs;
 
-        Result rc = capsLoadAlbumScreenShotThumbnailImageEx0(&w, &h, &attrs, &fileId.get(), &opts, imgBuffer, imgSize, workBuffer, workSize);
+        Result rc = capsLoadAlbumScreenShotThumbnailImageEx0(&w, &h, &attrs, imageHolder->file_id, &opts, imgBuffer, imgSize, workBuffer, workSize);
 
         if (R_FAILED(rc))
             return brls::Logger::error("Failed to load image with: 0x%x", rc);
 
-        if (fileId.get().content == CapsAlbumFileContents_Movie) {
+        if (imageHolder->file_id->content == CapsAlbumFileContents_Movie) {
             /* Round video length to nearest full number. */
             u8 seconds               = std::round(static_cast<float>(attrs.length_x10) / 1000);
             imageHolder->frameCount  = attrs.frame_count / 1000;
@@ -57,11 +57,13 @@ namespace album {
 
         /* TODO: async loading with deko3d */
         imageHolder->setRGBAImage(imgBuffer, ThumbnailWidth, ThumbnailHeight);
+        imageHolder->invalidate();
     }
 
     bool ThumbnailAdapter::applyFilter() {
         auto &entries = getAllEntries();
         albumFilterList.reserve(std::size(entries));
+
         /* TODO */
         for (auto &entry : entries)
             albumFilterList.emplace_back(entry.file_id);

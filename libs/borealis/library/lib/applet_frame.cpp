@@ -188,15 +188,11 @@ void AppletFrame::layout(NVGcontext* vg, Style* style, FontStash* stash)
     if (this->icon)
     {
         if (this->headerStyle == HeaderStyle::REGULAR)
-        {
             this->icon->setBoundaries(style->AppletFrame.imageLeftPadding, style->AppletFrame.imageTopPadding, style->AppletFrame.imageSize, style->AppletFrame.imageSize);
-            this->icon->invalidate();
-        }
         else if (this->headerStyle == HeaderStyle::POPUP)
-        {
             this->icon->setBoundaries(style->PopupFrame.edgePadding + style->PopupFrame.imageLeftPadding, style->PopupFrame.imageTopPadding, style->PopupFrame.imageSize, style->PopupFrame.imageSize);
-            this->icon->invalidate();
-        }
+
+        this->icon->layout(vg, style, stash);
     }
 
     // Content
@@ -207,7 +203,7 @@ void AppletFrame::layout(NVGcontext* vg, Style* style, FontStash* stash)
         else if (this->headerStyle == HeaderStyle::POPUP)
             this->contentView->setBoundaries(this->x + leftPadding, this->y + style->AppletFrame.headerHeightPopup, this->width - this->leftPadding - this->rightPadding, this->height - style->AppletFrame.footerHeight - style->AppletFrame.headerHeightPopup);
 
-        this->contentView->invalidate();
+        this->contentView->layout(vg, style, stash);
     }
 
     // Hint
@@ -219,7 +215,8 @@ void AppletFrame::layout(NVGcontext* vg, Style* style, FontStash* stash)
         this->y + this->height - style->AppletFrame.footerHeight,
         hintWidth,
         style->AppletFrame.footerHeight);
-    this->hint->invalidate();
+
+    this->hint->layout(vg, style, stash);
 }
 
 void AppletFrame::setContentView(View* view)

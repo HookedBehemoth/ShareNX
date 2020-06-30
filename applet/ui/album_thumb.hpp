@@ -13,13 +13,13 @@ namespace album {
         friend class album::ThumbnailAdapter;
 
       private:
-        const CapsAlbumFileId &file_id;
+        const CapsAlbumFileId *file_id = nullptr;
         std::string videoLength;
         int frameCount = 0;
         NVGpaint shadow;
 
       public:
-        Thumbnail(const CapsAlbumFileId &id);
+        Thumbnail();
         ~Thumbnail();
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override final;
