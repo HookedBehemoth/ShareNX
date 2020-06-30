@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:HookedBehemoth/borealis.git
 	branch = QoL-rebase
-	commit = bfd3f0d530063d6179ace7abcfbb983f5827adec
-	parent = 35b40ebc6f17c7fb5bc3e89f0c406ba6004116cf
+	commit = 009849519c52092425cfd5f537deedd4f98cf568
+	parent = 1782b33cdc8db5c3b3bf2487f7c56038def250c8
 	method = merge
 	cmdver = 0.4.1

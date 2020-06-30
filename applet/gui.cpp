@@ -130,7 +130,7 @@ namespace album {
         brls::Application::setQuitOnPopRoot(true);
         brls::Application::setGlobalQuit(false);
 
-        if (!brls::Application::init())
+        if (!brls::Application::init(WINDOW_NAME))
             return false;
 
         /* Official software actually sets a function pointer that's called in nn::applet::StartLibraryApplet instead of setting the jump flag */

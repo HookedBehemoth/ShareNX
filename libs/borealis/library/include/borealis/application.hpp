@@ -56,10 +56,10 @@ class Application
 {
   public:
     //Init with default style and theme (as close to HOS as possible)
-    static bool init();
+    static bool init(std::string title);
 
     // Init with given style and theme
-    static bool init(Style style, Theme theme);
+    static bool init(std::string title, Style style, Theme theme);
 
     static bool mainLoop();
 
@@ -95,6 +95,8 @@ class Application
     static int loadFont(const char* fontName, const char* filePath);
     static int loadFontFromMemory(const char* fontName, void* data, size_t size, bool freeData);
     static int findFont(const char* fontName);
+
+    static FontStash* getFontStash();
 
     static void notify(std::string text);
 
@@ -145,9 +147,13 @@ class Application
 
     static View* getCurrentFocus();
 
+    static std::string getTitle();
+
   private:
     inline static GLFWwindow* window;
     inline static NVGcontext* vg;
+
+    inline static std::string title;
 
     inline static TaskManager* taskManager;
     inline static NotificationManager* notificationManager;

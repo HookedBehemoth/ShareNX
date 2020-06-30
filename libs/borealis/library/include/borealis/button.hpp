@@ -58,7 +58,7 @@ class Button : public View
     float cornerRadiusOverride = 0;
 
   public:
-    Button(ButtonStyle style);
+    Button(ButtonStyle style = ButtonStyle::PLAIN);
     ~Button();
 
     void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, Style* style, FrameContext* ctx) override;
@@ -71,7 +71,7 @@ class Button : public View
 
     Button* setLabel(std::string label);
     Button* setImage(std::string path);
-    Button* setImage(const unsigned char* buffer, size_t bufferSize);
+    Button* setImage(unsigned char* buffer, size_t bufferSize);
 
     GenericEvent* getClickEvent();
 

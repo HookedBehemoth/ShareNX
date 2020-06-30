@@ -136,7 +136,7 @@ void ThumbnailSidebar::layout(NVGcontext* vg, Style* style, FontStash* stash)
         );
 
         // Call layout directly to update height
-        this->title->layout(vg, style, stash);
+        this->title->invalidate(true);
 
         yAdvance += this->title->getHeight() + style->ThumbnailSidebar.marginTopBottom / 2;
     }
@@ -172,22 +172,30 @@ View* ThumbnailSidebar::getDefaultFocus()
 
 void ThumbnailSidebar::setThumbnail(std::string imagePath)
 {
-    if (this->image == nullptr) {
-        this->image = new Image();
-        this->image->setParent(this);
+    if (this->image)
+    {
+        this->image->setImage(imagePath);
     }
-
-    this->image->setImage(imagePath);
+    else
+    {
+        this->image = new Image(imagePath);
+        this->image->setParent(this);
+        this->invalidate();
+    }
 }
 
-void ThumbnailSidebar::setThumbnail(const unsigned char* buffer, size_t bufferSize)
+void ThumbnailSidebar::setThumbnail(unsigned char* buffer, size_t bufferSize)
 {
-    if (this->image == nullptr) {
-        this->image = new Image();
-        this->image->setParent(this);
+    if (this->image)
+    {
+        this->image->setImage(buffer, bufferSize);
     }
-
-    this->image->setImage(buffer, bufferSize);
+    else
+    {
+        this->image = new Image(buffer, bufferSize);
+        this->image->setParent(this);
+        this->invalidate();
+    }
 }
 
 void ThumbnailSidebar::setSubtitle(std::string subTitle)

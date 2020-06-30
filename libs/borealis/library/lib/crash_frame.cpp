@@ -91,7 +91,7 @@ void CrashFrame::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned hei
     nvgFontSize(vg, style->AppletFrame.footerTextSize);
     nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
     nvgBeginPath(vg);
-    nvgText(vg, x + style->AppletFrame.separatorSpacing + style->AppletFrame.footerTextSpacing, y + height - style->AppletFrame.footerHeight / 2, WINDOW_NAME, nullptr);
+    nvgText(vg, x + style->AppletFrame.separatorSpacing + style->AppletFrame.footerTextSpacing, y + height - style->AppletFrame.footerHeight / 2, Application::getTitle().c_str(), nullptr);
 
     // Button
     this->button->frame(ctx);
@@ -114,7 +114,7 @@ void CrashFrame::layout(NVGcontext* vg, Style* style, FontStash* stash)
 {
     // Label
     this->label->setWidth(roundf((float)this->width * style->CrashFrame.labelWidth));
-    this->label->layout(vg, style, stash);
+    this->label->invalidate(true);
 
     this->label->setBoundaries(
         this->x + this->width / 2 - this->label->getWidth() / 2,

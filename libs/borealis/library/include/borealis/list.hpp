@@ -33,7 +33,7 @@ namespace brls
 // TODO: Use a Label with integrated ticker
 class ListItem : public View
 {
-  protected:
+  private:
     std::string label;
     std::string subLabel;
     std::string value;
@@ -71,7 +71,7 @@ class ListItem : public View
 
     void setThumbnail(Image* image);
     void setThumbnail(std::string imagePath);
-    void setThumbnail(const unsigned char* buffer, size_t bufferSize);
+    void setThumbnail(unsigned char* buffer, size_t bufferSize);
 
     bool hasDescription();
     void setDrawTopSeparator(bool draw);
@@ -177,14 +177,19 @@ class IntegerInputListItem : public InputListItem
     virtual bool onClick() override;
 };
 
+class List; // forward declaration for ListContentView::list
+
 // The content view of lists (used internally)
 class ListContentView : public BoxLayout
 {
   public:
-    ListContentView(size_t defaultFocus = 0);
+    ListContentView(List* list, size_t defaultFocus = 0);
 
   protected:
     void customSpacing(View* current, View* next, int* spacing) override;
+
+  private:
+    List* list;
 };
 
 // A vertical list of various widgets, with proper margins and spacing
@@ -203,6 +208,10 @@ class List : public ScrollView
     // Wrapped BoxLayout methods
     void addView(View* view, bool fill = false);
     void setMargins(unsigned top, unsigned right, unsigned bottom, unsigned left);
+    void setMarginBottom(unsigned bottom);
+    void setSpacing(unsigned spacing);
+    unsigned getSpacing();
+    virtual void customSpacing(View* current, View* next, int* spacing);
 };
 
 } // namespace brls

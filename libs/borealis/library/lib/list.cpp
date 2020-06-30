@@ -33,8 +33,9 @@
 namespace brls
 {
 
-ListContentView::ListContentView(size_t defaultFocus)
+ListContentView::ListContentView(List* list, size_t defaultFocus)
     : BoxLayout(BoxLayoutOrientation::VERTICAL, defaultFocus)
+    , list(list)
 {
     Style* style = Application::getStyle();
     this->setMargins(style->List.marginTopBottom, style->List.marginLeftRight, style->List.marginTopBottom, style->List.marginLeftRight);
@@ -100,6 +101,10 @@ void ListContentView::customSpacing(View* current, View* next, int* spacing)
             *spacing     = style->Header.padding;
         }
     }
+
+    // Call list custom spacing
+    if (this->list)
+        this->list->customSpacing(current, next, spacing);
 }
 
 ListItem::ListItem(std::string label, std::string description, std::string subLabel)
@@ -134,24 +139,26 @@ void ListItem::setThumbnail(Image* image)
 
 void ListItem::setThumbnail(std::string imagePath)
 {
-    if (this->thumbnailView == nullptr) {
-        this->thumbnailView = new Image();
-        this->thumbnailView->setParent(this);
-        this->thumbnailView->setScaleType(ImageScaleType::FIT);
-    }
+    if (this->thumbnailView)
+        this->thumbnailView->setImage(imagePath);
+    else
+        this->thumbnailView = new Image(imagePath);
 
-    this->thumbnailView->setImage(imagePath);
+    this->thumbnailView->setParent(this);
+    this->thumbnailView->setScaleType(ImageScaleType::FIT);
+    this->invalidate();
 }
 
-void ListItem::setThumbnail(const unsigned char* buffer, size_t bufferSize)
+void ListItem::setThumbnail(unsigned char* buffer, size_t bufferSize)
 {
-    if (this->thumbnailView == nullptr) {
-        this->thumbnailView = new Image();
-        this->thumbnailView->setParent(this);
-        this->thumbnailView->setScaleType(ImageScaleType::FIT);
-    }
+    if (this->thumbnailView)
+        this->thumbnailView->setImage(buffer, bufferSize);
+    else
+        this->thumbnailView = new Image(buffer, bufferSize);
 
-    this->thumbnailView->setImage(buffer, bufferSize);
+    this->thumbnailView->setParent(this);
+    this->thumbnailView->setScaleType(ImageScaleType::FIT);
+    this->invalidate();
 }
 
 bool ListItem::getReduceDescriptionSpacing()
@@ -201,7 +208,7 @@ void ListItem::layout(NVGcontext* vg, Style* style, FontStash* stash)
 
         this->height = style->List.Item.height;
         this->descriptionView->setBoundaries(this->x + indent, this->y + this->height + style->List.Item.descriptionSpacing, this->width - indent * 2, 0);
-        this->descriptionView->layout(vg, style, stash); // we must call layout directly
+        this->descriptionView->invalidate(true); // we must call layout directly
         this->height += this->descriptionView->getHeight() + style->List.Item.descriptionSpacing;
     }
 
@@ -559,7 +566,7 @@ ValueSelectedEvent* SelectListItem::getValueSelectedEvent()
 
 List::List(size_t defaultFocus)
 {
-    this->layout = new ListContentView(defaultFocus);
+    this->layout = new ListContentView(this, defaultFocus);
 
     this->layout->setResize(true);
     this->layout->setParent(this);
@@ -581,6 +588,26 @@ void List::setMargins(unsigned top, unsigned right, unsigned bottom, unsigned le
         right,
         bottom,
         left);
+}
+
+void List::setSpacing(unsigned spacing)
+{
+    this->layout->setSpacing(spacing);
+}
+
+unsigned List::getSpacing()
+{
+    return this->layout->getSpacing();
+}
+
+void List::setMarginBottom(unsigned bottom)
+{
+    this->layout->setMarginBottom(bottom);
+}
+
+void List::customSpacing(View* current, View* next, int* spacing)
+{
+    // Nothing to do by default
 }
 
 List::~List()

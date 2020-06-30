@@ -24,7 +24,7 @@
 #include "nanovg.h"
 #define FONTSTASH_IMPLEMENTATION
 #include "fontstash.h"
-#ifdef __ARM_NEON__
+#ifdef __SWITCH__
 #define STBI_NEON
 #endif
 #define STB_IMAGE_IMPLEMENTATION

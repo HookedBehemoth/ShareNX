@@ -80,7 +80,7 @@ void View::frame(FrameContext* ctx)
     // Layout if needed
     if (this->dirty)
     {
-        this->layout(ctx->vg, style, ctx->fontStash);
+        this->invalidate(true);
         this->dirty = false;
     }
 
@@ -617,6 +617,14 @@ View::~View()
     // Focus sanity check
     if (Application::getCurrentFocus() == this)
         Application::giveFocus(nullptr);
+}
+
+void View::invalidate(bool immediate)
+{
+    if (immediate)
+        this->layout(Application::getNVGContext(), Application::getStyle(), Application::getFontStash());
+    else
+        this->dirty = true;
 }
 
 } // namespace brls

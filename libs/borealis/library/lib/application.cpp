@@ -53,9 +53,8 @@
 
 // Constants used for scaling as well as
 // creating a window of the right size on PC
-constexpr uint32_t WINDOW_WIDTH    = 1280;
-constexpr uint32_t WINDOW_HEIGHT   = 720;
-constexpr const char* WINDOW_TITLE = WINDOW_NAME;
+constexpr uint32_t WINDOW_WIDTH  = 1280;
+constexpr uint32_t WINDOW_HEIGHT = 720;
 
 #define DEFAULT_FPS 60
 #define BUTTON_REPEAT_DELAY 15
@@ -133,12 +132,12 @@ static void windowKeyCallback(GLFWwindow* window, int key, int scancode, int act
     }
 }
 
-bool Application::init()
+bool Application::init(std::string title)
 {
-    return Application::init(Style::horizon(), Theme::horizon());
+    return Application::init(title, Style::horizon(), Theme::horizon());
 }
 
-bool Application::init(Style style, Theme theme)
+bool Application::init(std::string title, Style style, Theme theme)
 {
     // Init rng
     std::srand(std::time(nullptr));
@@ -152,6 +151,7 @@ bool Application::init(Style style, Theme theme)
     Application::currentFocus = nullptr;
     Application::oldGamepad   = {};
     Application::gamepad      = {};
+    Application::title        = title;
 
     // Init theme to defaults
     Application::setTheme(theme);
@@ -180,7 +180,7 @@ bool Application::init(Style style, Theme theme)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #endif
 
-    Application::window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, nullptr, nullptr);
+    Application::window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, title.c_str(), nullptr, nullptr);
     if (!window)
     {
         Logger::error("glfw: failed to create window\n");
@@ -226,6 +226,8 @@ bool Application::init(Style style, Theme theme)
 #ifdef __SWITCH__
     {
         PlFontData font;
+
+        // Standard font
         Result rc = plGetSharedFontByType(&font, PlSharedFontType_Standard);
         if (R_SUCCEEDED(rc))
         {
@@ -233,6 +235,16 @@ bool Application::init(Style style, Theme theme)
             Application::fontStash.regular = Application::loadFontFromMemory("regular", font.address, font.size, false);
         }
 
+        // Korean font
+        rc = plGetSharedFontByType(&font, PlSharedFontType_KO);
+        if (R_SUCCEEDED(rc))
+        {
+            Logger::info("Adding Switch shared Korean font");
+            Application::fontStash.korean = Application::loadFontFromMemory("korean", font.address, font.size, false);
+            nvgAddFallbackFontId(Application::vg, Application::fontStash.regular, Application::fontStash.korean);
+        }
+
+        // Extented font
         rc = plGetSharedFontByType(&font, PlSharedFontType_NintendoExt);
         if (R_SUCCEEDED(rc))
         {
@@ -786,9 +798,12 @@ void Application::pushView(View* view, ViewAnimation animation)
         Application::focusStack.push_back(Application::currentFocus);
     }
 
+    // Layout and prepare view
+    view->invalidate(true);
     view->willAppear(true);
     Application::giveFocus(view->getDefaultFocus());
 
+    // And push it
     Application::viewStack.push_back(view);
 }
 
@@ -951,6 +966,11 @@ void Application::setGlobalQuit(bool enabled)
     Application::globalQuit = enabled;
 }
 
+std::string Application::getTitle()
+{
+    return Application::title;
+}
+
 GenericEvent* Application::getGlobalFocusChangeEvent()
 {
     return &Application::globalFocusChangeEvent;
@@ -959,6 +979,11 @@ GenericEvent* Application::getGlobalFocusChangeEvent()
 VoidEvent* Application::getGlobalHintsUpdateEvent()
 {
     return &Application::globalHintsUpdateEvent;
+}
+
+FontStash* Application::getFontStash()
+{
+    return &Application::fontStash;
 }
 
 } // namespace brls
