@@ -8,10 +8,16 @@ namespace album {
 
     Thumbnail::Thumbnail() : SaneImage() {
         this->registerAction(~OK, brls::Key::A, [this] {
-            if (this->file_id && this->file_id->content == CapsAlbumFileContents_ScreenShot)
-                brls::Application::pushView(new PhotoView(*this->file_id));
-            else
-                brls::Application::pushView(new MovieView(*this->file_id, this->frameCount));
+            try {
+                if (this->file_id && this->file_id->content == CapsAlbumFileContents_ScreenShot) 
+                    brls::Application::pushView(new PhotoView(*this->file_id));
+                else
+                    brls::Application::pushView(new MovieView(*this->file_id, this->frameCount));
+            } catch (String msg) {
+                auto dialog = new brls::Dialog(~msg);
+                dialog->addButton(~OK, [dialog](brls::View *) {dialog->close();});
+                dialog->open();
+            }
             return true;
         });
     }

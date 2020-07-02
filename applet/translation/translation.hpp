@@ -26,6 +26,8 @@ namespace album {
         WEB_APPLET_MODE,
         CANCELLED,
         CONFIG_SAVED_FMT,
+        OUT_OF_MEMORY,
+        OPEN_FAILED,
         /* */
         DELETE_INFO,
         NAND,

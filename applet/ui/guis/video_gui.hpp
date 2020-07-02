@@ -1,40 +1,27 @@
 #pragma once
 
+#include "../../util/video_decoder.hpp"
 #include "album_gui.hpp"
-
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-}
 
 namespace album {
 
-    /* TODO: Split of decoder. */
     class MovieView : public AlbumView {
+        static constexpr u32 ImageWidth       = 1280;
+        static constexpr u32 ImageHeight      = 720;
+        static constexpr u32 ImageComponent   = 4;
+        static constexpr u32 DecodeBufferSize = ImageWidth * ImageHeight * ImageComponent;
+
       private:
-        AVFormatContext *fmt_ctx      = NULL;
-        AVCodecContext *video_dec_ctx = NULL;
-        int width, height;
-        enum AVPixelFormat pix_fmt;
-        AVStream *video_stream = NULL;
-
-        int video_stream_idx = -1;
-        AVFrame *frame       = NULL;
-        AVPacket pkt;
-
-        u8 *decodeWorkBuffer = nullptr;
-
-        int frameCount;
+        VideoDecoder decoder;
+        u8 workBuffer[DecodeBufferSize];
         bool running = false;
+        const u32 frameCount;
 
       public:
         MovieView(const CapsAlbumFileId &fileId, int frameCount);
-
         ~MovieView();
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx);
-
-        bool tryReceive(AVCodecContext *dec);
     };
 
 }

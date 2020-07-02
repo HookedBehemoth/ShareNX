@@ -21,6 +21,13 @@
             throw rc;        \
     })
 
+#define R_THROW_UNLESS(rc_expr, obj) \
+    ({                        \
+        auto rc = (rc_expr);  \
+        if (R_FAILED(rc))     \
+            throw obj;        \
+    })
+
 #define THROW_UNLESS(expr, obj) \
     ({                          \
         bool res = (expr);      \
