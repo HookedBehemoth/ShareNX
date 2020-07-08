@@ -9,22 +9,28 @@ namespace album {
     Thumbnail::Thumbnail() : SaneImage() {
         this->registerAction(~OK, brls::Key::A, [this] {
             try {
-                if (this->file_id && this->file_id->content == CapsAlbumFileContents_ScreenShot) 
-                    brls::Application::pushView(new PhotoView(*this->file_id));
+                if (this->fileId && this->fileId->content == CapsAlbumFileContents_ScreenShot)
+                    brls::Application::pushView(new PhotoView(*this->fileId));
                 else
-                    brls::Application::pushView(new MovieView(*this->file_id, this->frameCount));
+                    brls::Application::pushView(new MovieView(*this->fileId, this->frameCount));
             } catch (String msg) {
                 auto dialog = new brls::Dialog(~msg);
-                dialog->addButton(~OK, [dialog](brls::View *) {dialog->close();});
+                dialog->addButton(~OK, [dialog](brls::View *) { dialog->close(); });
                 dialog->open();
             }
             return true;
         });
     }
 
-    Thumbnail::~Thumbnail() = default;
-
     void Thumbnail::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
+        if (!this->ready) {
+            return;
+        } else if (this->imageBuffer != nullptr) {
+            this->setRGBAImage(imageBuffer.get(), 320, 180);
+            this->invalidate(true);
+            imageBuffer = nullptr;
+        }
+
         float cornerRadius = style->Button.cornerRadius;
 
         float shadowWidth   = 2.0f;

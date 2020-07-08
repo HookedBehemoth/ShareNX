@@ -10,17 +10,18 @@ namespace album {
     class ThumbnailAdapter;
 
     class Thumbnail : public brls::SaneImage {
-        friend class album::ThumbnailAdapter;
+        friend class AsyncThumbnailLoader;
 
       private:
-        const CapsAlbumFileId *file_id = nullptr;
+        const CapsAlbumFileId *fileId = nullptr;
         std::string videoLength;
         int frameCount = 0;
+        bool ready = false;
         NVGpaint shadow;
+        std::unique_ptr<u8[]> imageBuffer = nullptr;
 
       public:
         Thumbnail();
-        ~Thumbnail();
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override final;
         View *getDefaultFocus() override final;
