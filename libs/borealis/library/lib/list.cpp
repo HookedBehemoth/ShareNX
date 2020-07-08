@@ -101,6 +101,10 @@ void ListContentView::customSpacing(View* current, View* next, int* spacing)
             *spacing     = style->Header.padding;
         }
     }
+    else if (next != nullptr)
+    {
+        *spacing = 0;
+    }
 
     // Call list custom spacing
     if (this->list)
