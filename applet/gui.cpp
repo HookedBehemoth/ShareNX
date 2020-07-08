@@ -66,7 +66,7 @@ namespace album {
             return true;
         }
 
-        bool OpenFilterGui() {
+        [[maybe_unused]] bool OpenFilterGui() {
             auto icon = new brls::SaneImage();
             icon->setImage(logo_bin, logo_bin_size);
 
