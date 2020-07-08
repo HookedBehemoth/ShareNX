@@ -4,6 +4,7 @@
 #include "translation/translation.hpp"
 #include "ui/album_adapter.hpp"
 #include "ui/brls_ext/recycler_view.hpp"
+#include "ui/brls_ext/sane_image.hpp"
 #include "ui/filter_item.hpp"
 #include "util/custom_config.hpp"
 
@@ -43,20 +44,22 @@ namespace album {
         }
 
         bool OpenHosterGui() {
-            brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
-            filterFrame->setTitle("ShareNX \uE134");
-            filterFrame->setIcon(logo_bin, logo_bin_size);
-
-            brls::List *filterList = new brls::List();
+            auto icon = new brls::SaneImage();
+            icon->setImage(logo_bin, logo_bin_size);
 
             auto imgurButton = new brls::ListItem("Imgur", "Log into an Imgur Account or create a new one.\nRequires Application override.");
             imgurButton->registerAction(~OK, brls::Key::A, [] { return MakeConfig(&GenerateImgurConfig); });
-            filterList->addView(imgurButton);
 
             auto elixireButton = new brls::ListItem("Elixi.re", "Log into your Elixi.re account.");
             elixireButton->registerAction(~OK, brls::Key::A, [] { return MakeConfig(&GenerateElixireConfig); });
+
+            brls::List *filterList = new brls::List();
+            filterList->addView(imgurButton);
             filterList->addView(elixireButton);
 
+            brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
+            filterFrame->setTitle("ShareNX \uE134");
+            filterFrame->setIcon(icon);
             filterFrame->setContentView(filterList);
             brls::Application::pushView(filterFrame);
 
@@ -64,8 +67,8 @@ namespace album {
         }
 
         bool OpenFilterGui() {
-            brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
-            filterFrame->setTitle(~FILTER);
+            auto icon = new brls::SaneImage();
+            icon->setImage(logo_bin, logo_bin_size);
 
             brls::List *filterList = new brls::List();
             filterList->addView(new FilterListItem());
@@ -90,8 +93,11 @@ namespace album {
             for (auto [tid, count] : applicationMap)
                 filterList->addView(new FilterListItem(tid, count));
 
-            filterList->addView(new FilterListItem(0, appletCount));
+            filterList->addView(new FilterListItem(appletCount));
 
+            brls::AppletFrame *filterFrame = new brls::AppletFrame(220, 220);
+            filterFrame->setTitle(~FILTER);
+            filterFrame->setIcon(icon);
             filterFrame->setContentView(filterList);
             brls::Application::pushView(filterFrame);
 
@@ -99,26 +105,27 @@ namespace album {
         }
 
         void OpenMainGui() {
-            brls::AppletFrame *albumFrame = new brls::AppletFrame(true, true);
-            {
-                albumFrame->setTitle("ShareNX \uE134");
-                albumFrame->setIcon(logo_bin, logo_bin_size);
+            auto icon = new brls::SaneImage();
+            icon->setImage(logo_bin, logo_bin_size);
 
-                auto adapter  = new ThumbnailAdapter();
-                auto recycler = new brls::RecyclerView();
+            auto adapter  = new ThumbnailAdapter();
+            auto recycler = new brls::RecyclerView();
 
-                FilterListItem::setAdapter(adapter);
+            FilterListItem::setAdapter(adapter);
 
-                auto view = recycler->get();
-                view->setAdapter(adapter);
-                view->setChildSize(210, 120);
-                view->setMargins(26, 65, 23, 65);
+            auto view = recycler->get();
+            view->setAdapter(adapter);
+            view->setChildSize(210, 120);
+            view->setMargins(26, 65, 23, 65);
 
-                view->registerAction(~FILTER, brls::Key::Y, &OpenFilterGui);
-                view->registerAction("Custom Config", brls::Key::MINUS, &OpenHosterGui);
+            //view->registerAction(~FILTER, brls::Key::Y, &OpenFilterGui);
+            view->registerAction("Custom Config", brls::Key::MINUS, &OpenHosterGui);
 
-                albumFrame->setContentView(recycler);
-            }
+            auto albumFrame = new brls::AppletFrame(true, true);
+
+            albumFrame->setTitle("ShareNX \uE134");
+            albumFrame->setIcon(icon);
+            albumFrame->setContentView(recycler);
 
             // Add the root view to the stack
             brls::Application::pushView(albumFrame);

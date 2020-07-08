@@ -19,6 +19,7 @@ namespace album {
         FilterListItem(CapsAlbumFileContents type);
         FilterListItem(CapsAlbumStorage storage);
         FilterListItem(u64 titleId, int count);
+        FilterListItem(int count);
 
         void draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) override final;
         brls::View *getDefaultFocus() override final;

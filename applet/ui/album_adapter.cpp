@@ -20,7 +20,7 @@ namespace album {
     }
 
     ThumbnailAdapter::ThumbnailAdapter() {
-        applyFilter();
+        this->applyFilter([](const CapsAlbumEntry &entry) -> bool { return true; });
     }
 
     size_t ThumbnailAdapter::getItemCount() {
@@ -60,13 +60,15 @@ namespace album {
         imageHolder->invalidate();
     }
 
-    bool ThumbnailAdapter::applyFilter() {
+    bool ThumbnailAdapter::applyFilter(FilterFunc filter) {
         auto &entries = getAllEntries();
+        albumFilterList.clear();
         albumFilterList.reserve(std::size(entries));
 
         /* TODO */
         for (auto &entry : entries)
-            albumFilterList.emplace_back(entry.file_id);
+            if (filter(entry))
+                albumFilterList.emplace_back(entry.file_id);
 
         return true;
     }

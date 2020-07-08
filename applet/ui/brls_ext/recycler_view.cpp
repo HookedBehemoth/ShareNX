@@ -142,6 +142,8 @@ namespace brls {
     }
 
     void RecyclerContentView::willAppear(bool resetState) {
+        brls::Logger::debug("RecyclerContentView::willAppear");
+
         for (auto &child : this->children)
             child->willAppear(resetState);
     }

@@ -71,16 +71,6 @@ namespace brls {
         return this;
     }
 
-    void SaneImage::setImage(unsigned char *buffer, size_t bufferSize) {
-        NVGcontext *vg = Application::getNVGContext();
-
-        if (this->texture != -1)
-            nvgDeleteImage(vg, this->texture);
-
-        this->texture = nvgCreateImageMem(vg, 0, buffer, bufferSize);
-        this->invalidate();
-    }
-
     void SaneImage::setImage(std::string imagePath) {
         NVGcontext *vg = Application::getNVGContext();
 
@@ -88,6 +78,16 @@ namespace brls {
             nvgDeleteImage(vg, this->texture);
 
         this->texture = nvgCreateImage(vg, imagePath.c_str(), 0);
+        this->invalidate();
+    }
+
+    void SaneImage::setImage(const unsigned char *buffer, size_t bufferSize) {
+        NVGcontext *vg = Application::getNVGContext();
+
+        if (this->texture != -1)
+            nvgDeleteImage(vg, this->texture);
+
+        this->texture = nvgCreateImageMem(vg, 0, buffer, bufferSize);
         this->invalidate();
     }
 

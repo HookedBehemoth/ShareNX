@@ -44,7 +44,7 @@ namespace brls {
         }
 
         void setImage(std::string imagePath);
-        void setImage(unsigned char *buffer, size_t bufferSize);
+        void setImage(const unsigned char *buffer, size_t bufferSize);
         void setRGBAImage(unsigned char *buffer, int width, int height);
 
       private:

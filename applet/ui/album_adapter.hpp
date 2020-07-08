@@ -24,7 +24,7 @@ namespace album {
         virtual void bindView(brls::View *view, int index) override final;
 
       public:
-        bool applyFilter();
+        bool applyFilter(FilterFunc filter);
     };
 
 }

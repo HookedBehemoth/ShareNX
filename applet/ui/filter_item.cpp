@@ -1,6 +1,7 @@
 #include "filter_item.hpp"
 
 #include "../translation/translation.hpp"
+#include "../util/ns.hpp"
 
 #include <fmt/core.h>
 #include <util/caps.hpp>
@@ -43,24 +44,21 @@ namespace album {
             return entry.file_id.application_id == titleId;
         };
 
-        u64 size;
-        auto *data = new (std::nothrow) NsApplicationControlData;
-        if (data == nullptr) {
-            this->label = ~ERROR;
-            return;
-        }
+        auto title = ns::getApplicationName(titleId);
 
-        const char *title = nullptr;
-        NacpLanguageEntry *languageEntry;
-        if (R_SUCCEEDED(nsGetApplicationControlData(NsApplicationControlSource_Storage, titleId, data, sizeof(NsApplicationControlData), &size)) &&
-            R_SUCCEEDED(nacpGetLanguageEntry(&data->nacp, &languageEntry))) {
-            title = languageEntry->name;
-        } else {
-            title = ~FILTER_OTHER;
-        }
-        brls::Logger::info("tid: %016lX: %s (%d)", titleId, title, count);
+        brls::Logger::info("tid: %016lX: %s (%d)", titleId, title.c_str(), count);
 
-        this->updateLabel(title, count);
+        this->updateLabel(title.c_str(), count);
+    }
+
+    FilterListItem::FilterListItem(int count) {
+        this->filter = [](const CapsAlbumEntry &entry) -> bool {
+            return entry.file_id.application_id < 0x010000000000ffff;
+        };
+
+        brls::Logger::info("other: %d", count);
+
+        this->updateLabel(~FILTER_OTHER, count);
     }
 
     void FilterListItem::draw(NVGcontext *vg, int x, int y, unsigned width, unsigned height, brls::Style *style, brls::FrameContext *ctx) {
@@ -91,7 +89,14 @@ namespace album {
     }
 
     void FilterListItem::updateLabel(const char *title, int count) {
-        
         this->label = fmt::format("{} ({})", title, count);
+
+        auto style = brls::Application::getStyle();
+        this->setHeight(style->List.Item.height);
+
+        View::registerAction("Apply", brls::Key::A, [this]() -> bool {
+            brls::Logger::debug("applying filter: %s", this->label.c_str());
+            return FilterListItem::adapter->applyFilter(this->filter);
+        });
     }
 }
