@@ -39,7 +39,7 @@ namespace album {
             unsigned progress_y      = y + 0.8f * height;
 
             /* Progress bar background */
-            /* In official software this is more trasparent instead of brighter. */
+            /* In official software this is more transparent instead of brighter. */
             nvgFillColor(vg, a(nvgRGBAf(1.f, 1.f, 1.f, 0.5f)));
             nvgBeginPath(vg);
             nvgRoundedRect(vg, x + 15, progress_y, barLength, 16, 8);

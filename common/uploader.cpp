@@ -3,9 +3,6 @@
 #include "album.hpp"
 
 #include <cstring>
-#include <filesystem>
-#include <fmt/core.h>
-#include <fstream>
 #include <json.hpp>
 #include <memory>
 #include <string>
@@ -15,6 +12,7 @@
 #include <curl/curl.h>
 
 using json = nlohmann::json;
+using namespace std::string_literals;
 
 namespace album {
 
@@ -43,25 +41,52 @@ namespace album {
     }
 
     void InitializeHoster() {
-        std::error_code err;
-        std::filesystem::create_directory(HosterConfigPath, err);
-
         UpdateHoster();
     }
 
     void ExitHoster() {
     }
 
+    const Hoster &GetDefaultHoster() {
+
+        return lewd_pics;
+    }
+
+    void SetDefaultHoster(const Hoster &hoster) {
+    }
+
     void UpdateHoster() {
         s_HosterList.clear();
 
-        std::error_code err;
-        for (auto &&entry : std::filesystem::directory_iterator(HosterConfigPath, std::filesystem::directory_options::skip_permission_denied, err))
-            if (entry.is_regular_file(err) && (entry.path().extension() == ".sxcu"))
-                s_HosterList.emplace_back().ParseFile(entry.path());
+        auto fs = fsdevGetDeviceFileSystem("sdmc");
+        char path[FS_MAX_PATH];
+        strcpy(path, HosterConfigPath);
+        fsFsCreateDirectory(fs, path);
 
-        if (s_HosterList.empty())
-            s_HosterList.push_back(lewd_pics);
+        Result rc;
+
+        FsDir dir;
+        if (R_FAILED(rc = fsFsOpenDirectory(fs, path, FsDirOpenMode_ReadFiles, &dir)))
+            return;
+
+        s64 count;
+        FsDirectoryEntry entry;
+        while (R_SUCCEEDED(fsDirRead(&dir, &count, 1, &entry)) && count) {
+            size_t length = std::strlen(entry.name);
+            if (length > 5 && std::strcmp(entry.name + length - 5, ".sxcu") == 0) {
+                std::sprintf(path, "%s%s", HosterConfigPath, entry.name);
+                FsFile file;
+                if (R_SUCCEEDED(fsFsOpenFile(fs, path, FsOpenMode_Read, &file))) {
+                    printf("parsing: %s\n", path);
+                    auto &hoster = s_HosterList.emplace_back();
+                    hoster.ParseFile(file, entry.file_size);
+                    hoster.path = path;
+                    fsFileClose(&file);
+                }
+            }
+        }
+
+        fsDirClose(&dir);
     }
 
     std::vector<Hoster> &GetHosterList() {
@@ -171,14 +196,13 @@ namespace album {
                 try {
                     return this->ParseResponse(urlresponse);
                 } catch (std::exception &e) {
-                    fmt::print("failed to parse response: {}\n", e.what());
                     return "Invalid response";
                 }
             } else {
-                return fmt::format("Http Code: %ld", http_code);
+                return "Http Code: "s + std::to_string(http_code);
             }
         } else {
-            return curl_easy_strerror(res);
+            return "curl error:\n"s + curl_easy_strerror(res);
         }
     }
 
@@ -249,61 +273,62 @@ namespace album {
         return result;
     }
 
-    void Hoster::ParseFile(const std::string &path) {
-        try {
-            std::fstream f(path);
-            if (!f.good())
-                throw std::runtime_error("Failed to open file");
+    void Hoster::ParseFile(FsFile &file, s64 file_size) {
+        std::string text;
+        text.resize(file_size);
 
-            json j;
-            f >> j;
+        u64 size_read;
+        if (R_SUCCEEDED(fsFileRead(&file, 0, text.data(), file_size, FsReadOption_None, &size_read))) {
+            json j = json::parse(text.begin(), text.end());
 
-            this->url       = j["RequestURL"];
-            this->file_form = j["FileFormName"];
+            try {
+                this->url       = j["RequestURL"];
+                this->file_form = j["FileFormName"];
 
-            if (j.contains("Name"))
-                this->name = j["Name"];
-            if (j.contains("URL"))
-                this->scheme = j["URL"];
+                if (j.contains("Name"))
+                    this->name = j["Name"];
+                if (j.contains("URL"))
+                    this->scheme = j["URL"];
 
-            if (j.contains("DestinationType")) {
-                std::string support = j["DestinationType"];
-                const char *str     = support.c_str();
-                while (*str) {
-                    if (std::memcmp(str, "ImageUploader", 13) == 0) {
-                        this->can_img = true;
-                        str += 13;
-                    } else if (std::memcmp(str, "VideoUploader", 13) == 0) {
-                        this->can_mov = true;
-                        str += 13;
-                    } else {
-                        str++;
+                if (j.contains("DestinationType")) {
+                    std::string support = j["DestinationType"];
+                    const char *str     = support.c_str();
+                    while (*str) {
+                        if (std::memcmp(str, "ImageUploader", 13) == 0) {
+                            this->can_img = true;
+                            str += 13;
+                        } else if (std::memcmp(str, "VideoUploader", 13) == 0) {
+                            this->can_mov = true;
+                            str += 13;
+                        } else {
+                            str++;
+                        }
                     }
                 }
+
+                /* Append parameters to URL. */
+                bool first = true;
+                for (auto &[k, v] : j["Parameters"].items()) {
+                    this->url += first ? '?' : '&';
+                    this->url += k + '=';
+                    this->url += v;
+                    first = false;
+                }
+
+                /* Append body arguments. */
+                for (auto &[k, v] : j["Arguments"].items())
+                    this->body.push_back({k, v.get<std::string>()});
+
+                /* Make custom http header. */
+                for (auto &[k, v] : j["Headers"].items())
+                    this->header.push_back(k + v.get<std::string>());
+
+            } catch (std::exception &e) {
+                printf("failed to parse");
+                this->name    = path + " (failed to parse)";
+                this->can_img = false;
+                this->can_mov = false;
             }
-
-            /* Append parameters to URL. */
-            bool first = true;
-            for (auto &[k, v] : j["Parameters"].items()) {
-                this->url += first ? '?' : '&';
-                this->url += k + '=';
-                this->url += v;
-                first = false;
-            }
-
-            /* Append body arguments. */
-            for (auto &[k, v] : j["Arguments"].items())
-                this->body.push_back({k, v.get<std::string>()});
-
-            /* Make custom http header. */
-            for (auto &[k, v] : j["Headers"].items())
-                this->header.push_back(fmt::format("{}: {}", k, v));
-
-        } catch (std::exception &e) {
-            printf("sth went wrong owo: %s\n", e.what());
-            this->name    = path + " (failed to parse)";
-            this->can_img = false;
-            this->can_mov = false;
         }
     }
 }

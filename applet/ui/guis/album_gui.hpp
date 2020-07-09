@@ -12,6 +12,7 @@ namespace album {
       private:
         brls::PopupHint hint;
         PopupView popupView;
+        std::string titleName;
         std::string dateString;
 
       protected:

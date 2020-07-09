@@ -42,6 +42,7 @@ namespace album {
         FILTER_SD,
         FILTER_OTHER,
         LENGTH_FMT,
+        DATE_FMT,
         UPLOADER,
         /* String count. */
         Total_Strings,

@@ -1,6 +1,7 @@
 #include "album_gui.hpp"
 
 #include "../../translation/translation.hpp"
+#include "../../util/ns.hpp"
 #include "../brls_ext/sane_dropdown.hpp"
 #include "../upload_process.hpp"
 
@@ -116,11 +117,12 @@ namespace album {
         this->popupView.setParent(this);
         this->hint.setParent(this);
 
-        auto &datetime = fileId.datetime;
-        dateString     = fmt::format("{}  {:2}/{:02}/{:04} {:02}:{:02}",
-                                 fileId.storage == CapsAlbumStorage_Nand ? ~NAND : ~SD,
-                                 datetime.day, datetime.month, datetime.year,
-                                 datetime.hour, datetime.minute);
+        titleName = ns::getApplicationName(fileId.application_id);
+
+        auto &date = fileId.datetime;
+        dateString = fmt::format(~DATE_FMT, fileId.storage == CapsAlbumStorage_Nand ? ~NAND : ~SD,
+                                 date.day, date.month, date.year,
+                                 date.hour, date.minute);
     }
 
     AlbumView::~AlbumView() {
@@ -162,12 +164,16 @@ namespace album {
         this->popupView.frame(ctx);
 
         if (!this->popupView.isHidden()) {
-            nvgFillColor(vg, a(brls::Application::getThemeValuesForVariant(brls::ThemeVariant_DARK)->textColor));
-            nvgFontSize(vg, 15);
-            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
-            nvgFontFaceId(vg, ctx->fontStash->regular);
             nvgBeginPath(vg);
-            nvgText(vg, x + 40, y + 75, this->dateString.c_str(), nullptr);
+            nvgFillColor(vg, a(brls::Application::getThemeValuesForVariant(brls::ThemeVariant_DARK)->textColor));
+            nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+            nvgFontFaceId(vg, ctx->fontStash->regular);
+
+            nvgFontSize(vg, 20);
+            nvgText(vg, x + 210, y + 45, this->titleName.c_str(), nullptr);
+
+            nvgFontSize(vg, 15);
+            nvgText(vg, x + 210, y + 75, this->dateString.c_str(), nullptr);
         }
     }
 

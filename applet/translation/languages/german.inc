@@ -35,5 +35,6 @@ constexpr static const char *const german[Total_Strings] = {
     [FILTER_SD]          = "microSD Card",
     [FILTER_OTHER]       = "Andere",
     [LENGTH_FMT]         = "{} Sek.",
+    [DATE_FMT]           = "{}  {:2}/{:02}/{:04} {:02}:{:02}",
     [UPLOADER]           = "Hochlader",
 };

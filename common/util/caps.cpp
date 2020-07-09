@@ -40,12 +40,15 @@ inline bool operator<(const CapsAlbumEntry &a, const CapsAlbumEntry &b) {
 namespace album {
 
     std::string dateToString(const CapsAlbumFileDateTime &date) {
-        return fmt::format("{}", date);
+        char buffer[0x20];
+        std::snprintf(buffer, sizeof(buffer), "%02d.%02d.%04d %02d:%02d:%02d",
+                      date.day, date.month, date.year,
+                      date.hour, date.minute, date.second);
+        return buffer;
     }
 
     std::string MakeFileName(const CapsAlbumFileId &file_id) {
-        auto &date = file_id.datetime;
-        return fmt::format("{}.{}", date, file_id.content % 2 ? "mp4" : "jpg");
+        return dateToString(file_id.datetime) + (file_id.content % 2 ? ".mp4" : ".jpg");
     }
 
     std::vector<CapsAlbumEntry> getEntries(CapsAlbumStorage storage) {
@@ -181,7 +184,6 @@ namespace album {
                 /* Read movie data to temporary buffer. */
                 Result rc = 0;
                 if (R_FAILED(rc = capsaReadMovieDataFromAlbumMovieReadStream(stream_id, bufferIndex * AlbumMovieBufferSize, buffer, AlbumMovieBufferSize, &actualSize))) {
-                    printf("read failed: 0x%x\n", rc);
                     return 0;
                 }
                 last_buffer_index = bufferIndex;

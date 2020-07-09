@@ -45,6 +45,8 @@ namespace album {
         };
 
         auto title = ns::getApplicationName(titleId);
+        if (title == "")
+            title = ~ERROR;
 
         brls::Logger::info("tid: %016lX: %s (%d)", titleId, title.c_str(), count);
 

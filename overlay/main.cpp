@@ -18,7 +18,6 @@
 #define TESLA_INIT_IMPL
 #include "gui_error.hpp"
 #include "gui_main.hpp"
-#include "image_item.hpp"
 
 #include <netinet/in.h>
 #include <unistd.h>
@@ -27,6 +26,7 @@
 #include <util/caps.hpp>
 /* Curl header for global init on start. */
 #include <curl/curl.h>
+#include <constants.hpp>
 
 #define R_INIT(cmd, message) \
     rc = (cmd);              \
@@ -74,8 +74,8 @@ namespace album {
             R_INIT(socketInitialize(&sockConf), "Failed to init socket!");
             nxlink = nxlinkStdio();
             R_INIT(capsaInitialize(), "Failed to init capture service!");
-            R_INIT(fsInitialize(), "Failed to init fs!");
-            album::Initialize();
+            fsdevMountSdmc();
+            album::InitializeHoster();
             curl_res = curl_global_init(CURL_GLOBAL_DEFAULT);
             if (curl_res != CURLE_OK) {
                 return;
@@ -115,7 +115,6 @@ namespace album {
         virtual void exitServices() override {
             curl_global_cleanup();
             fsdevUnmountAll();
-            fsExit();
             capsaExit();
             ::close(nxlink);
             socketExit();

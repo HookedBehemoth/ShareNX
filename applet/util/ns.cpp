@@ -1,7 +1,5 @@
 #include "ns.hpp"
 
-#include "../translation/translation.hpp"
-
 #include <memory>
 
 namespace album::ns {
@@ -15,7 +13,7 @@ namespace album::ns {
             R_SUCCEEDED(nacpGetLanguageEntry(&data->nacp, &languageEntry))) {
             return languageEntry->name;
         } else {
-            return ~ERROR;
+            return "";
         }
     }
 
