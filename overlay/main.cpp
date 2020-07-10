@@ -74,7 +74,6 @@ namespace album {
             R_INIT(socketInitialize(&sockConf), "Failed to init socket!");
             nxlink = nxlinkStdio();
             R_INIT(capsaInitialize(), "Failed to init capture service!");
-            fsdevMountSdmc();
             album::InitializeHoster();
             curl_res = curl_global_init(CURL_GLOBAL_DEFAULT);
             if (curl_res != CURLE_OK) {
@@ -114,7 +113,7 @@ namespace album {
         }
         virtual void exitServices() override {
             curl_global_cleanup();
-            fsdevUnmountAll();
+            album::ExitHoster();
             capsaExit();
             ::close(nxlink);
             socketExit();

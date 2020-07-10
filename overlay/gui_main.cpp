@@ -30,7 +30,7 @@ namespace album {
 
     MainGui::MainGui(const CapsAlbumFileId &file_id, const u8 *rgba_buffer, u32 video_length) : fileId(file_id), buffer(rgba_buffer) {
         auto uploader = GetDefaultHoster();
-        this->upload  = "Upload to "s + uploader.name;
+        this->upload  = "Upload to "s + uploader->name;
 
         is_video = file_id.content == CapsAlbumFileContents_Movie;
 
@@ -87,7 +87,10 @@ namespace album {
                     auto hw = w - 20;
                     auto hh = 70;
                     renderer->drawRect(hx, hy, hw, hh, a(0xF000));
-                    renderer->drawString(this->upload.c_str(), false, hx + 40, hy + 40, 25, tsl::style::color::ColorText);
+
+                    auto hoster = GetDefaultHoster();
+                    if (hoster->name.size() && hoster->name.c_str())
+                        renderer->drawString(hoster->name.c_str(), false, hx + 40, hy + 40, 25, tsl::style::color::ColorText);
 
                     renderer->drawRect(hx - 4, hy - 4, hw + 8, 4, a(highlightColor));
                     renderer->drawRect(hx - 4, hy + hh, hw + 8, 4, a(highlightColor));
@@ -111,7 +114,8 @@ namespace album {
                 }
                 case UploadStage::Done: {
                     /* Url */
-                    renderer->drawString(this->text.c_str(), false, x + 15, y + ThumbnailHeight + 85, 20, tsl::style::color::ColorText, w);
+                    if (this->text.size())
+                        renderer->drawString(this->text.c_str(), false, x + 15, y + ThumbnailHeight + 85, 20, tsl::style::color::ColorText, w);
                     break;
                 }
                 case UploadStage::Canceled: {
@@ -151,6 +155,7 @@ namespace album {
         }
 
         if ((keysDown & KEY_Y) || false) {
+            tsl::changeTo<SelectorGui>();
         }
 
         return false;

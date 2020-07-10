@@ -39,9 +39,9 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	ShareNX
 BUILD		:=	build.nx
-SOURCES		:=	applet applet/translation applet/ui applet/ui/brls_ext applet/ui/guis applet/util common common/util
+SOURCES		:=	applet applet/translation applet/ui applet/ui/brls_ext applet/ui/guis applet/util common common/util libs/tiny-json
 DATA		:=	data
-INCLUDES	:=	libs/json libs/borealis common
+INCLUDES	:=	libs/json libs/tiny-json libs/borealis common
 APP_TITLE	:=	ShareNX 
 APP_AUTHOR	:=	Behemoth & Huntereb
 CONFIG_JSON	:=	album.json

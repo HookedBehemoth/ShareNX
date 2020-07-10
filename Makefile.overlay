@@ -39,9 +39,9 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	ovlShareNX
 BUILD		:=	build.ovl
-SOURCES		:=	overlay common common/util
+SOURCES		:=	overlay common common/util libs/tiny-json
 DATA		:=	data
-INCLUDES	:=	libs/libtesla/include libs/json common
+INCLUDES	:=	libs/libtesla/include libs/tiny-json common
 APP_TITLE	:=	ShareNX 
 APP_AUTHOR	:=	Behemoth & Huntereb
 
@@ -52,7 +52,7 @@ NO_ICON		:=  1
 #---------------------------------------------------------------------------------
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS	:=	-g -Wall -O3 -ffunction-sections \
+CFLAGS	:=	-g -Wall -O2 -ffunction-sections -D__OVERLAY__ \
 			$(ARCH) $(DEFINES) `curl-config --cflags`
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DVERSION=\"v$(APP_VERSION)\"\
