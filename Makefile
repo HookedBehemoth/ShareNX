@@ -61,7 +61,7 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -std=gnu++17
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= 	-lcurl -lmbedtls -lmbedx509 -lmbedcrypto \
+LIBS	:= 	`curl-config --libs` \
 			-lpu -lSDL2_mixer -lSDL2_gfx -lSDL2_image -lEGL -lGLESv2 -lglapi -ldrm_nouveau \
 			-lpng -ljpeg -lwebp \
 			-lopusfile -lopus -lmodplug -lmpg123 -lvorbisidec -logg \
