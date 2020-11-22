@@ -5,6 +5,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    container: devkitpro/devkita64
 
     steps:
     - uses: actions/checkout@v1
@@ -12,20 +13,6 @@ jobs:
       run: |
         sed -i 's/git@github.com:/git:\/\/github.com\//' .gitmodules
         git submodule update --init --recursive
-        
-    - name: Install devkitpro
-      run: |
-        wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb
-        sudo dpkg -i devkitpro-pacman.deb
-        sudo dkp-pacman -S $(dkp-pacman -Ssq switch-*) --noconfirm
-
-    - name: Build and install libnx master
-      run: |
-        source /etc/profile.d/devkit-env.sh
-        git clone https://github.com/switchbrew/libnx.git
-        sed -i 's/ lib\/libnxd\.a//g' libnx/nx/Makefile
-        make -C libnx -j$(nproc)
-        sudo -E make -C libnx install
         
     - name: Building ShareNX
       run: |
