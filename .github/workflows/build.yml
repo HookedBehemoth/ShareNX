@@ -16,5 +16,4 @@ jobs:
         
     - name: Building ShareNX
       run: |
-        source /etc/profile.d/devkit-env.sh
         make -j$(nproc)
