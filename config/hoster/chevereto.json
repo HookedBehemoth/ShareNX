@@ -1,0 +1,7 @@
+{
+    "Url": "https://[CHEVERETO_SITE_URL]/api/1/upload/?key=[API_KEY]",
+    "Regex": "",
+    "ImageName": "source",
+    "VideoName": "",
+    "Show Response": false
+}
